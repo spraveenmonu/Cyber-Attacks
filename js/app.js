@@ -806,6 +806,390 @@ const ATTACKS = [
         ],
         simulate: 'simulateWateringHole',
     },
+    {
+        id: 'emailvirus',
+        name: 'Email Virus',
+        icon: '✉️',
+        category: 'virus',
+        severity: 'high',
+        tags: ['virus', 'email', 'attachment', 'macros', 'propagation'],
+        description: 'An email virus propagates by sending copies of itself as attachments or links to all contacts in the victim\'s address book when executed. It infects files locally and uses standard mail client services to spread.',
+        accent: '#ff3b3b',
+        accentDim: 'rgba(255,59,59,0.15)',
+        steps: [
+            { title: 'Inbound Phish', desc: 'Victim receives an email with an infected attachment (e.g. invoice.exe).' },
+            { title: 'Execution Hook', desc: 'Victim runs the attachment, executing malicious loader code.' },
+            { title: 'File Infection', desc: 'Virus infects and attaches itself to local executable files.' },
+            { title: 'Harvesting Contacts', desc: 'Extracts contact email addresses from local address books and caches.' },
+            { title: 'Self-Propagation', desc: 'Emails itself to all harvested contacts using SMTP APIs.' },
+        ],
+        stats: [
+            { label: 'Emails Sent', value: '0', live: true },
+            { label: 'Files Infected', value: '0', live: true },
+            { label: 'Contacts Found', value: '0', live: true },
+            { label: 'Mail Server Load', value: '0%', live: true },
+        ],
+        defense: [
+            'Scan all incoming email attachments with email security gateways.',
+            'Block executable file attachments (.exe, .scr, .bat) at the gateway.',
+            'Keep email client software patched against execution flaws.',
+            'Never open attachments from unverified or suspicious senders.',
+            'Implement SPF, DKIM, and DMARC record checks to prevent spoofing.',
+        ],
+        simulate: 'simulateEmailVirus',
+    },
+    {
+        id: 'parasiticvirus',
+        name: 'Parasitic Virus',
+        icon: '🦠',
+        category: 'virus',
+        severity: 'high',
+        tags: ['virus', 'file-infector', 'executable', 'prepender', 'appender'],
+        description: 'A parasitic virus attaches itself to legitimate executable files (.exe or .com). When the host program runs, the virus executes first, searching for and infecting other clean host files before passing control back to the original application.',
+        accent: '#ff3b3b',
+        accentDim: 'rgba(255,59,59,0.15)',
+        steps: [
+            { title: 'Host Execution', desc: 'User launches an infected program, thinking it is clean.' },
+            { title: 'Control Hijack', desc: 'Virus code runs first, taking CPU control immediately.' },
+            { title: 'Directory Scan', desc: 'Searches local and network directories for target executables.' },
+            { title: 'Binary Injection', desc: 'Injects virus code into targets and redirects their entry points.' },
+            { title: 'Clean Handover', desc: 'Passes execution back to the host program so it runs normally.' },
+        ],
+        stats: [
+            { label: 'Host Files Checked', value: '0', live: true },
+            { label: 'Files Poisoned', value: '0', live: true },
+            { label: 'Infection Rate', value: '0/s', live: true },
+            { label: 'Target File Size', value: '0 KB', live: true },
+        ],
+        defense: [
+            'Deploy File Integrity Monitoring (FIM) to detect executable modifications.',
+            'Use secure code signing to verify binary origins.',
+            'Configure directories with strict write-permission control.',
+            'Run endpoint protection software with active heuristics.',
+            'Compare file hashes (SHA-256) of critical system files regularly.',
+        ],
+        simulate: 'simulateParasiticVirus',
+    },
+    {
+        id: 'memoryresidentvirus',
+        name: 'Memory Resident Virus',
+        icon: '💾',
+        category: 'virus',
+        severity: 'high',
+        tags: ['virus', 'ram', 'resident', 'interrupts', 'persistence'],
+        description: 'A memory resident virus loads into RAM upon execution and stays active even after its host program closes. It hooks system interrupts to dynamically infect any clean files accessed or executed by the operating system.',
+        accent: '#ff3b3b',
+        accentDim: 'rgba(255,59,59,0.15)',
+        steps: [
+            { title: 'Loader Executed', desc: 'User executes an infected file, which runs and allocates memory.' },
+            { title: 'RAM Allocation', desc: 'Virus copies its payload to a reserved RAM space, hiding its presence.' },
+            { title: 'Interrupt Hooking', desc: 'Hooks file-open or directory-list OS interrupt vectors.' },
+            { title: 'Active Interception', desc: 'Monitors disk requests; infects any accessed file in real-time.' },
+            { title: 'RAM Persistence', desc: 'Stays resident in memory until system shutdown or memory purge.' },
+        ],
+        stats: [
+            { label: 'RAM Occupied', value: '0 KB', live: true },
+            { label: 'Interrupts Hooked', value: '0', live: true },
+            { label: 'Intercepted Files', value: '0', live: true },
+            { label: 'Detection Scans', value: '0', live: true },
+        ],
+        defense: [
+            'Use EDR tools with active RAM monitoring and memory heuristics.',
+            'Implement boot security systems like Secure Boot.',
+            'Perform periodic system restarts to clear volatile memory.',
+            'Configure driver signature validation to prevent kernel residency.',
+            'Deploy security tools that analyze running process memory spaces.',
+        ],
+        simulate: 'simulateMemoryResidentVirus',
+    },
+    {
+        id: 'bootsectorvirus',
+        name: 'Boot Sector Virus',
+        icon: '🥾',
+        category: 'virus',
+        severity: 'critical',
+        tags: ['virus', 'boot', 'mbr', 'bios', 'early-execution'],
+        description: 'A boot sector virus targets the Master Boot Record (MBR) or partition boot sector of storage drives. It loads before the operating system, allowing it to bypass traditional OS security layers and gain deep control.',
+        accent: '#ff3b3b',
+        accentDim: 'rgba(255,59,59,0.15)',
+        steps: [
+            { title: 'MBR Hijack', desc: 'Copies original MBR to a safe sector and overwrites Sector 0.' },
+            { title: 'BIOS Load', desc: 'On reboot, BIOS reads malicious code from boot sector.' },
+            { title: 'RAM Residency', desc: 'Virus allocates high memory, hooks interrupts, and resides in RAM.' },
+            { title: 'OS Chainload', desc: 'Reads and executes original MBR sector to start the OS loader.' },
+            { title: 'Stealth Execution', desc: 'Monitors disk access in OS background, infecting plugged-in media.' },
+        ],
+        stats: [
+            { label: 'MBR Integrity', value: 'Valid', live: true },
+            { label: 'Sectors Read', value: '0', live: true },
+            { label: 'Media Scanned', value: '0', live: true },
+            { label: 'IO Interceptions', value: '0', live: true },
+        ],
+        defense: [
+            'Use UEFI Secure Boot with hardware trust verification (TPM).',
+            'Enable BIOS write protection on the boot sector/MBR.',
+            'Avoid booting from unknown external storage devices.',
+            'Use modern partition formats like GPT instead of legacy MBR.',
+            'Employ specialized boot loaders that perform pre-boot signature audits.',
+        ],
+        simulate: 'simulateBootSectorVirus',
+    },
+    {
+        id: 'stealthvirus',
+        name: 'Stealth Virus',
+        icon: '🥷',
+        category: 'virus',
+        severity: 'high',
+        tags: ['virus', 'stealth', 'anti-detection', 'hooking', 'spoofing'],
+        description: 'A stealth virus hides its presence by intercepting read requests directed at infected files. When an AV scanner requests the file, the virus redirects the call to present the original uninfected data, evading detection.',
+        accent: '#ff3b3b',
+        accentDim: 'rgba(255,59,59,0.15)',
+        steps: [
+            { title: 'Driver Loading', desc: 'Loads kernel or file system driver to monitor I/O requests.' },
+            { title: 'System Call Hook', desc: 'Hooks read system calls (e.g. ReadFile) related to target executables.' },
+            { title: 'AV Query Detection', desc: 'Detects scan request from antivirus software.' },
+            { title: 'Payload Spoofing', desc: 'Temporarily swaps infected bytes with clean cache contents.' },
+            { title: 'AV Clean Scan', desc: 'Sends clean data back; AV scanner reports zero threats.' },
+        ],
+        stats: [
+            { label: 'System Hooks', value: '0', live: true },
+            { label: 'Scanner Spoofs', value: '0', live: true },
+            { label: 'Bytes Spoofed', value: '0 KB', live: true },
+            { label: 'Infection Dwell', value: '0 days', live: true },
+        ],
+        defense: [
+            'Boot from clean external media (PE USB) to perform offline AV scans.',
+            'Deploy kernel integrity checks and monitor file driver tables.',
+            'Use behavior-based EDR that analyzes process execution flow.',
+            'Employ cryptographic file hashing independent of standard OS APIs.',
+            'Analyze file system metadata variations that bypass standard read calls.',
+        ],
+        simulate: 'simulateStealthVirus',
+    },
+    {
+        id: 'polymorphicvirus',
+        name: 'Polymorphic Virus',
+        icon: '🌈',
+        category: 'virus',
+        severity: 'high',
+        tags: ['virus', 'polymorphic', 'encryption', 'mutation', 'heuristics'],
+        description: 'A polymorphic virus alters its binary signature every time it replicates. By encrypting its core payload with a different key for each infection and creating a dynamically modified decryption stub, it evades signature-based scanner detection.',
+        accent: '#ff3b3b',
+        accentDim: 'rgba(255,59,59,0.15)',
+        steps: [
+            { title: 'Replication Start', desc: 'Virus prepares to copy itself to a new target host file.' },
+            { title: 'Key Generation', desc: 'Generates a unique, randomized encryption key.' },
+            { title: 'Payload Encryption', desc: 'Encrypts the main virus body using the new key.' },
+            { title: 'Stub Mutation', desc: 'Generates a dynamically varied decryptor routine (stub).' },
+            { title: 'Modified Write', desc: 'Writes the unique stub + encrypted body to disk, creating a new signature.' },
+        ],
+        stats: [
+            { label: 'Signatures Created', value: '0', live: true },
+            { label: 'Keys Generated', value: '0', live: true },
+            { label: 'Decryptor Stubs', value: '0', live: true },
+            { label: 'Scanner Misses', value: '0', live: true },
+        ],
+        defense: [
+            'Use heuristic-based scanning that matches abstract code patterns.',
+            'Run antivirus in sandbox environments to emulate stub execution.',
+            'Implement behavior monitoring to catch the payload after decryption.',
+            'Use advanced signature detection like generic decryption emulation.',
+            'Apply machine learning models trained on structural entropy differences.',
+        ],
+        simulate: 'simulatePolymorphicVirus',
+    },
+    {
+        id: 'metamorphicvirus',
+        name: 'Metamorphic Virus',
+        icon: '🧬',
+        category: 'virus',
+        severity: 'critical',
+        tags: ['virus', 'metamorphic', 'obfuscation', 'reassembly', 'rewriting'],
+        description: 'A metamorphic virus rewrites its own binary structure completely with each infection. Using dead-code insertion, register swapping, and instruction transposition, it creates a unique file with no signatures, but identical logic.',
+        accent: '#ff3b3b',
+        accentDim: 'rgba(255,59,59,0.15)',
+        steps: [
+            { title: 'Self-Analysis', desc: 'Virus decompiles its own binary into instruction representations.' },
+            { title: 'Register Swapping', desc: 'Swaps processor registers (e.g. using ESI instead of EDI).' },
+            { title: 'Instruction Morph', desc: 'Swaps instructions (e.g. SUB EAX, EAX replaced with XOR EAX, EAX).' },
+            { title: 'Dead-Code Insertion', desc: 'Inserts functional NOP instructions or junk jumps to shift blocks.' },
+            { title: 'Binary Compilation', desc: 'Recompiles the assembly code into a completely unique executable.' },
+        ],
+        stats: [
+            { label: 'Rewrite Cycles', value: '0', live: true },
+            { label: 'Junk Codes', value: '0 lines', live: true },
+            { label: 'Swaps Applied', value: '0', live: true },
+            { label: 'Sig Match Rate', value: '0%', live: true },
+        ],
+        defense: [
+            'Employ endpoint security with execution flow graph tracking.',
+            'Monitor system APIs and detect malicious behavioral patterns.',
+            'Perform runtime memory profiling instead of disk signature checks.',
+            'Use advanced sandboxing that detects logical anomalies.',
+            'Keep all network detection filters active to block download traffic.',
+        ],
+        simulate: 'simulateMetamorphicVirus',
+    },
+    {
+        id: 'wormgeneral',
+        name: 'Network Worm',
+        icon: '🪱',
+        category: 'worm',
+        severity: 'critical',
+        tags: ['worm', 'network', 'exploit', 'lateral-movement', 'self-contained'],
+        description: 'A network worm is a standalone program that self-replicates across computer networks. By exploiting vulnerabilities (like SMB or RPC flaws) in active network services, it copies its binary directly to other machines without user action.',
+        accent: '#ffaa00',
+        accentDim: 'rgba(255,170,0,0.15)',
+        steps: [
+            { title: 'IP Scanning', desc: 'Scans network ranges (local and public) for active machines.' },
+            { title: 'Port Probing', desc: 'Probes systems for vulnerable listening services (e.g. port 445).' },
+            { title: 'Exploitation', desc: 'Fires network exploit payload (e.g., EternalBlue) at target services.' },
+            { title: 'Self-Transfer', desc: 'Establishes a connection to copy and write its executable to the host.' },
+            { title: 'Spawning execution', desc: 'Triggers remote execution of the copy, which starts scanning.' },
+        ],
+        stats: [
+            { label: 'Hosts Scanned', value: '0', live: true },
+            { label: 'Exploits Sent', value: '0', live: true },
+            { label: 'Infections Spawns', value: '0', live: true },
+            { label: 'Bandwidth Saturated', value: '0 Mbps', live: true },
+        ],
+        defense: [
+            'Apply OS security updates immediately, prioritizing SMB and RPC services.',
+            'Enable local host firewalls and block unsolicited inbound ports.',
+            'Implement network segmentation to contain propagation.',
+            'Disable legacy protocols like SMBv1, NetBIOS, and Telnet.',
+            'Use network intrusion prevention systems (IPS) to detect scanning.',
+        ],
+        simulate: 'simulateWormGeneral',
+    },
+    {
+        id: 'emailworm',
+        name: 'Email Worm',
+        icon: '📬',
+        category: 'worm',
+        severity: 'high',
+        tags: ['worm', 'email', 'social-engineering', 'broadcasting', 'outbox'],
+        description: 'An email worm propagates by automatically mass-mailing copies of itself to contacts found on infected hosts. It utilizes local mail folders and SMTP services to send outbound emails with enticing attachments or links.',
+        accent: '#ffaa00',
+        accentDim: 'rgba(255,170,0,0.15)',
+        steps: [
+            { title: 'Contact Harvest', desc: 'Scans registry, cache, and email files for valid addresses.' },
+            { title: 'Server Access', desc: 'Identifies local mail client configurations and mail servers.' },
+            { title: 'Email Assembly', desc: 'Drafts emails using social engineering templates and sender spoofing.' },
+            { title: 'Outbound Blast', desc: 'Sends emails containing infected files (e.g., update.pdf.exe) to all contacts.' },
+            { title: 'Remote Execution', desc: 'Recipient opens mail and runs the file, repeating propagation.' },
+        ],
+        stats: [
+            { label: 'Addresses Scraped', value: '0', live: true },
+            { label: 'Mails Dispatched', value: '0', live: true },
+            { label: 'SMTP Connections', value: '0', live: true },
+            { label: 'Inbox Infects', value: '0', live: true },
+        ],
+        defense: [
+            'Configure strict SPF, DKIM, and DMARC checks on email servers.',
+            'Deploy email threat filters that scan and block double extensions.',
+            'Limit outbound SMTP requests from endpoint workstations.',
+            'Train employees on identifying unsolicited file attachments.',
+            'Run endpoint protection that monitors execution from mail clients.',
+        ],
+        simulate: 'simulateEmailWorm',
+    },
+    {
+        id: 'trojangeneral',
+        name: 'Trojan Disguise',
+        icon: '🎁',
+        category: 'trojan',
+        severity: 'high',
+        tags: ['trojan', 'social-engineering', 'disguise', 'wrapper', 'consent'],
+        description: 'A Trojan disguise presents itself as a useful, safe utility or file, gaining user trust to secure installation consent. Once launched, it installs the normal application while secretly deploying malicious processes in the background.',
+        accent: '#8b5cf6',
+        accentDim: 'rgba(139,92,246,0.15)',
+        steps: [
+            { title: 'Wrapper packaging', desc: 'Attacker bundles malware inside a clean installer (e.g. PDF reader).' },
+            { title: 'Malicious Upload', desc: 'Publishes file on unofficial sites or cracks platforms.' },
+            { title: 'User Download', desc: 'User downloads application, thinking it is legitimate.' },
+            { title: 'Silent Installer', desc: 'Run installer; user gets PDF reader, but malware runs in background.' },
+            { title: 'Backdoor Setup', desc: 'Trojan registers a hidden startup entry and connects to C2.' },
+        ],
+        stats: [
+            { label: 'Disguise Rating', value: 'Excellent', live: true },
+            { label: 'Downloads Triggered', value: '0', live: true },
+            { label: 'Install Consent', value: 'Granted', live: true },
+            { label: 'Hidden Processes', value: '0', live: true },
+        ],
+        defense: [
+            'Only download software from official, vetted developer portals.',
+            'Verify code-signing certificates before authorizing installer prompts.',
+            'Implement administrative restrictions (UAC) on user accounts.',
+            'Use antivirus software with real-time wrapper unpacking.',
+            'Monitor autorun registry locations for unexpected startup entries.',
+        ],
+        simulate: 'simulateTrojanGeneral',
+    },
+    {
+        id: 'passivetrojan',
+        name: 'Passive Trojan (Listener)',
+        icon: '🚪',
+        category: 'trojan',
+        severity: 'high',
+        tags: ['trojan', 'backdoor', 'listener', 'port-binding', 'incoming'],
+        description: 'A passive Trojan establishes a port listener on the infected computer, waiting silently for the attacker to initiate a network connection. Since it creates no outbound traffic, it easily bypasses standard egress monitoring systems.',
+        accent: '#8b5cf6',
+        accentDim: 'rgba(139,92,246,0.15)',
+        steps: [
+            { title: 'Port Binding', desc: 'Backdoor runs and binds a listening socket to a specific local port.' },
+            { title: 'Firewall Bypass', desc: 'Modifies local system firewall rules to allow inbound requests on that port.' },
+            { title: 'Passive Listening', desc: 'Waits silently on the socket, generating zero active network traffic.' },
+            { title: 'Attacker Connection', desc: 'Attacker discovers IP and connects directly to the listening port.' },
+            { title: 'Remote Shell', desc: 'Accepts connection and spawns a command shell with user privileges.' },
+        ],
+        stats: [
+            { label: 'Listening Ports', value: '0', live: true },
+            { label: 'Rules Injected', value: '0', live: true },
+            { label: 'Egress Traffic', value: '0 B', live: true },
+            { label: 'Inbound Conns', value: '0', live: true },
+        ],
+        defense: [
+            'Deploy host firewalls that block all unsolicited inbound network requests.',
+            'Perform regular port auditing and scan with tools like netstat.',
+            'Configure switches with ingress traffic filtering policies.',
+            'Utilize Intrusion Detection Systems (IDS) to track unsolicited local connections.',
+            'Keep system firewalls updated and limit user privilege to edit rule exceptions.',
+        ],
+        simulate: 'simulatePassiveTrojan',
+    },
+    {
+        id: 'activetrojan',
+        name: 'Active Trojan (Reverse Shell)',
+        icon: '📡',
+        category: 'trojan',
+        severity: 'critical',
+        tags: ['trojan', 'active', 'reverse-shell', 'beaconing', 'c2-server'],
+        description: 'An active Trojan initiates outbound network connections to an attacker\'s Command and Control (C2) server. This reverse connection bypasses inbound firewall rules, enabling full remote access from a public server.',
+        accent: '#8b5cf6',
+        accentDim: 'rgba(139,92,246,0.15)',
+        steps: [
+            { title: 'Persist Registry', desc: 'Registers startup entries to run background processes at boot.' },
+            { title: 'C2 Resolution', desc: 'Queries DNS for C2 domain, bypassing static IP blocks via DGA.' },
+            { title: 'Reverse Connect', desc: 'Triggers outbound connection (HTTP/HTTPS) to the C2 server.' },
+            { title: 'Heartbeat Beacon', desc: 'Sends periodic heartbeat signals to the server requesting tasks.' },
+            { title: 'Task Executed', desc: 'Receives instructions (shell, exfiltration) and transmits data.' },
+        ],
+        stats: [
+            { label: 'C2 Heartbeats', value: '0', live: true },
+            { label: 'Egress Port', value: 'HTTPS (443)', live: true },
+            { label: 'Beacon Interval', value: '5s', live: true },
+            { label: 'Data Transpatched', value: '0 KB', live: true },
+        ],
+        defense: [
+            'Configure egress filtering to restrict outbound traffic to approved ports.',
+            'Analyze network traffic for periodic, automated beaconing signatures.',
+            'Implement SSL/TLS decryption to inspect outgoing web communications.',
+            'Integrate reputation threat lists to block communication with known C2 IPs.',
+            'Perform continuous threat hunting for anomalous system processes.',
+        ],
+        simulate: 'simulateActiveTrojan',
+    },
 ];
 
 /* ─── APP STATE ─────────────────────────────────────────────────────────── */
@@ -866,6 +1250,8 @@ document.addEventListener('DOMContentLoaded', () => {
     dom.typedText = $('typed-text');
 
     renderCards();
+    const statAttacks = $('stat-attacks');
+    if (statAttacks) statAttacks.textContent = ATTACKS.length;
     setupFilters();
     setupModal();
     setupNavbar();
@@ -1144,7 +1530,6 @@ function runTypingEffect() {
         'Visualizing cyber threats in real-time.',
         'Understanding attacks to build better defenses.',
         'Educational simulations. No real systems harmed.',
-        '25 attack vectors. Fully interactive. 100% safe.',
     ];
     let pi = 0, ci = 0, deleting = false;
     const el = dom.typedText;
@@ -3319,4 +3704,1328 @@ window.simulateWateringHole = function() {
         state.simFrame=requestAnimationFrame(draw);
     }
     state.simFrame=requestAnimationFrame(draw);
+};
+
+/* ─── 26. EMAIL VIRUS ───────────────────────────────────────────────────── */
+window.simulateEmailVirus = function() {
+    termLog('> Connecting to SMTP mail server...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame = 0, emailsSent = 0, filesInfected = 0, contactsFound = 0, mailLoad = 0;
+    const contacts = [
+        { name: 'john.doe@corporate.com', x: w * 0.15, y: h * 0.75, status: 'clean' },
+        { name: 'finance.admin@org.org', x: w * 0.38, y: h * 0.8, status: 'clean' },
+        { name: 'it.helpdesk@net.net', x: w * 0.62, y: h * 0.8, status: 'clean' },
+        { name: 'ceo.office@major.com', x: w * 0.85, y: h * 0.75, status: 'clean' }
+    ];
+    const localFiles = [
+        { name: 'explorer.exe', x: w * 0.25, y: h * 0.35, status: 'clean' },
+        { name: 'notepad.exe', x: w * 0.5, y: h * 0.35, status: 'clean' },
+        { name: 'calc.exe', x: w * 0.75, y: h * 0.35, status: 'clean' }
+    ];
+    const packets = [];
+
+    simTimeout(() => { if (!state.simRunning) return; activateStep(1); termLog('> Attachment invoice.exe clicked. Loader spawned!', 'error'); }, 600);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(2); termLog('> Scanning disk. Injecting payload into local processes...', 'warning'); }, 1400);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(3); contactsFound = 4; termLog('> Accessing local address books... 4 contacts found.', 'warning'); }, 2200);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(4); termLog('> Mass mailing initiated. Sending infected attachments...', 'error'); }, 3000);
+
+    function draw() {
+        if (!state.simRunning) return;
+        frame++;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
+
+        // Draw Workstation Host node in center-middle
+        const hostX = w / 2, hostY = h * 0.55;
+        ctx.shadowBlur = 10; ctx.shadowColor = filesInfected > 0 ? '#ff3b3b' : '#00f0ff';
+        ctx.beginPath(); ctx.arc(hostX, hostY, 25, 0, Math.PI * 2);
+        ctx.fillStyle = filesInfected > 0 ? 'rgba(255, 59, 59, 0.15)' : 'rgba(0, 240, 255, 0.15)'; ctx.fill();
+        ctx.strokeStyle = filesInfected > 0 ? '#ff3b3b' : '#00f0ff'; ctx.lineWidth = 2; ctx.stroke(); ctx.shadowBlur = 0;
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('HOST', hostX, hostY - 4);
+        ctx.fillText('WORKSTATION', hostX, hostY + 6);
+
+        // Infecting Local files animation
+        if (frame > 84 && frame < 132 && frame % 16 === 0) {
+            const idx = Math.floor((frame - 85) / 16);
+            if (localFiles[idx]) {
+                localFiles[idx].status = 'infected';
+                filesInfected++;
+                termLog(`> File infected: C:\\Windows\\System32\\${localFiles[idx].name}`, 'error');
+            }
+        }
+
+        // Draw local files
+        localFiles.forEach(f => {
+            const isInf = f.status === 'infected';
+            ctx.fillStyle = isInf ? 'rgba(255, 59, 59, 0.2)' : 'rgba(255, 255, 255, 0.05)';
+            ctx.strokeStyle = isInf ? '#ff3b3b' : 'rgba(255, 255, 255, 0.15)';
+            ctx.beginPath(); ctx.roundRect(f.x - 30, f.y - 12, 60, 24, 4); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = isInf ? '#ff3b3b' : '#8892a8'; ctx.font = '9px monospace'; ctx.textAlign = 'center';
+            ctx.fillText(f.name, f.x, f.y + 4);
+            // Draw link to host
+            ctx.beginPath(); ctx.moveTo(f.x, f.y + 12); ctx.lineTo(hostX, hostY - 25);
+            ctx.strokeStyle = isInf ? 'rgba(255, 59, 59, 0.3)' : 'rgba(255, 255, 255, 0.05)'; ctx.stroke();
+        });
+
+        // Launch outbound emails
+        if (frame > 180 && frame % 25 === 0 && emailsSent < 40) {
+            const dest = contacts[rndInt(0, 4)];
+            packets.push({ x: hostX, y: hostY, tx: dest.x, ty: dest.y, p: 0, target: dest });
+            emailsSent++;
+            mailLoad = Math.min(100, mailLoad + 8);
+        }
+
+        // Draw contact nodes and packets
+        contacts.forEach(c => {
+            const isComp = c.status === 'compromised';
+            ctx.beginPath(); ctx.arc(c.x, c.y, 8, 0, Math.PI * 2);
+            ctx.fillStyle = isComp ? '#ff3b3b' : 'rgba(255, 255, 255, 0.1)'; ctx.fill();
+            ctx.strokeStyle = isComp ? '#ff3b3b' : '#8892a8'; ctx.stroke();
+            ctx.fillStyle = isComp ? '#ff3b3b' : '#8892a8'; ctx.font = '8px monospace'; ctx.textAlign = 'center';
+            ctx.fillText(c.name.split('@')[0], c.x, c.y + 18);
+        });
+
+        packets.forEach(p => {
+            p.p += 0.025;
+            const px = p.x + (p.tx - p.x) * p.p;
+            const py = p.y + (p.ty - p.y) * p.p;
+            ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#ff3b3b'; ctx.fill();
+            if (p.p >= 1) {
+                p.target.status = 'compromised';
+                p.dead = true;
+                termLog(`> Inbound SMTP connection resolved: Email dispatched to ${p.target.name}`, 'warning');
+            }
+        });
+        for (let i = packets.length - 1; i >= 0; i--) {
+            if (packets[i].dead) packets.splice(i, 1);
+        }
+
+        if (frame % 20 === 0) {
+            const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
+            if (e0) e0.textContent = emailsSent;
+            if (e1) e1.textContent = filesInfected;
+            if (e2) e2.textContent = contactsFound;
+            if (e3) e3.textContent = `${Math.min(100, Math.round(mailLoad))}%`;
+            setProgress(Math.min(100, (frame / 360) * 100));
+        }
+
+        if (frame >= 360) {
+            setProgress(100);
+            termLog('> Simulation done. Email virus spreads successfully. Filter gateway blocks exe attachments!', 'success');
+            stopSimulation();
+            return;
+        }
+        state.simFrame = requestAnimationFrame(draw);
+    }
+    state.simFrame = requestAnimationFrame(draw);
+};
+
+/* ─── 27. PARASITIC VIRUS ───────────────────────────────────────────────── */
+window.simulateParasiticVirus = function() {
+    termLog('> Loading process execution analyzer...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame = 0, checked = 0, poisoned = 0;
+    const executables = [
+        { name: 'word.exe', x: w * 0.2, y: h * 0.45, inf: false, progress: 0 },
+        { name: 'chrome.exe', x: w * 0.5, y: h * 0.45, inf: false, progress: 0 },
+        { name: 'outlook.exe', x: w * 0.8, y: h * 0.45, inf: false, progress: 0 }
+    ];
+
+    simTimeout(() => { if (!state.simRunning) return; activateStep(1); termLog('> User runs infected program: word.exe. Control hijacked!', 'error'); }, 600);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(2); termLog('> Scanning folder C:\\Program Files for executable headers...', 'warning'); }, 1400);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(3); termLog('> Modifying binary headers. Prepending malicious block...', 'error'); }, 2200);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(4); termLog('> Executing clean payload. Redirecting control back to host...', 'success'); }, 3000);
+
+    function draw() {
+        if (!state.simRunning) return;
+        frame++;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
+
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('PARASITIC BINARY INJECTION SIMULATION', w / 2, 25);
+
+        // Animate scans and infections
+        if (frame === 60) executables[0].inf = true; // infected initially
+        if (frame > 90 && frame < 200 && frame % 1 === 0) {
+            checked = Math.min(220, checked + 2);
+        }
+        if (frame === 130) {
+            executables[1].inf = true;
+            poisoned = 1;
+            termLog('> Host chrome.exe header modified. Entry point hijacked!', 'error');
+        }
+        if (frame === 180) {
+            executables[2].inf = true;
+            poisoned = 2;
+            termLog('> Host outlook.exe header modified. Entry point hijacked!', 'error');
+        }
+
+        executables.forEach((ex, idx) => {
+            // Draw clean / infected file block structure
+            const bx = ex.x - 45, by = ex.y - 60, bw = 90, bh = 120;
+            
+            // Outer block
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.02)';
+            ctx.strokeStyle = ex.inf ? '#ff3b3b' : 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 6); ctx.fill(); ctx.stroke();
+
+            // Label
+            ctx.fillStyle = ex.inf ? '#ff3b3b' : '#8892a8'; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center';
+            ctx.fillText(ex.name, ex.x, by - 8);
+
+            // Clean block segment (green/grey)
+            ctx.fillStyle = 'rgba(0, 240, 255, 0.08)';
+            ctx.strokeStyle = 'rgba(0, 240, 255, 0.2)';
+            ctx.beginPath(); ctx.roundRect(bx + 6, by + 40, bw - 12, bh - 48, 4); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#525c70'; ctx.font = '8px monospace';
+            ctx.fillText('Original Host', ex.x, by + 75);
+            ctx.fillText('Code Segment', ex.x, by + 87);
+
+            // Virus block segment (red) at top (prepended)
+            if (ex.inf) {
+                ctx.fillStyle = 'rgba(255, 59, 59, 0.2)';
+                ctx.strokeStyle = '#ff3b3b';
+                ctx.beginPath(); ctx.roundRect(bx + 6, by + 8, bw - 12, 26, 4); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = '#ff3b3b'; ctx.font = 'bold 7px monospace';
+                ctx.fillText('VIRUS HEADER', ex.x, by + 20);
+                ctx.fillText('(Prepended Payload)', ex.x, by + 30);
+
+                // Draw entry point arrow going to virus first, then to clean code
+                ctx.beginPath(); ctx.moveTo(ex.x, by - 20); ctx.lineTo(ex.x, by + 8);
+                ctx.strokeStyle = '#ffaa00'; ctx.lineWidth = 2; ctx.stroke();
+                // Arrow tip
+                ctx.beginPath(); ctx.moveTo(ex.x - 3, by + 5); ctx.lineTo(ex.x, by + 8); ctx.lineTo(ex.x + 3, by + 5); ctx.stroke();
+
+                // Arrow from virus back to host
+                ctx.beginPath(); ctx.moveTo(ex.x, by + 34); ctx.lineTo(ex.x, by + 40);
+                ctx.strokeStyle = '#39ff14'; ctx.stroke();
+            } else {
+                // Direct arrow clean entry
+                ctx.beginPath(); ctx.moveTo(ex.x, by - 20); ctx.lineTo(ex.x, by + 40);
+                ctx.strokeStyle = '#00f0ff'; ctx.lineWidth = 1; ctx.stroke();
+            }
+        });
+
+        if (frame % 20 === 0) {
+            const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
+            if (e0) e0.textContent = checked;
+            if (e1) e1.textContent = poisoned + 1; // plus initial
+            if (e2) e2.textContent = `${(checked / 3).toFixed(1)}/s`;
+            if (e3) e3.textContent = `${512 + poisoned * 45} KB`;
+            setProgress(Math.min(100, (frame / 360) * 100));
+        }
+
+        if (frame >= 360) {
+            setProgress(100);
+            termLog('> Simulation done. Parasitic virus copies itself and handovers control. Deploy FIM headers checking!', 'success');
+            stopSimulation();
+            return;
+        }
+        state.simFrame = requestAnimationFrame(draw);
+    }
+    state.simFrame = requestAnimationFrame(draw);
+};
+
+/* ─── 28. MEMORY RESIDENT VIRUS ─────────────────────────────────────────── */
+window.simulateMemoryResidentVirus = function() {
+    termLog('> Allocating process mapping sandbox...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame = 0, memoryUsed = 0, intercepts = 0, scans = 0, hooked = 0;
+    const memorySlots = [];
+    const files = [
+        { name: 'config.sys', state: 'clean', y: -20 },
+        { name: 'driver.dll', state: 'clean', y: -20 },
+        { name: 'cmd.exe', state: 'clean', y: -20 },
+        { name: 'hosts.txt', state: 'clean', y: -20 }
+    ];
+
+    for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 8; c++) {
+            memorySlots.push({ x: w * 0.15 + c * 35, y: h * 0.42 + r * 25, infected: false, label: `0x${rndInt(10,99)}${rndInt(10,99)}` });
+        }
+    }
+
+    simTimeout(() => { if (!state.simRunning) return; activateStep(1); termLog('> Executable loader written. Allocating High memory (TPA)...', 'warning'); }, 600);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(2); hooked = 3; termLog('> Hooking vector IVT: Hooked INT 21h (DOS API), INT 13h (Disk I/O).', 'error'); }, 1400);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(3); termLog('> Intercepting file accesses. Hook is monitoring Open/Close handle requests.', 'warning'); }, 2200);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(4); termLog('> Virus persists dynamically in memory. System infection active.', 'error'); }, 3000);
+
+    function draw() {
+        if (!state.simRunning) return;
+        frame++;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
+
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('SYSTEM RAM RESIDENCE & API INTERCEPTION', w / 2, 22);
+
+        // Infecting RAM blocks animation
+        if (frame > 40 && frame < 90 && frame % 10 === 0) {
+            const idx = Math.floor((frame - 41) / 10);
+            if (memorySlots[idx]) {
+                memorySlots[idx].infected = true;
+                memoryUsed = (idx + 1) * 8;
+            }
+        }
+
+        // Draw RAM grid
+        ctx.fillStyle = '#525c70'; ctx.font = '8px monospace'; ctx.textAlign = 'left';
+        ctx.fillText('SYSTEM RAM MATRIX', w * 0.15, h * 0.38);
+
+        memorySlots.forEach(slot => {
+            ctx.fillStyle = slot.infected ? 'rgba(255, 59, 59, 0.35)' : 'rgba(255, 255, 255, 0.02)';
+            ctx.strokeStyle = slot.infected ? '#ff3b3b' : 'rgba(255, 255, 255, 0.08)';
+            ctx.beginPath(); ctx.roundRect(slot.x, slot.y, 30, 20, 2); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = slot.infected ? '#fff' : '#525c70'; ctx.font = '7px monospace'; ctx.textAlign = 'center';
+            ctx.fillText(slot.infected ? 'RES' : slot.label, slot.x + 15, slot.y + 12);
+        });
+
+        // Hook arrows to interrupt vectors
+        if (hooked > 0) {
+            ctx.beginPath(); ctx.moveTo(w * 0.35, h * 0.55); ctx.lineTo(w * 0.65, h * 0.55);
+            ctx.strokeStyle = '#ff3b3b'; ctx.lineWidth = 1.5; ctx.stroke();
+            ctx.fillStyle = '#ff3b3b'; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'center';
+            ctx.fillText('HOOKED VECTOR: INT 21h', w * 0.5, h * 0.53);
+        }
+
+        // Pass files through file system call loop
+        const apiX = w * 0.72, apiY = h * 0.6;
+        ctx.fillStyle = 'rgba(0, 240, 255, 0.05)';
+        ctx.strokeStyle = '#00f0ff';
+        ctx.beginPath(); ctx.roundRect(apiX - 40, apiY - 30, 80, 60, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#00f0ff'; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('File Open API', apiX, apiY - 5);
+        ctx.fillText('(ReadFile)', apiX, apiY + 10);
+
+        // Animate files
+        if (frame > 120 && frame % 60 === 0) {
+            const fIdx = Math.floor((frame - 120) / 60) % files.length;
+            files[fIdx].y = h * 0.15;
+            files[fIdx].state = 'clean';
+        }
+
+        files.forEach(f => {
+            if (f.y >= h * 0.15 && f.y < h * 0.8) {
+                f.y += 2;
+                // Hook check
+                if (Math.abs(f.y - apiY) < 15) {
+                    if (hooked > 0 && f.state === 'clean') {
+                        f.state = 'infected';
+                        intercepts++;
+                        termLog(`> System call INT 21h intercepted for: ${f.name}. File infected!`, 'error');
+                    }
+                }
+                ctx.fillStyle = f.state === 'infected' ? 'rgba(255, 59, 59, 0.2)' : 'rgba(255, 255, 255, 0.05)';
+                ctx.strokeStyle = f.state === 'infected' ? '#ff3b3b' : 'rgba(255, 255, 255, 0.15)';
+                ctx.beginPath(); ctx.roundRect(apiX + 70, f.y - 10, 60, 20, 3); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = f.state === 'infected' ? '#ff3b3b' : '#8892a8'; ctx.font = '8px monospace';
+                ctx.fillText(f.name, apiX + 100, f.y + 2);
+            }
+        });
+
+        if (frame % 20 === 0) {
+            const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
+            if (e0) e0.textContent = `${memoryUsed} KB`;
+            if (e1) e1.textContent = hooked;
+            if (e2) e2.textContent = intercepts;
+            if (e3) e3.textContent = Math.round(frame / 4);
+            setProgress(Math.min(100, (frame / 360) * 100));
+        }
+
+        if (frame >= 360) {
+            setProgress(100);
+            termLog('> Simulation done. Memory resident virus hooks remain in RAM. Perform cold reboot!', 'success');
+            stopSimulation();
+            return;
+        }
+        state.simFrame = requestAnimationFrame(draw);
+    }
+    state.simFrame = requestAnimationFrame(draw);
+};
+
+/* ─── 29. BOOT SECTOR VIRUS ─────────────────────────────────────────────── */
+window.simulateBootSectorVirus = function() {
+    termLog('> Loading Master Boot Record (MBR) analyzer...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame = 0, sectorReads = 0, scanned = 0, interceptions = 0, MBRStatus = 'Valid';
+
+    simTimeout(() => { if (!state.simRunning) return; activateStep(1); termLog('> BIOS loaded boot sector Sector 0 (compromised).', 'error'); }, 600);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(2); termLog('> Malicious MBR executed. Redirecting system pointers to high memory...', 'error'); }, 1400);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(3); termLog('> Reading original backup MBR from Sector 14. Chain loading OS...', 'warning'); }, 2200);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(4); termLog('> Windows booted successfully. Virus loaded at ring-0. Intercepting IO...', 'error'); }, 3000);
+
+    function draw() {
+        if (!state.simRunning) return;
+        frame++;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
+
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('MBR HIJACK & PRE-OS BOOT SEQUENCE', w / 2, 22);
+
+        // Nodes coordinates
+        const biosX = w * 0.18, biosY = h * 0.5;
+        const MBRX = w * 0.42, MBRY = h * 0.5;
+        const ramX = w * 0.68, ramY = h * 0.35;
+        const osX = w * 0.68, osY = h * 0.65;
+
+        // Draw BIOS Node
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.03)'; ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.beginPath(); ctx.roundRect(biosX - 35, biosY - 20, 70, 40, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#8892a8'; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('BIOS', biosX, biosY - 4);
+        ctx.fillStyle = '#39ff14'; ctx.font = '7px monospace';
+        ctx.fillText('POST OK', biosX, biosY + 10);
+
+        // Draw MBR Sector 0 Node
+        const isMBRBad = frame > 40;
+        ctx.fillStyle = isMBRBad ? 'rgba(255, 59, 59, 0.1)' : 'rgba(0, 240, 255, 0.05)';
+        ctx.strokeStyle = isMBRBad ? '#ff3b3b' : '#00f0ff';
+        ctx.beginPath(); ctx.roundRect(MBRX - 45, MBRY - 30, 90, 60, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = isMBRBad ? '#ff3b3b' : '#00f0ff'; ctx.font = 'bold 9px monospace';
+        ctx.fillText('SECTOR 0', MBRX, MBRY - 14);
+        ctx.fillText('(MBR Boot)', MBRX, MBRY - 2);
+        ctx.fillStyle = isMBRBad ? '#ff3b3b' : '#8892a8'; ctx.font = '8px monospace';
+        ctx.fillText(isMBRBad ? '[POISONED]' : '[CLEAN]', MBRX, MBRY + 16);
+
+        // BIOS reads MBR
+        if (frame > 20) {
+            ctx.beginPath(); ctx.moveTo(biosX + 35, biosY); ctx.lineTo(MBRX - 45, MBRY);
+            ctx.strokeStyle = isMBRBad ? '#ff3b3b' : '#00f0ff'; ctx.stroke();
+            sectorReads = 1;
+        }
+
+        // MBR copies to High Memory RAM
+        if (frame > 60) {
+            ctx.beginPath(); ctx.moveTo(MBRX + 45, MBRY - 10); ctx.lineTo(ramX - 45, ramY);
+            ctx.strokeStyle = '#ff3b3b'; ctx.stroke();
+            
+            // Draw RAM Slot
+            ctx.fillStyle = 'rgba(255, 59, 59, 0.2)'; ctx.strokeStyle = '#ff3b3b';
+            ctx.beginPath(); ctx.roundRect(ramX - 45, ramY - 20, 90, 40, 4); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#ff3b3b'; ctx.font = 'bold 8px monospace';
+            ctx.fillText('HIGH MEMORY', ramX, ramY - 4);
+            ctx.fillText('(Virus Active)', ramX, ramY + 10);
+            MBRStatus = 'Corrupt';
+        }
+
+        // MBR chain loads OS (from sector 14 copy)
+        if (frame > 130) {
+            ctx.beginPath(); ctx.moveTo(MBRX + 45, MBRY + 10); ctx.lineTo(osX - 45, osY);
+            ctx.strokeStyle = '#39ff14'; ctx.stroke();
+            
+            // Draw OS Node
+            ctx.fillStyle = 'rgba(57, 255, 20, 0.1)'; ctx.strokeStyle = '#39ff14';
+            ctx.beginPath(); ctx.roundRect(osX - 45, osY - 20, 90, 40, 4); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#39ff14'; ctx.font = 'bold 9px monospace';
+            ctx.fillText('WINDOWS OS', osX, osY - 4);
+            ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
+            ctx.fillText('BOOTED SUCCESS', osX, osY + 10);
+            sectorReads = 2;
+        }
+
+        // Virus in RAM intercepts system IO
+        if (frame > 200) {
+            ctx.beginPath(); ctx.setLineDash([3, 3]);
+            ctx.moveTo(osX, osY - 20); ctx.lineTo(ramX, ramY + 20);
+            ctx.strokeStyle = '#ff3b3b'; ctx.stroke(); ctx.setLineDash([]);
+            interceptions = Math.min(48, Math.round((frame - 200) / 3));
+            scanned = Math.min(5, Math.round((frame - 200) / 30));
+        }
+
+        if (frame % 20 === 0) {
+            const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
+            if (e0) e0.textContent = MBRStatus;
+            if (e1) e1.textContent = sectorReads;
+            if (e2) e2.textContent = scanned;
+            if (e3) e3.textContent = interceptions;
+            setProgress(Math.min(100, (frame / 360) * 100));
+        }
+
+        if (frame >= 360) {
+            setProgress(100);
+            termLog('> Simulation done. Boot sector virus loaded before the OS. Enable Secure Boot and MBR recovery!', 'success');
+            stopSimulation();
+            return;
+        }
+        state.simFrame = requestAnimationFrame(draw);
+    }
+    state.simFrame = requestAnimationFrame(draw);
+};
+
+/* ─── 30. STEALTH VIRUS ─────────────────────────────────────────────────── */
+window.simulateStealthVirus = function() {
+    termLog('> Spawning antivirus scanning monitor...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame = 0, hooks = 0, spoofs = 0, bytesSpoofed = 0;
+
+    simTimeout(() => { if (!state.simRunning) return; activateStep(1); termLog('> Stealth virus loaded in system drivers. Hooking NTReadRequest...', 'error'); hooks = 1; }, 600);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(2); termLog('> Antivirus scanner initiated scanning loop on disk...', 'warning'); }, 1400);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(3); termLog('> Read request intercepted for explorer.exe! Spoofing payload...', 'error'); spoofs = 1; }, 2200);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(4); termLog('> Antivirus scan reports: explorer.exe [SAFE]. Threat evaded.', 'success'); bytesSpoofed = 124; }, 3000);
+
+    function draw() {
+        if (!state.simRunning) return;
+        frame++;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
+
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('STEALTH VECTOR SPOOFING & I/O HOOKING', w / 2, 22);
+
+        // Core entities positions
+        const avX = w * 0.18, avY = h * 0.45;
+        const driverX = w * 0.5, driverY = h * 0.45;
+        const diskX = w * 0.82, diskY = h * 0.45;
+
+        // Draw AV Scanner Node
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.02)'; ctx.strokeStyle = '#00f0ff';
+        ctx.beginPath(); ctx.roundRect(avX - 45, avY - 40, 90, 80, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#00f0ff'; ctx.font = 'bold 9px monospace';
+        ctx.fillText('AV SCANNER', avX, avY - 20);
+        ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
+        ctx.fillText('Scanning...', avX, avY - 5);
+        if (frame > 220) {
+            ctx.fillStyle = '#39ff14'; ctx.font = 'bold 9px monospace';
+            ctx.fillText('STATUS: SAFE', avX, avY + 20);
+        } else {
+            ctx.fillText('Parsing disk...', avX, avY + 15);
+        }
+
+        // Draw File System Driver (Kernel Call handler)
+        const isHookActive = frame > 40;
+        ctx.fillStyle = isHookActive ? 'rgba(255, 59, 59, 0.15)' : 'rgba(255, 255, 255, 0.03)';
+        ctx.strokeStyle = isHookActive ? '#ff3b3b' : 'rgba(255, 255, 255, 0.1)';
+        ctx.beginPath(); ctx.roundRect(driverX - 55, driverY - 40, 110, 80, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = isHookActive ? '#ff3b3b' : '#8892a8'; ctx.font = 'bold 9px monospace';
+        ctx.fillText('SYSTEM KERNEL', driverX, driverY - 20);
+        ctx.fillText('FILE SYSTEM I/O', driverX, driverY - 8);
+        ctx.fillStyle = isHookActive ? '#ff3b3b' : '#525c70'; ctx.font = '7px monospace';
+        ctx.fillText(isHookActive ? '[HOOK ACTIVE]' : '[SECURE]', driverX, driverY + 20);
+
+        // Draw Physical Disk File explorer.exe
+        ctx.fillStyle = 'rgba(255, 59, 59, 0.1)'; ctx.strokeStyle = '#ff3b3b';
+        ctx.beginPath(); ctx.roundRect(diskX - 45, diskY - 40, 90, 80, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#ff3b3b'; ctx.font = 'bold 9px monospace';
+        ctx.fillText('DISK STORAGE', diskX, diskY - 20);
+        ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
+        ctx.fillText('explorer.exe', diskX, diskY - 5);
+        ctx.fillStyle = '#ff3b3b'; ctx.font = 'bold 7px monospace';
+        ctx.fillText('INFECTED BYTES', diskX, diskY + 15);
+
+        // AV sends Read Request
+        if (frame > 80) {
+            ctx.beginPath(); ctx.moveTo(avX + 45, avY - 10); ctx.lineTo(driverX - 55, driverY - 10);
+            ctx.strokeStyle = '#00f0ff'; ctx.stroke();
+            ctx.fillStyle = '#00f0ff'; ctx.font = '7px monospace';
+            ctx.fillText('ReadReq', (avX + driverX) / 2, avY - 15);
+        }
+
+        // Kernel Hook Interception
+        if (frame > 140) {
+            // Instead of reading the infected disk directly, hook triggers and reads a clean cache block
+            ctx.fillStyle = 'rgba(57, 255, 20, 0.08)'; ctx.strokeStyle = '#39ff14';
+            ctx.beginPath(); ctx.roundRect(driverX - 45, driverY + 55, 90, 24, 3); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#39ff14'; ctx.font = 'bold 7px monospace';
+            ctx.fillText('CLEAN FILE CACHE', driverX, driverY + 68);
+
+            // Arrow to cache
+            ctx.beginPath(); ctx.moveTo(driverX, driverY + 40); ctx.lineTo(driverX, driverY + 55);
+            ctx.strokeStyle = '#39ff14'; ctx.stroke();
+
+            // Arrow from cache back to AV
+            ctx.beginPath(); ctx.moveTo(driverX - 45, driverY + 65); ctx.lineTo(avX, avY + 40);
+            ctx.strokeStyle = '#39ff14'; ctx.stroke();
+            ctx.fillStyle = '#39ff14'; ctx.font = '7px monospace';
+            ctx.fillText('Clean Data Output', (avX + driverX - 20) / 2, avY + 60);
+        }
+
+        if (frame % 20 === 0) {
+            const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
+            if (e0) e0.textContent = hooks;
+            if (e1) e1.textContent = spoofs;
+            if (e2) e2.textContent = `${bytesSpoofed} KB`;
+            if (e3) e3.textContent = `${Math.round(frame / 6)} days`;
+            setProgress(Math.min(100, (frame / 360) * 100));
+        }
+
+        if (frame >= 360) {
+            setProgress(100);
+            termLog('> Simulation done. Stealth virus spoofed scanner successfully. Run offline scans to clean!', 'success');
+            stopSimulation();
+            return;
+        }
+        state.simFrame = requestAnimationFrame(draw);
+    }
+    state.simFrame = requestAnimationFrame(draw);
+};
+
+/* ─── 31. POLYMORPHIC VIRUS ─────────────────────────────────────────────── */
+window.simulatePolymorphicVirus = function() {
+    termLog('> Loading signature analyzer and emulated sandbox...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame = 0, sigs = 0, keys = 0, stubs = 0, misses = 0;
+    const replicationFiles = [
+        { name: 'app1.exe', key: '0x992B', color: '#ff3b3b', status: 'clean' },
+        { name: 'sys2.exe', key: '0xE14F', color: '#ffaa00', status: 'clean' },
+        { name: 'run3.exe', key: '0x5C80', color: '#8b5cf6', status: 'clean' }
+    ];
+
+    simTimeout(() => { if (!state.simRunning) return; activateStep(1); termLog('> Executed polymorphic routine. Generates a new 16-bit key: 0x992B.', 'warning'); }, 600);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(2); termLog('> Payload encrypted. Polymorphic engine modifies decryptor stub structures.', 'error'); }, 1400);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(3); termLog('> Writing unique signature sequence to run3.exe. AV signatures bypassed!', 'error'); }, 2200);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(4); termLog('> Heuristic sandbox detects dynamic memory execution loop! Caught payload.', 'success'); }, 3000);
+
+    function draw() {
+        if (!state.simRunning) return;
+        frame++;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
+
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('POLYMORPHIC MUTATION & SANDBOX DECRYPTION', w / 2, 22);
+
+        // Original Payload Box
+        const pX = w * 0.18, pY = h * 0.45;
+        ctx.fillStyle = 'rgba(255, 59, 59, 0.15)'; ctx.strokeStyle = '#ff3b3b';
+        ctx.beginPath(); ctx.roundRect(pX - 45, pY - 40, 90, 80, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#ff3b3b'; ctx.font = 'bold 9px monospace';
+        ctx.fillText('CORE PAYLOAD', pX, pY - 20);
+        ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
+        ctx.fillText('Static instructions', pX, pY - 5);
+        ctx.fillText('Signature: [A3 B9 22]', pX, pY + 15);
+
+        // Polymorphic engine
+        const engX = w * 0.5, engY = h * 0.45;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.02)'; ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.beginPath(); ctx.roundRect(engX - 55, engY - 40, 110, 80, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 8px monospace';
+        ctx.fillText('MUTATION ENGINE', engX, engY - 20);
+        ctx.fillStyle = '#ffaa00'; ctx.font = '7px monospace';
+        if (frame > 40) {
+            ctx.fillText('KEY: ' + (frame > 140 ? '0xE14F' : '0x992B'), engX, engY - 5);
+            ctx.fillText('Encrypting...', engX, engY + 10);
+            ctx.fillText('Generating Stub...', engX, engY + 22);
+            keys = frame > 140 ? 2 : 1;
+            stubs = keys;
+        }
+
+        // Link payload to engine
+        ctx.beginPath(); ctx.moveTo(pX + 45, pY); ctx.lineTo(engX - 55, engY);
+        ctx.strokeStyle = '#ff3b3b'; ctx.stroke();
+
+        // Mutated outputs
+        replicationFiles.forEach((file, idx) => {
+            const fx = w * 0.8, fy = h * 0.25 + idx * 75;
+            const activeInfect = frame > 80 + idx * 60;
+            if (activeInfect && file.status === 'clean') {
+                file.status = 'infected';
+                sigs++;
+                misses++;
+                termLog(`> Created mutated signature for host file ${file.name}. Key: ${file.key}`, 'error');
+            }
+
+            ctx.fillStyle = file.status === 'infected' ? 'rgba(255, 255, 255, 0.02)' : 'rgba(255, 255, 255, 0.01)';
+            ctx.strokeStyle = file.status === 'infected' ? file.color : 'rgba(255, 255, 255, 0.05)';
+            ctx.beginPath(); ctx.roundRect(fx - 50, fy - 22, 100, 44, 4); ctx.fill(); ctx.stroke();
+
+            ctx.fillStyle = file.status === 'infected' ? '#fff' : '#525c70'; ctx.font = 'bold 8px monospace';
+            ctx.fillText(file.name, fx, fy - 10);
+            ctx.fillStyle = file.status === 'infected' ? file.color : '#525c70'; ctx.font = '7px monospace';
+            ctx.fillText(file.status === 'infected' ? `Stub: [${file.key.slice(2,4)} F9]` : 'CLEAN', fx, fy + 2);
+            ctx.fillText(file.status === 'infected' ? `Encrypted Body` : '', fx, fy + 12);
+
+            if (file.status === 'infected') {
+                ctx.beginPath(); ctx.moveTo(engX + 55, engY); ctx.lineTo(fx - 50, fy);
+                ctx.strokeStyle = file.color; ctx.stroke();
+            }
+        });
+
+        // Sandbox emulator captures it
+        if (frame > 280) {
+            ctx.strokeStyle = '#39ff14'; ctx.lineWidth = 1.5;
+            ctx.strokeRect(w * 0.7, h * 0.15, w * 0.25, h * 0.7);
+            ctx.fillStyle = '#39ff14'; ctx.font = 'bold 9px monospace';
+            ctx.fillText('EMULATED SANDBOX', w * 0.82, h * 0.89);
+            ctx.fillText('[DECRYPTED & DETECTED]', w * 0.82, h * 0.12);
+            misses = Math.max(0, misses - 1);
+        }
+
+        if (frame % 20 === 0) {
+            const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
+            if (e0) e0.textContent = sigs;
+            if (e1) e1.textContent = keys;
+            if (e2) e2.textContent = stubs;
+            if (e3) e3.textContent = misses;
+            setProgress(Math.min(100, (frame / 360) * 100));
+        }
+
+        if (frame >= 360) {
+            setProgress(100);
+            termLog('> Simulation done. Static signature scans failed. Emulated sandbox heuristics caught the virus!', 'success');
+            stopSimulation();
+            return;
+        }
+        state.simFrame = requestAnimationFrame(draw);
+    }
+    state.simFrame = requestAnimationFrame(draw);
+};
+
+/* ─── 32. METAMORPHIC VIRUS ─────────────────────────────────────────────── */
+window.simulateMetamorphicVirus = function() {
+    termLog('> Spawning disassembler and rewriting engines...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame = 0, rewrites = 0, junks = 0, swaps = 0;
+
+    simTimeout(() => { if (!state.simRunning) return; activateStep(1); termLog('> Decompiling payload binary to intermediate representation...', 'warning'); }, 600);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(2); termLog('> Register allocator: swapping EAX/EBX, mapping intermediate logic...', 'error'); swaps = 8; }, 1400);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(3); termLog('> Dead-code inserting: NOP codes and junk JMP structures appended...', 'error'); junks = 44; }, 2200);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(4); termLog('> Binary reassembled. Created unique instruction code blocks!', 'success'); rewrites = 1; }, 3000);
+
+    function draw() {
+        if (!state.simRunning) return;
+        frame++;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
+
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('METAMORPHIC CODE REWRITING & REASSEMBLY', w / 2, 22);
+
+        // Assembly window A (Original)
+        const aX = w * 0.22, aY = h * 0.52, aW = 140, aH = 140;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.02)'; ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.beginPath(); ctx.roundRect(aX - aW / 2, aY - aH / 2, aW, aH, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#8892a8'; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('ORIGINAL BINARY (A)', aX, aY - aH / 2 - 6);
+        ctx.fillStyle = '#e8ecf4'; ctx.font = '8px monospace'; ctx.textAlign = 'left';
+        ctx.fillText('1:  MOV EAX, 0', aX - aW / 2 + 10, aY - 40);
+        ctx.fillText('2:  ADD EAX, EDX', aX - aW / 2 + 10, aY - 20);
+        ctx.fillText('3:  MOV [EBX], EAX', aX - aW / 2 + 10, aY);
+        ctx.fillText('4:  JMP short 0x12', aX - aW / 2 + 10, aY + 20);
+        ctx.fillText('5:  RET', aX - aW / 2 + 10, aY + 40);
+
+        // Rewrite Engine
+        const eX = w * 0.5, eY = h * 0.5;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.02)'; ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.beginPath(); ctx.arc(eX, eY, 32, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#ffaa00'; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('REWRITE', eX, eY - 4);
+        ctx.fillText('ENGINE', eX, eY + 6);
+        if (frame > 20) {
+            ctx.beginPath(); ctx.arc(eX, eY, 36, -Math.PI / 2, -Math.PI / 2 + (frame % 100 / 100) * Math.PI * 2);
+            ctx.strokeStyle = '#ffaa00'; ctx.lineWidth = 2; ctx.stroke();
+        }
+
+        // Assembly window B (Morphed)
+        const bX = w * 0.78, bY = h * 0.52, bW = 140, bH = 140;
+        ctx.fillStyle = 'rgba(255, 59, 59, 0.04)'; ctx.strokeStyle = frame > 120 ? '#ff3b3b' : 'rgba(255, 255, 255, 0.1)';
+        ctx.beginPath(); ctx.roundRect(bX - bW / 2, bY - bH / 2, bW, bH, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = frame > 120 ? '#ff3b3b' : '#8892a8'; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('METAMORPHIC BINARY (B)', bX, bY - bH / 2 - 6);
+        ctx.fillStyle = frame > 120 ? '#ff3b3b' : '#525c70'; ctx.font = '8px monospace'; ctx.textAlign = 'left';
+        
+        if (frame > 120) {
+            ctx.fillText('1:  XOR EBX, EBX', bX - bW / 2 + 10, bY - 45);
+            ctx.fillText('2:  NOP', bX - bW / 2 + 10, bY - 30);
+            ctx.fillText('3:  ADD EBX, EDX', bX - bW / 2 + 10, bY - 15);
+            ctx.fillText('4:  MOV [ECX], EBX', bX - bW / 2 + 10, bY);
+            ctx.fillText('5:  JMP short 0x16', bX - bW / 2 + 10, bY + 15);
+            ctx.fillText('6:  NOP', bX - bW / 2 + 10, bY + 30);
+            ctx.fillText('7:  RET', bX - bW / 2 + 10, bY + 45);
+        } else {
+            ctx.fillText('Pending reassembly...', bX - bW / 2 + 10, bY);
+        }
+
+        // Connecting lines
+        if (frame > 30) {
+            ctx.beginPath(); ctx.moveTo(aX + aW / 2, aY); ctx.lineTo(eX - 32, eY);
+            ctx.strokeStyle = '#ffaa00'; ctx.lineWidth = 1; ctx.stroke();
+        }
+        if (frame > 120) {
+            ctx.beginPath(); ctx.moveTo(eX + 32, eY); ctx.lineTo(bX - bW / 2, bY);
+            ctx.strokeStyle = '#ff3b3b'; ctx.lineWidth = 1.5; ctx.stroke();
+        }
+
+        if (frame % 20 === 0) {
+            const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
+            if (e0) e0.textContent = rewrites;
+            if (e1) e1.textContent = frame > 160 ? `${junks} lines` : '0 lines';
+            if (e2) e2.textContent = frame > 90 ? swaps : 0;
+            if (e3) e3.textContent = frame > 240 ? '0% (sig bypassed)' : '100%';
+            setProgress(Math.min(100, (frame / 360) * 100));
+        }
+
+        if (frame >= 360) {
+            setProgress(100);
+            termLog('> Simulation done. Metamorphic virus successfully rewrote structure. Signature scans bypassed completely!', 'success');
+            stopSimulation();
+            return;
+        }
+        state.simFrame = requestAnimationFrame(draw);
+    }
+    state.simFrame = requestAnimationFrame(draw);
+};
+
+/* ─── 33. NETWORK WORM ──────────────────────────────────────────────────── */
+window.simulateWormGeneral = function() {
+    termLog('> Scanning local subnet ranges...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame = 0, scanned = 0, exploits = 0, infects = 0, traffic = 0;
+    const nodes = [
+        { label: 'Host A (Gateway)', x: w * 0.5, y: h * 0.18, status: 'infected' },
+        { label: 'Host B', x: w * 0.18, y: h * 0.45, status: 'clean' },
+        { label: 'Host C', x: w * 0.38, y: h * 0.48, status: 'clean' },
+        { label: 'Host D', x: w * 0.62, y: h * 0.48, status: 'clean' },
+        { label: 'Host E', x: w * 0.82, y: h * 0.45, status: 'clean' },
+        { label: 'Host F (DB Server)', x: w * 0.5, y: h * 0.78, status: 'clean' }
+    ];
+    const packets = [];
+
+    simTimeout(() => { if (!state.simRunning) return; activateStep(1); termLog('> Gateway infected. Initiating local scanning daemon...', 'warning'); }, 600);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(2); termLog('> Found open Port 445 on Host B, Host D, Host F.', 'warning'); }, 1400);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(3); termLog('> Sending EternalBlue SMB exploit packets to targets...', 'error'); }, 2200);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(4); termLog('> Shell commands executed. Worm files transfered. Lateral movement success!', 'error'); }, 3000);
+
+    function draw() {
+        if (!state.simRunning) return;
+        frame++;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
+
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('WORM NETWORK REPLICATION & LATERAL MOVEMENT', w / 2, 22);
+
+        // Draw network connection lines
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)'; ctx.lineWidth = 1;
+        for (let i = 0; i < nodes.length; i++) {
+            for (let j = i + 1; j < nodes.length; j++) {
+                ctx.beginPath(); ctx.moveTo(nodes[i].x, nodes[i].y); ctx.lineTo(nodes[j].x, nodes[j].y); ctx.stroke();
+            }
+        }
+
+        // Scanning phase
+        if (frame > 40 && frame % 12 === 0) {
+            const infNodes = nodes.filter(n => n.status === 'infected');
+            const cleanNodes = nodes.filter(n => n.status === 'clean');
+            if (infNodes.length > 0 && cleanNodes.length > 0) {
+                const src = infNodes[rndInt(0, infNodes.length)];
+                const dest = cleanNodes[rndInt(0, cleanNodes.length)];
+                packets.push({ x: src.x, y: src.y, tx: dest.x, ty: dest.y, p: 0, target: dest, type: 'scan' });
+                scanned += 4;
+                traffic = Math.min(100, traffic + 1.5);
+            }
+        }
+
+        // Exploitation & infection phase
+        if (frame === 140) {
+            const target = nodes[1]; // Host B
+            packets.push({ x: nodes[0].x, y: nodes[0].y, tx: target.x, ty: target.y, p: 0, target: target, type: 'exploit' });
+            exploits++;
+        }
+        if (frame === 200) {
+            const target = nodes[3]; // Host D
+            packets.push({ x: nodes[0].x, y: nodes[0].y, tx: target.x, ty: target.y, p: 0, target: target, type: 'exploit' });
+            exploits++;
+        }
+        if (frame === 260) {
+            const target = nodes[5]; // Host F
+            packets.push({ x: nodes[3].x, y: nodes[3].y, tx: target.x, ty: target.y, p: 0, target: target, type: 'exploit' });
+            exploits++;
+        }
+
+        // Draw packets
+        packets.forEach(p => {
+            p.p += 0.035;
+            const px = p.x + (p.tx - p.x) * p.p;
+            const py = p.y + (p.ty - p.y) * p.p;
+            ctx.beginPath(); ctx.arc(px, py, p.type === 'exploit' ? 5 : 3, 0, Math.PI * 2);
+            ctx.fillStyle = p.type === 'exploit' ? '#ff3b3b' : '#ffaa00'; ctx.fill();
+            if (p.p >= 1) {
+                if (p.type === 'exploit') {
+                    p.target.status = 'infected';
+                    infects++;
+                    traffic = Math.min(1000, traffic + 120);
+                    termLog(`> Exploit verified on ${p.target.label}. Payload executed!`, 'error');
+                }
+                p.dead = true;
+            }
+        });
+        for (let i = packets.length - 1; i >= 0; i--) {
+            if (packets[i].dead) packets.splice(i, 1);
+        }
+
+        // Draw nodes
+        nodes.forEach(n => {
+            const isInfected = n.status === 'infected';
+            ctx.shadowBlur = isInfected ? 12 : 0; ctx.shadowColor = '#ffaa00';
+            ctx.beginPath(); ctx.arc(n.x, n.y, 16, 0, Math.PI * 2);
+            ctx.fillStyle = isInfected ? 'rgba(255, 170, 0, 0.2)' : 'rgba(255, 255, 255, 0.03)'; ctx.fill();
+            ctx.strokeStyle = isInfected ? '#ffaa00' : 'rgba(255, 255, 255, 0.15)'; ctx.lineWidth = 1.5; ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            ctx.fillStyle = isInfected ? '#ffaa00' : '#8892a8'; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'center';
+            ctx.fillText(n.label, n.x, n.y + 26);
+        });
+
+        if (frame % 20 === 0) {
+            const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
+            if (e0) e0.textContent = scanned;
+            if (e1) e1.textContent = exploits;
+            if (e2) e2.textContent = infects + 1; // plus initial
+            if (e3) e3.textContent = `${traffic.toFixed(1)} Mbps`;
+            setProgress(Math.min(100, (frame / 360) * 100));
+        }
+
+        if (frame >= 360) {
+            setProgress(100);
+            termLog('> Simulation done. Standalone network worm propagated. Enable internal segment firewalls!', 'success');
+            stopSimulation();
+            return;
+        }
+        state.simFrame = requestAnimationFrame(draw);
+    }
+    state.simFrame = requestAnimationFrame(draw);
+};
+
+/* ─── 34. EMAIL WORM ────────────────────────────────────────────────────── */
+window.simulateEmailWorm = function() {
+    termLog('> Initializing Outlook MAPI connectors...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame = 0, addresses = 0, dispatched = 0, connections = 0, inboxInfects = 0;
+    const inboxList = [
+        { email: 'hr.manager@corp.com', status: 'pending' },
+        { email: 'systems.eng@corp.com', status: 'pending' },
+        { email: 'sales.dept@corp.com', status: 'pending' }
+    ];
+    const mails = [];
+
+    simTimeout(() => { if (!state.simRunning) return; activateStep(1); termLog('> Address book parsed: 128 targets acquired.', 'warning'); addresses = 128; }, 600);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(2); termLog('> Initializing SMTP session with mail.corporate.com...', 'warning'); connections = 1; }, 1400);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(3); termLog('> Broadcasting emails with update.pdf.exe payload attachment...', 'error'); }, 2200);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(4); termLog('> Mail recipients executed attachment. Worm propagation loop triggered.', 'error'); }, 3000);
+
+    function draw() {
+        if (!state.simRunning) return;
+        frame++;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
+
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('SMTP BROADCAST & TARGET INBOX MULTIPLICATION', w / 2, 22);
+
+        // Core entities positions
+        const hostX = w * 0.18, hostY = h * 0.5;
+        const smtpX = w * 0.5, smtpY = h * 0.5;
+        const targetX = w * 0.82;
+
+        // Draw Local Infected Host Node
+        ctx.fillStyle = 'rgba(255, 170, 0, 0.15)'; ctx.strokeStyle = '#ffaa00';
+        ctx.beginPath(); ctx.roundRect(hostX - 45, hostY - 40, 90, 80, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#ffaa00'; ctx.font = 'bold 9px monospace';
+        ctx.fillText('INFECTED PC', hostX, hostY - 20);
+        ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
+        ctx.fillText('Outlook client', hostX, hostY - 5);
+        ctx.fillText('Worm: active', hostX, hostY + 15);
+
+        // Draw SMTP server Node
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.02)'; ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.beginPath(); ctx.roundRect(smtpX - 45, smtpY - 40, 90, 80, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 9px monospace';
+        ctx.fillText('SMTP SERVER', smtpX, smtpY - 20);
+        ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
+        ctx.fillText('mail.corp.com', smtpX, smtpY - 5);
+        ctx.fillStyle = connections > 0 ? '#39ff14' : '#525c70'; ctx.font = 'bold 7px monospace';
+        ctx.fillText(connections > 0 ? '[PORT 25 OPEN]' : '[STANDBY]', smtpX, smtpY + 15);
+
+        // Sending letters from host to server
+        if (frame > 60 && frame % 15 === 0 && dispatched < 60) {
+            mails.push({ x: hostX + 45, y: hostY, tx: smtpX - 45, ty: smtpY, p: 0, type: 'to-server' });
+            dispatched++;
+        }
+
+        // Sending from server to targets
+        if (frame > 140 && frame % 20 === 0) {
+            const destIdx = Math.floor(frame / 20) % inboxList.length;
+            const destY = h * 0.25 + destIdx * 75;
+            mails.push({ x: smtpX + 45, y: smtpY, tx: targetX - 50, ty: destY, p: 0, type: 'to-target', target: inboxList[destIdx] });
+        }
+
+        // Draw mails
+        mails.forEach(m => {
+            m.p += 0.035;
+            const mx = m.x + (m.tx - m.x) * m.p;
+            const my = m.y + (m.ty - m.y) * m.p;
+            ctx.beginPath(); ctx.rect(mx - 6, my - 4, 12, 8);
+            ctx.fillStyle = '#ffaa00'; ctx.fill();
+            ctx.strokeStyle = '#fff'; ctx.lineWidth = 0.5; ctx.stroke();
+            if (m.p >= 1) {
+                if (m.type === 'to-target' && m.target.status === 'pending') {
+                    m.target.status = 'infected';
+                    inboxInfects++;
+                    termLog(`> Inbound email loaded on ${m.target.email}. Attachment execution triggered!`, 'error');
+                }
+                m.dead = true;
+            }
+        });
+        for (let i = mails.length - 1; i >= 0; i--) {
+            if (mails[i].dead) mails.splice(i, 1);
+        }
+
+        // Draw target inbox nodes
+        inboxList.forEach((inb, idx) => {
+            const ty = h * 0.25 + idx * 75;
+            const isInf = inb.status === 'infected';
+            ctx.fillStyle = isInf ? 'rgba(255, 59, 59, 0.15)' : 'rgba(255, 255, 255, 0.01)';
+            ctx.strokeStyle = isInf ? '#ff3b3b' : 'rgba(255, 255, 255, 0.1)';
+            ctx.beginPath(); ctx.roundRect(targetX - 50, ty - 22, 100, 44, 4); ctx.fill(); ctx.stroke();
+
+            ctx.fillStyle = isInf ? '#ff3b3b' : '#8892a8'; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'center';
+            ctx.fillText(inb.email.split('@')[0], targetX, ty - 8);
+            ctx.fillStyle = isInf ? '#ff3b3b' : '#525c70'; ctx.font = '7px monospace';
+            ctx.fillText(isInf ? '[WORM SPAWNED]' : '[PENDING]', targetX, ty + 10);
+        });
+
+        if (frame % 20 === 0) {
+            const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
+            if (e0) e0.textContent = addresses;
+            if (e1) e1.textContent = dispatched * 2; // multiply for display
+            if (e2) e2.textContent = connections;
+            if (e3) e3.textContent = inboxInfects;
+            setProgress(Math.min(100, (frame / 360) * 100));
+        }
+
+        if (frame >= 360) {
+            setProgress(100);
+            termLog('> Simulation done. Email worm mass dispatch complete. Deploy SPF validation on gateways!', 'success');
+            stopSimulation();
+            return;
+        }
+        state.simFrame = requestAnimationFrame(draw);
+    }
+    state.simFrame = requestAnimationFrame(draw);
+};
+
+/* ─── 35. TROJAN DISGUISE ────────────────────────────────────────────────── */
+window.simulateTrojanGeneral = function() {
+    termLog('> Packaging wrapper payload installer...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame = 0, downloads = 0, consent = 'Granted', hiddenProcs = 0;
+
+    simTimeout(() => { if (!state.simRunning) return; activateStep(1); termLog('> Wrapped installer SuperPDF.msi published on unofficial web portal.', 'warning'); downloads = 280; }, 600);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(2); termLog('> User downloaded and ran SuperPDF installer wrapper.', 'warning'); }, 1400);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(3); termLog('> MSI installs normal PDF viewer. Spawning helper process: pdfhelper.exe...', 'error'); hiddenProcs = 1; }, 2200);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(4); termLog('> pdfhelper.exe registers startup run keys. Initiating C2 socket link...', 'error'); hiddenProcs = 2; }, 3000);
+
+    function draw() {
+        if (!state.simRunning) return;
+        frame++;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
+
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('WRAPPER INSTALLATION & VISUAL DISGUISE', w / 2, 22);
+
+        // Disguise installer frame
+        const instX = w * 0.15, instY = h * 0.35, instW = 120, instH = 80;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.02)'; ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.beginPath(); ctx.roundRect(instX, instY, instW, instH, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#8892a8'; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'left';
+        ctx.fillText('SuperPDF.msi', instX + 8, instY + 16);
+        ctx.fillStyle = '#525c70'; ctx.font = '7px monospace';
+        ctx.fillText('Size: 45.2 MB', instX + 8, instY + 34);
+        ctx.fillText('Signer: Unverified', instX + 8, instY + 48);
+        ctx.fillStyle = '#00f0ff'; ctx.font = 'bold 7px monospace';
+        ctx.fillText('[DISGUISE: PDF APP]', instX + 8, instY + 68);
+
+        // Execution arrow
+        if (frame > 40) {
+            ctx.beginPath(); ctx.moveTo(instX + instW, instY + instH / 2); ctx.lineTo(w * 0.45, h * 0.55);
+            ctx.strokeStyle = '#00f0ff'; ctx.stroke();
+        }
+
+        // Normal Front-end Process (User visual)
+        const uiX = w * 0.46, uiY = h * 0.28, uiW = 120, uiH = 90;
+        ctx.fillStyle = 'rgba(57, 255, 20, 0.05)'; ctx.strokeStyle = '#39ff14';
+        ctx.beginPath(); ctx.roundRect(uiX, uiY, uiW, uiH, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#39ff14'; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'left';
+        ctx.fillText('SuperPDF Reader v1.0', uiX + 8, uiY + 16);
+        ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
+        ctx.fillText('Reading: invoice.pdf', uiX + 8, uiY + 34);
+        ctx.fillStyle = 'rgba(255,255,255,0.05)';
+        ctx.fillRect(uiX + 8, uiY + 45, uiW - 16, 32); // text simulation blocks
+        ctx.fillStyle = '#39ff14'; ctx.fillText('User view: CLEAN', uiX + 8, uiY + 84);
+
+        // Hidden Back-end Process (Malicious thread)
+        const malX = w * 0.72, malY = h * 0.52, malW = 120, malH = 90;
+        const isMalRunning = frame > 130;
+        ctx.fillStyle = isMalRunning ? 'rgba(255, 59, 59, 0.12)' : 'rgba(255, 255, 255, 0.01)';
+        ctx.strokeStyle = isMalRunning ? '#ff3b3b' : 'rgba(255, 255, 255, 0.05)';
+        ctx.beginPath(); ctx.roundRect(malX, malY, malW, malH, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = isMalRunning ? '#ff3b3b' : '#525c70'; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'left';
+        ctx.fillText('pdfhelper.exe (HIDDEN)', malX + 8, malY + 16);
+        ctx.fillStyle = isMalRunning ? '#ff3b3b' : '#525c70'; ctx.font = '7px monospace';
+        if (isMalRunning) {
+            ctx.fillText('> Allocating sockets...', malX + 8, malY + 34);
+            ctx.fillText('> Injecting DLL hooks...', malX + 8, malY + 48);
+            ctx.fillText('> C2 Beaconing active', malX + 8, malY + 62);
+            ctx.fillText('[BACKDOOR ACTIVE]', malX + 8, malY + 80);
+        } else {
+            ctx.fillText('Waiting for wrapper...', malX + 8, malY + 34);
+        }
+
+        if (isMalRunning) {
+            ctx.beginPath(); ctx.moveTo(uiX + uiW / 2, uiY + uiH); ctx.lineTo(malX + malW / 2, malY);
+            ctx.strokeStyle = '#ff3b3b'; ctx.stroke();
+        }
+
+        if (frame % 20 === 0) {
+            const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
+            if (e0) e0.textContent = 'Excellent';
+            if (e1) e1.textContent = downloads + Math.round(frame * 1.5);
+            if (e2) e2.textContent = consent;
+            if (e3) e3.textContent = hiddenProcs;
+            setProgress(Math.min(100, (frame / 360) * 100));
+        }
+
+        if (frame >= 360) {
+            setProgress(100);
+            termLog('> Simulation done. Disguised Trojan payload loaded. Check installer digital signatures!', 'success');
+            stopSimulation();
+            return;
+        }
+        state.simFrame = requestAnimationFrame(draw);
+    }
+    state.simFrame = requestAnimationFrame(draw);
+};
+
+/* ─── 36. PASSIVE TROJAN ────────────────────────────────────────────────── */
+window.simulatePassiveTrojan = function() {
+    termLog('> Binding listener network sockets...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame = 0, listeningPorts = 9999, rulesInjected = 0, egress = '0 B', inbound = 0;
+
+    simTimeout(() => { if (!state.simRunning) return; activateStep(1); termLog('> Bound listener to TCP socket Port 9999.', 'warning'); }, 600);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(2); termLog('> Modifying system firewall: injected inbound exception for Port 9999.', 'error'); rulesInjected = 1; }, 1400);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(3); termLog('> Trojan socket transitioned to LISTEN status. Waiting for incoming shell connection...', 'warning'); }, 2200);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(4); termLog('> Incoming request from client: Attacker established session. Interactive CLI active!', 'error'); inbound = 1; }, 3000);
+
+    function draw() {
+        if (!state.simRunning) return;
+        frame++;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
+
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('PASSIVE BACKDOOR PORT LISTENER & SHELL BIND', w / 2, 22);
+
+        // Draw Firewall Wall in center-middle
+        const fX = w * 0.52, fY = h * 0.55;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.01)'; ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.beginPath(); ctx.fillRect(fX - 4, h * 0.2, 8, h * 0.6);
+
+        // Draw firewall gate representing Port 9999
+        const gateActive = frame > 90;
+        ctx.fillStyle = gateActive ? 'rgba(57, 255, 20, 0.15)' : 'rgba(255, 59, 59, 0.2)';
+        ctx.strokeStyle = gateActive ? '#39ff14' : '#ff3b3b';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.roundRect(fX - 15, fY - 20, 30, 40, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = gateActive ? '#39ff14' : '#ff3b3b'; ctx.font = 'bold 7px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('PORT', fX, fY - 6);
+        ctx.fillText('9999', fX, fY + 4);
+        ctx.fillText(gateActive ? '[OPEN]' : '[BLOCKED]', fX, fY + 14);
+
+        // Draw Victim PC (host) behind firewall
+        const hostX = w * 0.76, hostY = h * 0.5;
+        const isListening = frame > 40;
+        ctx.fillStyle = isListening ? 'rgba(255, 59, 59, 0.1)' : 'rgba(255, 255, 255, 0.02)';
+        ctx.strokeStyle = isListening ? '#ff3b3b' : 'rgba(255, 255, 255, 0.1)';
+        ctx.beginPath(); ctx.roundRect(hostX - 45, hostY - 40, 90, 80, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = isListening ? '#ff3b3b' : '#8892a8'; ctx.font = 'bold 9px monospace';
+        ctx.fillText('VICTIM PC', hostX, hostY - 20);
+        ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
+        ctx.fillText(isListening ? 'netstat: LISTEN' : 'Standby', hostX, hostY);
+        ctx.fillText('Egress: 0 packets', hostX, hostY + 15);
+
+        // Draw Attacker PC outside firewall
+        const attX = w * 0.22, attY = h * 0.5;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.02)'; ctx.strokeStyle = '#8b5cf6';
+        ctx.beginPath(); ctx.roundRect(attX - 45, attY - 40, 90, 80, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#8b5cf6'; ctx.font = 'bold 9px monospace';
+        ctx.fillText('ATTACKER PC', attX, attY - 20);
+        ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
+        ctx.fillText('nmap scan...', attX, attY);
+
+        // Attacker connecting inbound
+        if (frame > 220) {
+            ctx.beginPath(); ctx.moveTo(attX + 45, attY); ctx.lineTo(fX - 15, fY);
+            ctx.strokeStyle = '#8b5cf6'; ctx.lineWidth = 1.5; ctx.stroke();
+            ctx.fillStyle = '#8b5cf6'; ctx.font = 'bold 8px monospace';
+            ctx.fillText('Inbound Sync', (attX + fX) / 2, attY - 10);
+        }
+
+        if (frame > 280) {
+            ctx.beginPath(); ctx.moveTo(fX + 15, fY); ctx.lineTo(hostX - 45, hostY);
+            ctx.strokeStyle = '#39ff14'; ctx.lineWidth = 1.5; ctx.stroke();
+            ctx.fillStyle = '#39ff14'; ctx.font = 'bold 8px monospace';
+            ctx.fillText('Shell Spawned', (fX + hostX) / 2, hostY + 20);
+            egress = `${(frame - 280) * 12} B`;
+        }
+
+        if (frame % 20 === 0) {
+            const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
+            if (e0) e0.textContent = listeningPorts;
+            if (e1) e1.textContent = rulesInjected;
+            if (e2) e2.textContent = egress;
+            if (e3) e3.textContent = inbound;
+            setProgress(Math.min(100, (frame / 360) * 100));
+        }
+
+        if (frame >= 360) {
+            setProgress(100);
+            termLog('> Simulation done. Attacker gains console shell access. Configure ingress host-based firewall rules!', 'success');
+            stopSimulation();
+            return;
+        }
+        state.simFrame = requestAnimationFrame(draw);
+    }
+    state.simFrame = requestAnimationFrame(draw);
+};
+
+/* ─── 37. ACTIVE TROJAN ─────────────────────────────────────────────────── */
+window.simulateActiveTrojan = function() {
+    termLog('> Registering startup persistence handlers...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame = 0, heartbeats = 0, dataTx = 0;
+    const beacons = [];
+
+    simTimeout(() => { if (!state.simRunning) return; activateStep(1); termLog('> Autorun registry key configured: HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run.', 'warning'); }, 600);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(2); termLog('> Querying DNS resolvers for C2 domain beacons...', 'warning'); }, 1400);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(3); termLog('> Outbound TCP handshakes resolved. Tunnel established via reverse HTTPS (Port 443).', 'error'); }, 2200);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(4); termLog('> C2 shell command parsed: exfiltrating local documents directory.', 'error'); }, 3000);
+
+    function draw() {
+        if (!state.simRunning) return;
+        frame++;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
+
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('ACTIVE REVERSE SHELL TUNNELING & BEACONING', w / 2, 22);
+
+        // Core entities positions
+        const hostX = w * 0.18, hostY = h * 0.5;
+        const fX = w * 0.48, fY = h * 0.5;
+        const c2X = w * 0.82, c2Y = h * 0.5;
+
+        // Draw Infected Host PC Node
+        ctx.fillStyle = 'rgba(255, 59, 59, 0.12)'; ctx.strokeStyle = '#ff3b3b';
+        ctx.beginPath(); ctx.roundRect(hostX - 45, hostY - 40, 90, 80, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#ff3b3b'; ctx.font = 'bold 9px monospace';
+        ctx.fillText('INFECTED PC', hostX, hostY - 20);
+        ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
+        ctx.fillText('Agent: beaconing', hostX, hostY - 5);
+        ctx.fillText('Internal network', hostX, hostY + 15);
+
+        // Draw Outbound Firewall Wall
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.01)'; ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.beginPath(); ctx.fillRect(fX - 4, h * 0.2, 8, h * 0.6);
+
+        // Inbound block sign on firewall
+        ctx.fillStyle = 'rgba(255, 59, 59, 0.1)'; ctx.strokeStyle = '#ff3b3b';
+        ctx.beginPath(); ctx.arc(fX, fY - 50, 12, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#ff3b3b'; ctx.font = 'bold 7px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('IN', fX, fY - 52); ctx.fillText('BLOCKED', fX, fY - 43);
+
+        // Outbound permit sign on firewall (Port 443 open)
+        ctx.fillStyle = 'rgba(57, 255, 20, 0.1)'; ctx.strokeStyle = '#39ff14';
+        ctx.beginPath(); ctx.arc(fX, fY + 50, 12, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#39ff14'; ctx.font = 'bold 7px monospace';
+        ctx.fillText('OUT', fX, fY + 48); ctx.fillText('OK', fX, fY + 57);
+
+        // Draw Attacker C2 Server Node
+        const isC2Linked = frame > 120;
+        ctx.fillStyle = isC2Linked ? 'rgba(139, 92, 246, 0.15)' : 'rgba(255, 255, 255, 0.02)';
+        ctx.strokeStyle = isC2Linked ? '#8b5cf6' : 'rgba(255, 255, 255, 0.1)';
+        ctx.beginPath(); ctx.roundRect(c2X - 45, c2Y - 40, 90, 80, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = isC2Linked ? '#8b5cf6' : '#8892a8'; ctx.font = 'bold 9px monospace';
+        ctx.fillText('C2 SERVER', c2X, c2Y - 20);
+        ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
+        ctx.fillText('attacker-dns.org', c2X, c2Y - 5);
+        ctx.fillStyle = isC2Linked ? '#39ff14' : '#525c70'; ctx.font = 'bold 7px monospace';
+        ctx.fillText(isC2Linked ? '[TUNNEL OPEN]' : '[OFFLINE]', c2X, c2Y + 15);
+
+        // Active Beacon pulses outbound from host
+        if (frame > 80 && frame % 40 === 0 && beacons.length < 8) {
+            beacons.push({ x: hostX + 45, y: hostY, tx: c2X - 45, ty: c2Y, p: 0 });
+            heartbeats++;
+        }
+
+        beacons.forEach(b => {
+            b.p += 0.02;
+            const bx = b.x + (b.tx - b.x) * b.p;
+            const by = b.y + (b.ty - b.y) * b.p;
+            ctx.beginPath(); ctx.arc(bx, by, 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#ff3b3b'; ctx.fill();
+            if (b.p >= 1) {
+                b.dead = true;
+                termLog(`> Beacon pulse received on C2. Handshake response sent.`, 'warning');
+                dataTx += 8;
+            }
+        });
+        for (let i = beacons.length - 1; i >= 0; i--) {
+            if (beacons[i].dead) beacons.splice(i, 1);
+        }
+
+        // Connection line overlay
+        if (isC2Linked) {
+            ctx.beginPath(); ctx.moveTo(hostX + 45, hostY); ctx.lineTo(c2X - 45, c2Y);
+            ctx.strokeStyle = 'rgba(57, 255, 20, 0.25)'; ctx.lineWidth = 1.5; ctx.stroke();
+        }
+
+        if (frame % 20 === 0) {
+            const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
+            if (e0) e0.textContent = heartbeats;
+            if (e1) e1.textContent = 'HTTPS (443)';
+            if (e2) e2.textContent = '5s';
+            if (e3) e3.textContent = `${dataTx} KB`;
+            setProgress(Math.min(100, (frame / 360) * 100));
+        }
+
+        if (frame >= 360) {
+            setProgress(100);
+            termLog('> Simulation done. Reverse connection established to C2. Restrict outbound network policies!', 'success');
+            stopSimulation();
+            return;
+        }
+        state.simFrame = requestAnimationFrame(draw);
+    }
+    state.simFrame = requestAnimationFrame(draw);
 };
