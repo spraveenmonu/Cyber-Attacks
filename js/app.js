@@ -1192,6 +1192,9 @@ const ATTACKS = [
     },
 ];
 
+/* Sort attacks alphabetically by name */
+ATTACKS.sort((a, b) => a.name.localeCompare(b.name));
+
 /* ─── APP STATE ─────────────────────────────────────────────────────────── */
 const state = {
     activeFilter: 'all',
@@ -1449,14 +1452,15 @@ function startSimulation() {
     if (typeof fn === 'function') fn();
 }
 
-function stopSimulation() {
+function stopSimulation(isManual = false) {
+    const manualStop = (isManual === true) || (isManual instanceof Event);
     state.simRunning = false;
     state.simTimers.forEach(t => clearTimeout(t));
     state.simTimers = [];
     if (state.simFrame) { cancelAnimationFrame(state.simFrame); state.simFrame = null; }
     dom.simStart.disabled = false;
     dom.simStop.disabled = true;
-    if (state.currentAttack && dom.simTerminalBody.children.length > 3) {
+    if (manualStop && state.currentAttack && dom.simTerminalBody.children.length > 3) {
         termLog('> Simulation STOPPED by user.', 'warning');
     }
 }
@@ -4761,23 +4765,29 @@ window.simulateTrojanGeneral = function() {
         ctx.fillStyle = '#00f0ff'; ctx.font = 'bold 7px monospace';
         ctx.fillText('[DISGUISE: PDF APP]', instX + 8, instY + 68);
 
-        // Execution arrow
-        if (frame > 40) {
-            ctx.beginPath(); ctx.moveTo(instX + instW, instY + instH / 2); ctx.lineTo(w * 0.45, h * 0.55);
-            ctx.strokeStyle = '#00f0ff'; ctx.stroke();
-        }
-
         // Normal Front-end Process (User visual)
         const uiX = w * 0.46, uiY = h * 0.28, uiW = 120, uiH = 90;
-        ctx.fillStyle = 'rgba(57, 255, 20, 0.05)'; ctx.strokeStyle = '#39ff14';
+        const isUiRunning = frame > 80;
+        ctx.fillStyle = isUiRunning ? 'rgba(57, 255, 20, 0.05)' : 'rgba(255, 255, 255, 0.01)';
+        ctx.strokeStyle = isUiRunning ? '#39ff14' : 'rgba(255, 255, 255, 0.05)';
         ctx.beginPath(); ctx.roundRect(uiX, uiY, uiW, uiH, 4); ctx.fill(); ctx.stroke();
-        ctx.fillStyle = '#39ff14'; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'left';
+        ctx.fillStyle = isUiRunning ? '#39ff14' : '#525c70'; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'left';
         ctx.fillText('SuperPDF Reader v1.0', uiX + 8, uiY + 16);
-        ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
-        ctx.fillText('Reading: invoice.pdf', uiX + 8, uiY + 34);
-        ctx.fillStyle = 'rgba(255,255,255,0.05)';
-        ctx.fillRect(uiX + 8, uiY + 45, uiW - 16, 32); // text simulation blocks
-        ctx.fillStyle = '#39ff14'; ctx.fillText('User view: CLEAN', uiX + 8, uiY + 84);
+        ctx.fillStyle = isUiRunning ? '#8892a8' : '#525c70'; ctx.font = '7px monospace';
+        if (isUiRunning) {
+            ctx.fillText('Reading: invoice.pdf', uiX + 8, uiY + 34);
+            ctx.fillStyle = 'rgba(255,255,255,0.05)';
+            ctx.fillRect(uiX + 8, uiY + 45, uiW - 16, 32); // text simulation blocks
+            ctx.fillStyle = '#39ff14'; ctx.fillText('User view: CLEAN', uiX + 8, uiY + 84);
+        } else {
+            ctx.fillText('Waiting for wrapper...', uiX + 8, uiY + 34);
+        }
+
+        // Execution arrow
+        if (isUiRunning) {
+            ctx.beginPath(); ctx.moveTo(instX + instW, instY + instH / 2); ctx.lineTo(uiX, uiY + uiH / 2);
+            ctx.strokeStyle = '#00f0ff'; ctx.stroke();
+        }
 
         // Hidden Back-end Process (Malicious thread)
         const malX = w * 0.72, malY = h * 0.52, malW = 120, malH = 90;
