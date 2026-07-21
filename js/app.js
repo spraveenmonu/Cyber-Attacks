@@ -1190,6 +1190,70 @@ const ATTACKS = [
         ],
         simulate: 'simulateActiveTrojan',
     },
+    {
+        id: 'dos',
+        name: 'DoS Attack',
+        icon: '🚫',
+        category: 'network',
+        severity: 'high',
+        tags: ['flood', 'single-source', 'availability', 'bandwidth'],
+        description: 'A Denial of Service (DoS) attack originates from a single machine that floods a target server with an overwhelming volume of TCP SYN, UDP, or HTTP requests, exhausting its resources and rendering the service unavailable to legitimate users — unlike DDoS, no botnet is required.',
+        accent: '#ff6b35',
+        accentDim: 'rgba(255,107,53,0.15)',
+        steps: [
+            { title: 'Target Identified', desc: 'Attacker identifies the target server IP address and open ports.' },
+            { title: 'SYN Flood Initiated', desc: 'Single machine sends thousands of TCP SYN packets per second.' },
+            { title: 'Half-Open Connections', desc: 'Server allocates resources for each SYN but never gets ACK back.' },
+            { title: 'Resource Exhaustion', desc: 'Connection table overflows — memory and CPU spike to 100%.' },
+            { title: 'Service Denial', desc: 'Legitimate users receive timeouts. Service is effectively offline.' },
+        ],
+        stats: [
+            { label: 'SYN Packets/sec', value: '0', live: true },
+            { label: 'Half-Open Conns', value: '0', live: true },
+            { label: 'Server Memory', value: '0%', live: false },
+            { label: 'Server Status', value: 'ONLINE', live: false },
+        ],
+        defense: [
+            'Enable SYN cookies on the server to handle half-open connections efficiently.',
+            'Configure firewall rate-limiting rules per source IP.',
+            'Deploy an Intrusion Prevention System (IPS) with flood detection.',
+            'Set TCP connection timeouts to reclaim resources quickly.',
+            'Use network monitoring to detect abnormal single-source traffic spikes.',
+        ],
+        simulate: 'simulateDoS',
+    },
+    {
+        id: 'ip-spoofing',
+        name: 'IP Spoofing',
+        icon: '🎭',
+        category: 'network',
+        severity: 'high',
+        tags: ['spoofing', 'impersonation', 'packet-forging', 'network'],
+        description: 'IP Spoofing is a technique where an attacker forges the source IP address in packet headers to impersonate a trusted host, bypass IP-based access controls, or conceal identity during attacks like DDoS amplification and Man-in-the-Middle.',
+        accent: '#e040fb',
+        accentDim: 'rgba(224,64,251,0.15)',
+        steps: [
+            { title: 'Trusted Host Identified', desc: 'Attacker discovers the IP address of a host trusted by the target.' },
+            { title: 'Packet Header Forged', desc: 'Raw packets are crafted with the trusted host\'s IP as the source.' },
+            { title: 'Spoofed Packets Sent', desc: 'Forged packets are transmitted to the target server.' },
+            { title: 'Trust Exploited', desc: 'Target accepts packets as legitimate — ACL/firewall rules bypassed.' },
+            { title: 'Attack Achieved', desc: 'Attacker gains unauthorized access or amplifies DDoS traffic.' },
+        ],
+        stats: [
+            { label: 'Packets Forged', value: '0', live: true },
+            { label: 'Spoofed Source IP', value: '—', live: false },
+            { label: 'Firewall Bypassed', value: 'No', live: false },
+            { label: 'Trust Level', value: '0%', live: false },
+        ],
+        defense: [
+            'Implement ingress filtering (BCP 38/RFC 2827) at network borders.',
+            'Use cryptographic authentication (IPsec) instead of IP-based trust.',
+            'Enable Reverse Path Forwarding (RPF) checks on routers.',
+            'Avoid relying on IP addresses for authentication or access control.',
+            'Deploy deep packet inspection (DPI) to detect forged headers.',
+        ],
+        simulate: 'simulateIPSpoofing',
+    },
 ];
 
 /* Sort attacks alphabetically by name */
@@ -5032,6 +5096,338 @@ window.simulateActiveTrojan = function() {
         if (frame >= 360) {
             setProgress(100);
             termLog('> Simulation done. Reverse connection established to C2. Restrict outbound network policies!', 'success');
+            stopSimulation();
+            return;
+        }
+        state.simFrame = requestAnimationFrame(draw);
+    }
+    state.simFrame = requestAnimationFrame(draw);
+};
+
+/* ─── 38. DoS (DENIAL OF SERVICE — SINGLE SOURCE) ──────────────────────── */
+window.simulateDoS = function() {
+    termLog('> Initiating single-source SYN flood attack...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    const attackerX = w * 0.12, attackerY = h * 0.5;
+    const serverX = w * 0.78, serverY = h * 0.5;
+    const serverR = 32;
+    let frame = 0, synPerSec = 0, halfOpen = 0, serverMem = 0, serverHealth = 100;
+    const packets = [];
+    const halfOpenSlots = [];
+    const maxSlots = 18;
+
+    // Pre-build half-open connection slot positions (arc around server)
+    for (let i = 0; i < maxSlots; i++) {
+        const angle = -Math.PI / 2 + (i / maxSlots) * Math.PI * 2;
+        halfOpenSlots.push({ angle, x: serverX + Math.cos(angle) * (serverR + 28), y: serverY + Math.sin(angle) * (serverR + 28), active: false, age: 0 });
+    }
+
+    simTimeout(() => { if (!state.simRunning) return; activateStep(1); termLog('> SYN flood started — 12,000 packets/sec from single host.', 'error'); }, 600);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(2); termLog('> Server TCP backlog filling — half-open connections accumulating.', 'warning'); }, 1800);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(3); termLog('> Connection table FULL. Memory at critical level!', 'error'); }, 3000);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(4); termLog('> Service DENIED — legitimate connections refused.', 'error'); }, 4200);
+
+    function draw() {
+        if (!state.simRunning) return;
+        frame++;
+        ctx.clearRect(0, 0, w, h);
+
+        // Background gradient
+        const bg = ctx.createRadialGradient(serverX, serverY, 0, serverX, serverY, Math.min(w, h) / 1.5);
+        bg.addColorStop(0, `rgba(40, 12, 5, ${Math.min(0.85, frame / 300)})`);
+        bg.addColorStop(1, 'rgba(6, 10, 19, 0)');
+        ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+
+        // ── Attacker Machine ──
+        ctx.fillStyle = 'rgba(255, 107, 53, 0.12)'; ctx.strokeStyle = '#ff6b35';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.roundRect(attackerX - 40, attackerY - 35, 80, 70, 6); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#ff6b35'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('ATTACKER', attackerX, attackerY - 18);
+        ctx.fillStyle = '#8892a8'; ctx.font = '8px monospace';
+        ctx.fillText('192.168.1.66', attackerX, attackerY - 4);
+        ctx.fillStyle = '#ff6b35'; ctx.font = 'bold 8px monospace';
+        ctx.fillText('[ FLOODING ]', attackerX, attackerY + 14);
+        // Pulse ring
+        const pulseR = 40 + Math.sin(frame * 0.1) * 6;
+        ctx.beginPath(); ctx.arc(attackerX, attackerY, pulseR, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255, 107, 53, ${0.15 + Math.sin(frame * 0.1) * 0.1})`; ctx.lineWidth = 1; ctx.stroke();
+
+        // ── Target Server ──
+        const hc = serverHealth > 60 ? '#39ff14' : serverHealth > 25 ? '#ffaa00' : '#ff3b3b';
+        // Health arc
+        ctx.beginPath();
+        ctx.arc(serverX, serverY, serverR + 10, -Math.PI / 2, -Math.PI / 2 + (serverHealth / 100) * Math.PI * 2);
+        ctx.strokeStyle = hc; ctx.lineWidth = 3; ctx.stroke();
+        // Server body
+        ctx.beginPath(); ctx.arc(serverX, serverY, serverR, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 107, 53, ${0.08 + (1 - serverHealth / 100) * 0.25})`; ctx.fill();
+        ctx.strokeStyle = hc; ctx.lineWidth = 2; ctx.stroke();
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('SERVER', serverX, serverY - 8);
+        ctx.fillStyle = hc; ctx.font = 'bold 9px monospace';
+        ctx.fillText(`${Math.round(serverHealth)}%`, serverX, serverY + 8);
+
+        // ── Half-open connection slots (ring around server) ──
+        halfOpenSlots.forEach((slot, i) => {
+            if (slot.active) {
+                slot.age++;
+                const flicker = Math.sin(slot.age * 0.15 + i) * 0.3 + 0.7;
+                ctx.beginPath(); ctx.arc(slot.x, slot.y, 5, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 170, 0, ${flicker * 0.8})`; ctx.fill();
+                ctx.strokeStyle = `rgba(255, 170, 0, ${flicker * 0.5})`; ctx.lineWidth = 0.5; ctx.stroke();
+                // Connecting line to server
+                ctx.beginPath(); ctx.moveTo(slot.x, slot.y); ctx.lineTo(serverX, serverY);
+                ctx.strokeStyle = `rgba(255, 170, 0, ${flicker * 0.15})`; ctx.lineWidth = 0.5; ctx.stroke();
+            } else {
+                ctx.beginPath(); ctx.arc(slot.x, slot.y, 3, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.06)'; ctx.fill();
+            }
+        });
+
+        // ── Fire SYN packets ──
+        if (frame > 30 && frame % 3 === 0) {
+            const jitterY = rnd(-30, 30);
+            packets.push({ x: attackerX + 40, y: attackerY + jitterY, progress: 0, size: rnd(2, 4.5) });
+            synPerSec++;
+        }
+
+        // ── Draw & advance packets ──
+        for (let i = packets.length - 1; i >= 0; i--) {
+            const pkt = packets[i];
+            pkt.progress += 0.025;
+            const px = attackerX + 40 + (serverX - serverR - attackerX - 40) * pkt.progress;
+            const py = pkt.y + (serverY - pkt.y) * pkt.progress;
+            const alpha = 1 - pkt.progress;
+            ctx.beginPath(); ctx.arc(px, py, pkt.size * (1 - pkt.progress * 0.4), 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 107, 53, ${alpha})`; ctx.fill();
+            // Label on first few
+            if (i % 8 === 0 && pkt.progress < 0.3) {
+                ctx.fillStyle = `rgba(255, 107, 53, ${alpha * 0.6})`; ctx.font = '6px monospace'; ctx.textAlign = 'left';
+                ctx.fillText('SYN', px + 6, py - 3);
+            }
+            if (pkt.progress >= 1) {
+                packets.splice(i, 1);
+                // Fill a half-open slot
+                const freeSlot = halfOpenSlots.find(s => !s.active);
+                if (freeSlot) { freeSlot.active = true; freeSlot.age = 0; halfOpen++; }
+                serverHealth = Math.max(0, serverHealth - 0.12);
+                serverMem = Math.min(100, 100 - serverHealth);
+            }
+        }
+
+        // ── Connection label ──
+        const midX = (attackerX + serverX) / 2, midY = h * 0.22;
+        ctx.fillStyle = 'rgba(255, 107, 53, 0.7)'; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('TCP SYN FLOOD — SINGLE SOURCE', midX, midY);
+        ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '7px monospace';
+        ctx.fillText('No ACK returned → half-open connections pile up', midX, midY + 14);
+
+        // ── Update live stats ──
+        if (frame % 20 === 0) {
+            const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
+            if (e0) e0.textContent = (synPerSec * 600).toLocaleString();
+            if (e1) e1.textContent = halfOpen;
+            if (e2) e2.textContent = `${Math.round(serverMem)}%`;
+            if (e3) {
+                const status = serverHealth > 60 ? 'ONLINE' : serverHealth > 25 ? 'DEGRADED' : 'OFFLINE';
+                e3.textContent = status;
+                e3.style.color = hc;
+            }
+            synPerSec = 0;
+            setProgress(Math.min(100, (frame / 420) * 100));
+        }
+
+        if (frame >= 420) {
+            setProgress(100);
+            termLog('> Simulation complete. Single-source DoS demonstrated. Enable SYN cookies & rate-limiting!', 'success');
+            stopSimulation();
+            return;
+        }
+        state.simFrame = requestAnimationFrame(draw);
+    }
+    state.simFrame = requestAnimationFrame(draw);
+};
+
+/* ─── 39. IP SPOOFING ───────────────────────────────────────────────────── */
+window.simulateIPSpoofing = function() {
+    termLog('> Scanning target network for trusted host relationships...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    const attackerX = w * 0.10, attackerY = h * 0.5;
+    const trustedX = w * 0.10, trustedY = h * 0.18;
+    const firewallX = w * 0.50, firewallY = h * 0.5;
+    const serverX = w * 0.85, serverY = h * 0.5;
+
+    let frame = 0, packetsForged = 0, trustLevel = 0, firewallBypassed = false;
+    const spoofedIP = '10.0.0.5';
+    const realIP = '77.41.128.9';
+    const packets = [];
+
+    simTimeout(() => { if (!state.simRunning) return; activateStep(1); termLog(`> Trusted host identified: ${spoofedIP}. Forging packet headers...`, 'warning'); }, 800);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(2); termLog(`> Sending spoofed packets (SRC: ${spoofedIP}) to target server.`, 'error'); }, 2000);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(3); firewallBypassed = true; termLog('> Firewall ACL bypassed! Target trusts spoofed source address.', 'error'); }, 3200);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(4); termLog('> Unauthorized access achieved via trust exploitation.', 'error'); }, 4400);
+
+    function draw() {
+        if (!state.simRunning) return;
+        frame++;
+        ctx.clearRect(0, 0, w, h);
+
+        // Background
+        ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
+
+        // Title
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('IP SPOOFING — PACKET HEADER FORGERY', w / 2, 18);
+
+        // ── Trusted Host (faded, being impersonated) ──
+        ctx.fillStyle = 'rgba(57, 255, 20, 0.06)'; ctx.strokeStyle = 'rgba(57, 255, 20, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.roundRect(trustedX - 38, trustedY - 28, 76, 56, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#39ff14'; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('TRUSTED HOST', trustedX, trustedY - 12);
+        ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
+        ctx.fillText(spoofedIP, trustedX, trustedY + 2);
+        ctx.fillStyle = 'rgba(57, 255, 20, 0.5)'; ctx.font = '7px monospace';
+        ctx.fillText('(Impersonated)', trustedX, trustedY + 16);
+
+        // Dashed line from attacker to trusted host label (spoofing link)
+        ctx.setLineDash([3, 4]);
+        ctx.beginPath(); ctx.moveTo(attackerX, attackerY - 35); ctx.lineTo(trustedX, trustedY + 28);
+        ctx.strokeStyle = 'rgba(224, 64, 251, 0.25)'; ctx.lineWidth = 1; ctx.stroke();
+        ctx.setLineDash([]);
+
+        // ── Attacker ──
+        ctx.fillStyle = 'rgba(224, 64, 251, 0.12)'; ctx.strokeStyle = '#e040fb';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.roundRect(attackerX - 42, attackerY - 35, 84, 70, 5); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#e040fb'; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('ATTACKER', attackerX, attackerY - 18);
+        ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
+        ctx.fillText(`Real: ${realIP}`, attackerX, attackerY - 4);
+        ctx.fillStyle = '#e040fb'; ctx.font = 'bold 7px monospace';
+        ctx.fillText(`Spoofs: ${spoofedIP}`, attackerX, attackerY + 10);
+        // Packet forge indicator
+        if (frame > 60) {
+            const blink = Math.sin(frame * 0.12) > 0;
+            if (blink) {
+                ctx.fillStyle = '#ff3b3b'; ctx.font = 'bold 7px monospace';
+                ctx.fillText('[ FORGING HEADERS ]', attackerX, attackerY + 26);
+            }
+        }
+
+        // ── Firewall ──
+        const fwColor = firewallBypassed ? 'rgba(255, 59, 59, 0.6)' : 'rgba(57, 255, 20, 0.4)';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.02)';
+        ctx.strokeStyle = fwColor;
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.fillRect(firewallX - 6, h * 0.15, 12, h * 0.7);
+        ctx.strokeRect(firewallX - 6, h * 0.15, 12, h * 0.7);
+        ctx.fillStyle = fwColor; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('FIREWALL', firewallX, h * 0.11);
+        ctx.fillStyle = firewallBypassed ? '#ff3b3b' : '#39ff14'; ctx.font = '7px monospace';
+        ctx.fillText(firewallBypassed ? 'BYPASSED' : 'ACL ACTIVE', firewallX, h * 0.88);
+
+        // IP whitelist on firewall
+        ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '6px monospace';
+        ctx.fillText('Whitelist:', firewallX, h * 0.28);
+        ctx.fillStyle = '#39ff14';
+        ctx.fillText(spoofedIP, firewallX, h * 0.33);
+
+        // ── Target Server ──
+        const serverTrust = Math.min(100, trustLevel);
+        const sc = serverTrust > 70 ? '#ff3b3b' : serverTrust > 30 ? '#ffaa00' : '#39ff14';
+        ctx.fillStyle = 'rgba(0, 200, 255, 0.08)'; ctx.strokeStyle = '#00c8ff';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.roundRect(serverX - 45, serverY - 38, 90, 76, 5); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#00c8ff'; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('TARGET SERVER', serverX, serverY - 22);
+        ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
+        ctx.fillText('10.0.0.1', serverX, serverY - 8);
+        // Trust meter bar
+        ctx.fillStyle = 'rgba(255,255,255,0.1)';
+        ctx.fillRect(serverX - 30, serverY + 8, 60, 6);
+        ctx.fillStyle = sc;
+        ctx.fillRect(serverX - 30, serverY + 8, (serverTrust / 100) * 60, 6);
+        ctx.fillStyle = '#fff'; ctx.font = '6px monospace';
+        ctx.fillText(`Trust: ${Math.round(serverTrust)}%`, serverX, serverY + 26);
+
+        // ── Packet forging visualization ──
+        if (frame > 80 && frame % 12 === 0) {
+            packets.push({ x: attackerX + 42, y: attackerY, progress: 0 });
+            packetsForged++;
+        }
+
+        for (let i = packets.length - 1; i >= 0; i--) {
+            const pkt = packets[i];
+            pkt.progress += 0.015;
+
+            // Packet travels attacker → firewall → server
+            let px, py;
+            if (pkt.progress < 0.5) {
+                // attacker → firewall
+                const t = pkt.progress / 0.5;
+                px = attackerX + 42 + (firewallX - attackerX - 42) * t;
+                py = attackerY + (firewallY - attackerY) * t;
+            } else {
+                // firewall → server
+                const t = (pkt.progress - 0.5) / 0.5;
+                px = firewallX + 6 + (serverX - 45 - firewallX - 6) * t;
+                py = firewallY + (serverY - firewallY) * t;
+            }
+
+            const alpha = 0.9 - pkt.progress * 0.5;
+            // Packet box
+            ctx.fillStyle = `rgba(224, 64, 251, ${alpha * 0.7})`; ctx.strokeStyle = `rgba(224, 64, 251, ${alpha})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.roundRect(px - 14, py - 8, 28, 16, 2); ctx.fill(); ctx.stroke();
+            // Packet label — shows spoofed IP
+            ctx.fillStyle = `rgba(57, 255, 20, ${alpha})`; ctx.font = 'bold 5px monospace'; ctx.textAlign = 'center';
+            ctx.fillText(`SRC:${spoofedIP}`, px, py + 1);
+
+            // Passing through firewall — flash
+            if (pkt.progress > 0.48 && pkt.progress < 0.52) {
+                ctx.beginPath(); ctx.arc(firewallX, firewallY, 15, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(57, 255, 20, 0.15)'; ctx.fill();
+            }
+
+            if (pkt.progress >= 1) {
+                packets.splice(i, 1);
+                trustLevel = Math.min(100, trustLevel + 1.5);
+            }
+        }
+
+        // ── Spoofed header detail panel ──
+        if (frame > 60) {
+            const panelX = w * 0.30, panelY = h * 0.78;
+            ctx.fillStyle = 'rgba(224, 64, 251, 0.06)'; ctx.strokeStyle = 'rgba(224, 64, 251, 0.25)';
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.roundRect(panelX - 75, panelY - 18, 150, 40, 3); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#e040fb'; ctx.font = 'bold 7px monospace'; ctx.textAlign = 'center';
+            ctx.fillText('FORGED PACKET HEADER', panelX, panelY - 8);
+            ctx.fillStyle = '#39ff14'; ctx.font = '6px monospace';
+            ctx.fillText(`SRC IP: ${spoofedIP}  (FAKE)`, panelX, panelY + 4);
+            ctx.fillStyle = '#ff3b3b'; ctx.font = '6px monospace';
+            ctx.fillText(`REAL IP: ${realIP}  (HIDDEN)`, panelX, panelY + 14);
+        }
+
+        // ── Update live stats ──
+        if (frame % 20 === 0) {
+            const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
+            if (e0) e0.textContent = packetsForged;
+            if (e1) e1.textContent = spoofedIP;
+            if (e2) { e2.textContent = firewallBypassed ? 'Yes' : 'No'; e2.style.color = firewallBypassed ? '#ff3b3b' : '#39ff14'; }
+            if (e3) e3.textContent = `${Math.round(trustLevel)}%`;
+            setProgress(Math.min(100, (frame / 400) * 100));
+        }
+
+        if (frame >= 400) {
+            setProgress(100);
+            termLog('> Simulation complete. IP Spoofing demonstrated. Use ingress filtering & IPsec authentication!', 'success');
             stopSimulation();
             return;
         }
