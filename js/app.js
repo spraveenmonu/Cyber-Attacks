@@ -1254,6 +1254,262 @@ const ATTACKS = [
         ],
         simulate: 'simulateIPSpoofing',
     },
+    {
+        id: 'vuln-scan',
+        name: 'Vulnerability Scanning',
+        icon: '🔍',
+        category: 'security',
+        severity: 'medium',
+        tags: ['scanning', 'reconnaissance', 'CVE', 'audit'],
+        description: 'Vulnerability Scanning is the automated process of probing systems, networks, and applications for known security weaknesses (CVEs), misconfigurations, and outdated software. Attackers use it for reconnaissance; defenders use it for hardening.',
+        accent: '#00e5ff',
+        accentDim: 'rgba(0,229,255,0.15)',
+        steps: [
+            { title: 'Target Enumeration', desc: 'Scanner discovers live hosts and open ports on the target network.' },
+            { title: 'Service Fingerprinting', desc: 'Identifies running services, versions, and operating systems.' },
+            { title: 'CVE Database Lookup', desc: 'Compares discovered services against known vulnerability databases.' },
+            { title: 'Vulnerability Detected', desc: 'Critical and high-severity CVEs flagged with CVSS scores.' },
+            { title: 'Report Generated', desc: 'Full scan report with prioritized remediation steps is produced.' },
+        ],
+        stats: [
+            { label: 'Ports Scanned', value: '0', live: true },
+            { label: 'Services Found', value: '0', live: true },
+            { label: 'Vulns Detected', value: '0', live: true },
+            { label: 'Critical CVEs', value: '0', live: true },
+        ],
+        defense: [
+            'Run authenticated vulnerability scans regularly (weekly/monthly).',
+            'Prioritize remediation by CVSS score and exploit availability.',
+            'Keep all software and firmware updated to latest stable versions.',
+            'Use a vulnerability management platform (e.g., Nessus, Qualys, OpenVAS).',
+            'Integrate scanning into CI/CD pipelines for early detection.',
+        ],
+        simulate: 'simulateVulnScan',
+    },
+    {
+        id: 'patching',
+        name: 'Security Patching',
+        icon: '🩹',
+        category: 'security',
+        severity: 'low',
+        tags: ['patch', 'update', 'remediation', 'hardening'],
+        description: 'Security Patching is the process of applying vendor-released fixes to close known vulnerabilities in operating systems, applications, and firmware. Timely patching is the single most effective defense against exploitation of known CVEs.',
+        accent: '#39ff14',
+        accentDim: 'rgba(57,255,20,0.15)',
+        steps: [
+            { title: 'Vulnerability Identified', desc: 'Critical CVE detected during a vulnerability scan or advisory alert.' },
+            { title: 'Patch Available', desc: 'Vendor releases a security update addressing the vulnerability.' },
+            { title: 'Patch Tested', desc: 'Update is deployed to a staging environment for compatibility testing.' },
+            { title: 'Patch Deployed', desc: 'Approved patch is rolled out across all affected production systems.' },
+            { title: 'Verification Complete', desc: 'Post-patch scan confirms the vulnerability is remediated.' },
+        ],
+        stats: [
+            { label: 'Systems Scanned', value: '0', live: true },
+            { label: 'Patches Available', value: '0', live: true },
+            { label: 'Patches Applied', value: '0', live: true },
+            { label: 'Systems Secured', value: '0', live: true },
+        ],
+        defense: [
+            'Establish a patch management policy with SLA-based timelines.',
+            'Automate patch deployment with tools like WSUS, SCCM, or Ansible.',
+            'Test patches in staging before production rollout.',
+            'Maintain an asset inventory to ensure complete coverage.',
+            'Monitor vendor advisories and CISA KEV for urgent patches.',
+        ],
+        simulate: 'simulatePatching',
+    },
+    {
+        id: 'pentest',
+        name: 'Penetration Testing',
+        icon: '🧪',
+        category: 'security',
+        severity: 'high',
+        tags: ['pentest', 'ethical-hacking', 'exploit', 'red-team'],
+        description: 'Penetration Testing (pentesting) is an authorized, simulated cyber attack on a system to evaluate its security posture. Ethical hackers use the same tools and techniques as real attackers to find and exploit vulnerabilities before malicious actors do.',
+        accent: '#ff9100',
+        accentDim: 'rgba(255,145,0,0.15)',
+        steps: [
+            { title: 'Scope & Reconnaissance', desc: 'Define targets, gather OSINT, map the attack surface.' },
+            { title: 'Scanning & Enumeration', desc: 'Run Nmap, Nikto, and directory brute-force to find entry points.' },
+            { title: 'Exploitation', desc: 'Leverage discovered vulnerabilities to gain initial access.' },
+            { title: 'Privilege Escalation', desc: 'Escalate from low-privilege user to root/admin access.' },
+            { title: 'Report & Remediation', desc: 'Document findings with proof-of-concept and remediation advice.' },
+        ],
+        stats: [
+            { label: 'Hosts Discovered', value: '0', live: true },
+            { label: 'Exploits Attempted', value: '0', live: true },
+            { label: 'Shells Gained', value: '0', live: true },
+            { label: 'Privesc Level', value: 'None', live: false },
+        ],
+        defense: [
+            'Conduct penetration tests annually and after major changes.',
+            'Use both automated tools and manual testing for thorough coverage.',
+            'Engage third-party pentest firms for unbiased assessments.',
+            'Remediate all critical and high findings before retesting.',
+            'Integrate pentest results into the security improvement roadmap.',
+        ],
+        simulate: 'simulatePentest',
+    },
+    {
+        id: 'firewall',
+        name: 'Next-Gen Firewall',
+        icon: '🧱',
+        category: 'security',
+        severity: 'low',
+        tags: ['firewall', 'packet-filtering', 'inspection', 'access-control'],
+        description: 'A Next-Generation Firewall (NGFW) monitors and filters incoming and outgoing network traffic based on stateful security rules, protocol definitions, and deep packet inspection (DPI) to block malicious traffic.',
+        accent: '#e53935',
+        accentDim: 'rgba(229,57,53,0.15)',
+        steps: [
+            { title: 'Rule Evaluation', desc: 'Inspects packet headers (source, destination, port) against the active ACL.' },
+            { title: 'Deep Packet Inspection', desc: 'Analyzes packet payloads to identify hidden application-layer threat signatures.' },
+            { title: 'Stateful Tracking', desc: 'Verifies if packets belong to an existing, established connection.' },
+            { title: 'Threat Blocked', desc: 'Drops anomalous packets, spoofed traffic, and unapproved protocol attempts.' },
+            { title: 'Clean Traffic Passed', desc: 'Forwards legitimate packets safely to the internal network destination.' },
+        ],
+        stats: [
+            { label: 'Packets Inspected', value: '0', live: true },
+            { label: 'Threats Blocked', value: '0', live: true },
+            { label: 'Active Sessions', value: '0', live: true },
+            { label: 'CPU Usage', value: '0%', live: false },
+        ],
+        defense: [
+            'Maintain a strict default-deny inbound and outbound traffic policy.',
+            'Regularly audit and clean up outdated or redundant firewall rules.',
+            'Enable application-aware scanning and TLS decryption for deep visibility.',
+            'Integrate threat intelligence feeds to block known malicious IPs automatically.',
+            'Configure firewall high-availability pairs to prevent single points of failure.',
+        ],
+        simulate: 'simulateFirewall',
+    },
+    {
+        id: 'ids-ips',
+        name: 'Intrusion Detection System',
+        icon: '🚨',
+        category: 'security',
+        severity: 'medium',
+        tags: ['ids', 'ips', 'signature-matching', 'anomalous'],
+        description: 'An Intrusion Detection and Prevention System (IDS/IPS) monitors network traffic for signatures of known cyber attacks, vulnerabilities, and anomalous traffic patterns, alerting security teams and actively dropping connections.',
+        accent: '#ff9800',
+        accentDim: 'rgba(255,152,0,0.15)',
+        steps: [
+            { title: 'Traffic Mirroring', desc: 'Captures and monitors network packets via a network TAP/SPAN port.' },
+            { title: 'Signature Matching', desc: 'Scans traffic payloads against a database of thousands of known attack patterns.' },
+            { title: 'Heuristic Profiling', desc: 'Compares current traffic behavior against baseline network statistics.' },
+            { title: 'Alert Generated', desc: 'Creates high-priority security logs detailing the threat and target.' },
+            { title: 'Active Mitigation', desc: 'IPS drops offending packets and dynamically updates firewall blocklists.' },
+        ],
+        stats: [
+            { label: 'Gbps Monitored', value: '0.0 Gbps', live: false },
+            { label: 'Signatures Loaded', value: '18,500', live: false },
+            { label: 'Threat Alerts', value: '0', live: true },
+            { label: 'Blocked IPs', value: '0', live: true },
+        ],
+        defense: [
+            'Regularly update signature databases to protect against new vulnerabilities.',
+            'Tune alert rules to minimize false positives and prevent alert fatigue.',
+            'Configure IPS mode (active blocking) rather than IDS mode (alert only) on key segments.',
+            'Place sensors at both network boundaries (north-south) and internally (east-west).',
+            'Correlate IDS alerts with endpoint protection data in a SIEM.',
+        ],
+        simulate: 'simulateIDS',
+    },
+    {
+        id: 'mfa',
+        name: 'Multi-Factor Auth (MFA)',
+        icon: '🔑',
+        category: 'security',
+        severity: 'low',
+        tags: ['mfa', 'authentication', 'credentials', 'identity'],
+        description: 'Multi-Factor Authentication (MFA) requires users to provide two or more verification factors to gain access, combining credentials from something they know, have, and are to secure system access.',
+        accent: '#00bcd4',
+        accentDim: 'rgba(0,188,212,0.15)',
+        steps: [
+            { title: 'Credential Entry', desc: 'User enters primary login credentials (username and password).' },
+            { title: 'Directory Match', desc: 'Active Directory verifies the password is correct, then triggers MFA.' },
+            { title: 'OTP Generated', desc: 'A secure, time-based token is sent to the user\'s registered authenticator app.' },
+            { title: 'Second Factor Prompt', desc: 'Application blocks access, waiting for the user to input the token.' },
+            { title: 'Access Approved', desc: 'Token is validated, session cookies are created, and user login completes.' },
+        ],
+        stats: [
+            { label: 'Login Attempts', value: '0', live: true },
+            { label: 'MFA Challenges', value: '0', live: true },
+            { label: 'Successful Logins', value: '0', live: true },
+            { label: 'Bypassed Attempts', value: '0', live: true },
+        ],
+        defense: [
+            'Enforce MFA globally across all corporate systems, email, and VPNs.',
+            'Use push notifications or hardware tokens over SMS due to SIM swapping risks.',
+            'Deploy context-aware MFA that prompts on location or device changes.',
+            'Educate users on "MFA fatigue" attacks (bombarding users with prompts).',
+            'Protect service accounts with long, unique credentials and API keys.',
+        ],
+        simulate: 'simulateMFA',
+    },
+    {
+        id: 'zero-trust',
+        name: 'Zero Trust Architecture',
+        icon: '🛡️',
+        category: 'security',
+        severity: 'high',
+        tags: ['zero-trust', 'least-privilege', 'microsegmentation', 'never-trust'],
+        description: 'Zero Trust operates on the principle of "never trust, always verify." It continuously validates identity, device posture, and context before granting minimal access to specific resources via micro-segmentation.',
+        accent: '#4caf50',
+        accentDim: 'rgba(76,175,80,0.15)',
+        steps: [
+            { title: 'Identity & Device Check', desc: 'Validates user credentials, device patching status, and location context.' },
+            { title: 'Policy Evaluation', desc: 'Policy Decision Point (PDP) checks access controls and resource permissions.' },
+            { title: 'Microsegmentation', desc: 'Restricts user access to only the specific requested application, not the network.' },
+            { title: 'Continuous Verification', desc: 'Monitors session behavior continuously, terminating access on anomaly detection.' },
+            { title: 'Access Authorized', desc: 'Short-lived encrypted tunnel established to requested resource.' },
+        ],
+        stats: [
+            { label: 'Policy Checks', value: '0', live: true },
+            { label: 'Device Status', value: 'COMPLIANT', live: false },
+            { label: 'Segments Active', value: '0', live: true },
+            { label: 'Requests Blocked', value: '0', live: true },
+        ],
+        defense: [
+            'Adopt micro-segmentation to restrict lateral movement inside the network.',
+            'Perform real-time device posture checking before granting system access.',
+            'Implement the Principle of Least Privilege (PoLP) for all user accounts.',
+            'Encrypt all data in transit (TLS) and data at rest (AES).',
+            'Leverage Identity Providers (IdP) for unified authentication control.',
+        ],
+        simulate: 'simulateZeroTrust',
+    },
+    {
+        id: 'defense-system',
+        name: 'Threat Defense System',
+        icon: '🛡️',
+        category: 'security',
+        severity: 'critical',
+        tags: ['soc', 'siem', 'soar', 'incident-response'],
+        description: 'An integrated Threat Defense System correlates events from endpoint detection (EDR), firewalls, and mail relays, using automated SOAR playbooks to detect, isolate, and neutralize multi-stage security threats.',
+        accent: '#3f51b5',
+        accentDim: 'rgba(63,81,181,0.15)',
+        steps: [
+            { title: 'SIEM Log Ingestion', desc: 'Aggregates millions of events from firewalls, DNS, AD, and EDR.' },
+            { title: 'Alert Correlation', desc: 'Identifies active attack chains by connecting related anomalous logs.' },
+            { title: 'SOAR Containment', desc: 'Triggers automated playbooks to isolate compromised endpoints from the network.' },
+            { title: 'Threat Neutralized', desc: 'Stops malicious processes, deletes files, and resets credentials.' },
+            { title: 'Policy Hardened', desc: 'Automatically pushes firewall blocklists and EDR rules to prevent reinfection.' },
+        ],
+        stats: [
+            { label: 'Events Processed', value: '0', live: true },
+            { label: 'Threats Detected', value: '0', live: true },
+            { label: 'Hosts Contained', value: '0', live: true },
+            { label: 'Avg Containment Time', value: '—', live: false },
+        ],
+        defense: [
+            'Integrate SIEM and EDR for full visibility across endpoints and networks.',
+            'Build and test SOAR playbooks for common scenarios like phishing and ransomware.',
+            'Maintain offline, immutable backups for business continuity.',
+            'Conduct regular tabletop incident response exercises.',
+            'Establish clear escalation paths and communication protocols for breaches.',
+        ],
+        simulate: 'simulateDefenseSystem',
+    },
 ];
 
 /* Sort attacks alphabetically by name */
@@ -5435,3 +5691,1042 @@ window.simulateIPSpoofing = function() {
     }
     state.simFrame = requestAnimationFrame(draw);
 };
+
+/* ─── 40. VULNERABILITY SCANNING ────────────────────────────────────────── */
+window.simulateVulnScan = function() {
+    termLog('> Initializing vulnerability scanner (OpenVAS engine)...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame = 0, portsScanned = 0, servicesFound = 0, vulnsDetected = 0, criticalCVEs = 0;
+
+    // Network hosts to scan
+    const hosts = [];
+    const cols = 5, rows = 3;
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            const hx = w * 0.22 + c * (w * 0.14);
+            const hy = h * 0.22 + r * (h * 0.24);
+            const ports = [22, 80, 443, 3306, 8080, 21, 25, 53, 445, 3389].slice(0, rndInt(3, 8));
+            const vulnCount = rndInt(0, 4);
+            hosts.push({
+                x: hx, y: hy, ip: `10.0.${r}.${c + 1}`,
+                ports, scanned: false, scanning: false, scanProgress: 0,
+                vulns: vulnCount, criticals: vulnCount > 2 ? rndInt(1, 2) : 0,
+                services: ports.map(p => ({ port: p, name: p === 22 ? 'SSH' : p === 80 ? 'HTTP' : p === 443 ? 'HTTPS' : p === 3306 ? 'MySQL' : p === 8080 ? 'Tomcat' : p === 21 ? 'FTP' : p === 25 ? 'SMTP' : p === 53 ? 'DNS' : p === 445 ? 'SMB' : 'RDP' })),
+            });
+        }
+    }
+    let currentHostIdx = -1;
+
+    // Scanner node
+    const scannerX = w * 0.06, scannerY = h * 0.5;
+
+    simTimeout(() => { if (!state.simRunning) return; activateStep(1); termLog('> Port scanning target subnet 10.0.0.0/24...', 'warning'); }, 500);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(2); termLog('> Fingerprinting services — matching against CVE database...', 'warning'); }, 2500);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(3); termLog('> CRITICAL: CVE-2024-3094 (XZ Utils backdoor) detected on 10.0.1.2!', 'error'); }, 4000);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(4); termLog('> Scan complete. Generating prioritized remediation report.', 'success'); }, 5500);
+
+    function draw() {
+        if (!state.simRunning) return;
+        frame++;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
+
+        // Title
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('VULNERABILITY SCANNER — NETWORK AUDIT', w / 2, 16);
+
+        // Scanner node
+        ctx.fillStyle = 'rgba(0, 229, 255, 0.1)'; ctx.strokeStyle = '#00e5ff'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.roundRect(scannerX - 28, scannerY - 24, 56, 48, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#00e5ff'; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('SCANNER', scannerX, scannerY - 8);
+        ctx.fillStyle = '#8892a8'; ctx.font = '6px monospace';
+        ctx.fillText('OpenVAS', scannerX, scannerY + 6);
+        // Pulse
+        const pulseR = 28 + Math.sin(frame * 0.08) * 4;
+        ctx.beginPath(); ctx.arc(scannerX, scannerY, pulseR, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(0, 229, 255, ${0.1 + Math.sin(frame * 0.08) * 0.08})`; ctx.lineWidth = 1; ctx.stroke();
+
+        // Advance scanning — one host at a time
+        if (frame % 25 === 0 && currentHostIdx < hosts.length - 1) {
+            currentHostIdx++;
+            hosts[currentHostIdx].scanning = true;
+        }
+
+        // Draw hosts
+        hosts.forEach((host, idx) => {
+            if (host.scanning && !host.scanned) {
+                host.scanProgress += 0.02;
+                if (host.scanProgress >= 1) {
+                    host.scanned = true;
+                    host.scanning = false;
+                    portsScanned += host.ports.length;
+                    servicesFound += host.services.length;
+                    vulnsDetected += host.vulns;
+                    criticalCVEs += host.criticals;
+                }
+            }
+
+            // Host box
+            const boxColor = host.scanned
+                ? (host.vulns > 2 ? '#ff3b3b' : host.vulns > 0 ? '#ffaa00' : '#39ff14')
+                : (host.scanning ? '#00e5ff' : 'rgba(255,255,255,0.15)');
+            ctx.fillStyle = host.scanned
+                ? (host.vulns > 2 ? 'rgba(255,59,59,0.1)' : host.vulns > 0 ? 'rgba(255,170,0,0.08)' : 'rgba(57,255,20,0.08)')
+                : 'rgba(255,255,255,0.02)';
+            ctx.strokeStyle = boxColor; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.roundRect(host.x - 30, host.y - 20, 60, 40, 3); ctx.fill(); ctx.stroke();
+
+            // IP label
+            ctx.fillStyle = boxColor; ctx.font = 'bold 7px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(host.ip, host.x, host.y - 8);
+
+            // Status
+            if (host.scanned) {
+                ctx.fillStyle = host.vulns > 2 ? '#ff3b3b' : host.vulns > 0 ? '#ffaa00' : '#39ff14';
+                ctx.font = '6px monospace';
+                ctx.fillText(host.vulns > 0 ? `${host.vulns} CVEs` : 'CLEAN', host.x, host.y + 6);
+            } else if (host.scanning) {
+                // Scan progress bar
+                ctx.fillStyle = 'rgba(255,255,255,0.1)';
+                ctx.fillRect(host.x - 20, host.y + 4, 40, 3);
+                ctx.fillStyle = '#00e5ff';
+                ctx.fillRect(host.x - 20, host.y + 4, 40 * host.scanProgress, 3);
+            }
+
+            // Scan beam from scanner to current host
+            if (host.scanning && !host.scanned) {
+                ctx.beginPath(); ctx.moveTo(scannerX + 28, scannerY); ctx.lineTo(host.x - 30, host.y);
+                ctx.strokeStyle = `rgba(0, 229, 255, ${0.3 + Math.sin(frame * 0.15) * 0.15})`; ctx.lineWidth = 1; ctx.setLineDash([4, 4]); ctx.stroke(); ctx.setLineDash([]);
+            }
+        });
+
+        // Update stats
+        if (frame % 15 === 0) {
+            const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
+            if (e0) e0.textContent = portsScanned;
+            if (e1) e1.textContent = servicesFound;
+            if (e2) e2.textContent = vulnsDetected;
+            if (e3) e3.textContent = criticalCVEs;
+            setProgress(Math.min(100, (frame / 450) * 100));
+        }
+
+        if (frame >= 450) {
+            setProgress(100);
+            termLog(`> Scan complete — ${vulnsDetected} vulnerabilities found, ${criticalCVEs} critical. Patch immediately!`, 'success');
+            stopSimulation();
+            return;
+        }
+        state.simFrame = requestAnimationFrame(draw);
+    }
+    state.simFrame = requestAnimationFrame(draw);
+};
+
+/* ─── 41. SECURITY PATCHING ─────────────────────────────────────────────── */
+window.simulatePatching = function() {
+    termLog('> Initiating patch management cycle...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame = 0, systemsScanned = 0, patchesAvailable = 0, patchesApplied = 0, systemsSecured = 0;
+
+    // Systems grid
+    const systems = [];
+    const cols = 6, rows = 3;
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            const sx = w * 0.15 + c * (w * 0.13);
+            const sy = h * 0.2 + r * (h * 0.26);
+            const vulnLevel = rndInt(0, 3); // 0 = clean, 1 = low, 2 = med, 3 = critical
+            systems.push({
+                x: sx, y: sy,
+                name: `SRV-${String(r * cols + c + 1).padStart(2, '0')}`,
+                vulnLevel,
+                status: 'unscanned', // unscanned → scanned → downloading → patching → patched
+                patchProgress: 0,
+                downloadProgress: 0,
+            });
+        }
+    }
+
+    let phase = 0; // 0=scan, 1=download, 2=patch, 3=verify
+    let scanIdx = 0;
+
+    simTimeout(() => { if (!state.simRunning) return; activateStep(1); termLog('> Scanning systems for missing patches...', 'warning'); }, 400);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(2); termLog('> Patches downloaded. Deploying to staging for validation...', 'warning'); }, 2200);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(3); termLog('> Rolling out approved patches to production systems...', 'warning'); }, 3600);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(4); termLog('> Post-patch verification scan in progress...', 'info'); }, 5000);
+
+    function draw() {
+        if (!state.simRunning) return;
+        frame++;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
+
+        // Title
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('SECURITY PATCH MANAGEMENT — DEPLOYMENT CYCLE', w / 2, 16);
+
+        // Phase indicator
+        const phases = ['SCANNING', 'DOWNLOADING', 'PATCHING', 'VERIFIED'];
+        const phaseColors = ['#00e5ff', '#ffaa00', '#e040fb', '#39ff14'];
+        if (frame < 120) phase = 0;
+        else if (frame < 220) phase = 1;
+        else if (frame < 360) phase = 2;
+        else phase = 3;
+
+        ctx.fillStyle = phaseColors[phase]; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center';
+        ctx.fillText(`PHASE: ${phases[phase]}`, w / 2, h * 0.94);
+
+        // Scan systems sequentially
+        if (phase === 0 && frame % 6 === 0 && scanIdx < systems.length) {
+            systems[scanIdx].status = 'scanned';
+            systemsScanned++;
+            if (systems[scanIdx].vulnLevel > 0) patchesAvailable++;
+            scanIdx++;
+        }
+
+        // Download patches
+        if (phase === 1) {
+            systems.forEach(sys => {
+                if (sys.status === 'scanned' && sys.vulnLevel > 0) {
+                    sys.status = 'downloading';
+                }
+                if (sys.status === 'downloading') {
+                    sys.downloadProgress += 0.025;
+                    if (sys.downloadProgress >= 1) sys.status = 'ready';
+                }
+            });
+        }
+
+        // Apply patches
+        if (phase === 2) {
+            systems.forEach(sys => {
+                if (sys.status === 'ready' || (sys.status === 'scanned' && sys.vulnLevel > 0)) {
+                    sys.status = 'patching';
+                }
+                if (sys.status === 'patching') {
+                    sys.patchProgress += 0.015;
+                    if (sys.patchProgress >= 1) {
+                        sys.status = 'patched';
+                        sys.vulnLevel = 0;
+                        patchesApplied++;
+                    }
+                }
+            });
+        }
+
+        // Verify
+        if (phase === 3) {
+            systems.forEach(sys => {
+                if (sys.status !== 'verified') {
+                    sys.status = 'verified';
+                    systemsSecured++;
+                }
+            });
+        }
+
+        // Draw systems
+        systems.forEach(sys => {
+            let boxColor, bgColor, statusText;
+            switch (sys.status) {
+                case 'unscanned':
+                    boxColor = 'rgba(255,255,255,0.15)'; bgColor = 'rgba(255,255,255,0.02)'; statusText = '...'; break;
+                case 'scanned':
+                    boxColor = sys.vulnLevel > 1 ? '#ff3b3b' : sys.vulnLevel > 0 ? '#ffaa00' : '#39ff14';
+                    bgColor = sys.vulnLevel > 1 ? 'rgba(255,59,59,0.08)' : sys.vulnLevel > 0 ? 'rgba(255,170,0,0.06)' : 'rgba(57,255,20,0.06)';
+                    statusText = sys.vulnLevel > 0 ? `${sys.vulnLevel} CVEs` : 'OK'; break;
+                case 'downloading':
+                    boxColor = '#ffaa00'; bgColor = 'rgba(255,170,0,0.06)'; statusText = 'DL...'; break;
+                case 'ready':
+                    boxColor = '#e040fb'; bgColor = 'rgba(224,64,251,0.06)'; statusText = 'READY'; break;
+                case 'patching':
+                    boxColor = '#e040fb'; bgColor = 'rgba(224,64,251,0.08)'; statusText = 'APPLYING'; break;
+                case 'patched': case 'verified':
+                    boxColor = '#39ff14'; bgColor = 'rgba(57,255,20,0.1)'; statusText = '✓ SECURE'; break;
+                default:
+                    boxColor = 'rgba(255,255,255,0.15)'; bgColor = 'rgba(255,255,255,0.02)'; statusText = '...';
+            }
+
+            ctx.fillStyle = bgColor; ctx.strokeStyle = boxColor; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.roundRect(sys.x - 28, sys.y - 22, 56, 44, 3); ctx.fill(); ctx.stroke();
+
+            ctx.fillStyle = boxColor; ctx.font = 'bold 7px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(sys.name, sys.x, sys.y - 10);
+            ctx.font = '6px monospace';
+            ctx.fillText(statusText, sys.x, sys.y + 4);
+
+            // Progress bars
+            if (sys.status === 'downloading') {
+                ctx.fillStyle = 'rgba(255,255,255,0.1)';
+                ctx.fillRect(sys.x - 20, sys.y + 14, 40, 3);
+                ctx.fillStyle = '#ffaa00';
+                ctx.fillRect(sys.x - 20, sys.y + 14, 40 * sys.downloadProgress, 3);
+            }
+            if (sys.status === 'patching') {
+                ctx.fillStyle = 'rgba(255,255,255,0.1)';
+                ctx.fillRect(sys.x - 20, sys.y + 14, 40, 3);
+                ctx.fillStyle = '#e040fb';
+                ctx.fillRect(sys.x - 20, sys.y + 14, 40 * sys.patchProgress, 3);
+            }
+        });
+
+        // Update stats
+        if (frame % 15 === 0) {
+            const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
+            if (e0) e0.textContent = systemsScanned;
+            if (e1) e1.textContent = patchesAvailable;
+            if (e2) e2.textContent = patchesApplied;
+            if (e3) e3.textContent = systemsSecured;
+            setProgress(Math.min(100, (frame / 440) * 100));
+        }
+
+        if (frame >= 440) {
+            setProgress(100);
+            termLog(`> Patch cycle complete. ${patchesApplied} patches applied. All systems secured.`, 'success');
+            stopSimulation();
+            return;
+        }
+        state.simFrame = requestAnimationFrame(draw);
+    }
+    state.simFrame = requestAnimationFrame(draw);
+};
+
+/* ─── 42. PENETRATION TESTING ───────────────────────────────────────────── */
+window.simulatePentest = function() {
+    termLog('> Initiating authorized penetration test (scope: 10.0.0.0/24)...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame = 0, hostsDiscovered = 0, exploitsAttempted = 0, shellsGained = 0;
+    let privescLevel = 'None';
+
+    // Network targets
+    const targets = [
+        { x: w * 0.50, y: h * 0.18, ip: '10.0.0.1', os: 'Linux 5.15', service: 'Apache 2.4.49', vuln: 'CVE-2021-41773', exploitable: true, status: 'hidden' },
+        { x: w * 0.78, y: h * 0.18, ip: '10.0.0.5', os: 'Win Server 2019', service: 'SMB 3.1.1', vuln: 'CVE-2020-0796', exploitable: true, status: 'hidden' },
+        { x: w * 0.50, y: h * 0.50, ip: '10.0.0.10', os: 'Ubuntu 22.04', service: 'SSH 8.9p1', vuln: 'None', exploitable: false, status: 'hidden' },
+        { x: w * 0.78, y: h * 0.50, ip: '10.0.0.20', os: 'CentOS 7', service: 'MySQL 5.7', vuln: 'CVE-2023-21912', exploitable: true, status: 'hidden' },
+        { x: w * 0.64, y: h * 0.78, ip: '10.0.0.50', os: 'Win 10 Pro', service: 'RDP 10.0', vuln: 'CVE-2019-0708', exploitable: true, status: 'hidden' },
+    ];
+
+    // Pentester
+    const pentX = w * 0.10, pentY = h * 0.50;
+    const exploitPackets = [];
+    let activeTarget = null;
+    let phaseProgress = 0; // 0=recon, 1=scan, 2=exploit, 3=privesc, 4=report
+
+    simTimeout(() => { if (!state.simRunning) return; activateStep(1); termLog('> Running Nmap -sV -sC on target subnet...', 'warning'); }, 800);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(2); termLog('> Vulnerability found: CVE-2021-41773 on 10.0.0.1. Launching Metasploit...', 'error'); }, 2800);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(3); termLog('> Shell gained! Attempting privilege escalation via kernel exploit...', 'error'); }, 4200);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(4); termLog('> ROOT ACCESS OBTAINED. Documenting findings for report.', 'error'); }, 5400);
+
+    function draw() {
+        if (!state.simRunning) return;
+        frame++;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
+
+        // Title
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('PENETRATION TEST — AUTHORIZED RED TEAM ENGAGEMENT', w / 2, 16);
+
+        // Phase
+        if (frame < 100) phaseProgress = 0;
+        else if (frame < 200) phaseProgress = 1;
+        else if (frame < 320) phaseProgress = 2;
+        else if (frame < 400) phaseProgress = 3;
+        else phaseProgress = 4;
+
+        const phaseLabels = ['RECONNAISSANCE', 'SCANNING', 'EXPLOITATION', 'PRIVILEGE ESCALATION', 'REPORTING'];
+        const phaseCols = ['#00e5ff', '#ffaa00', '#ff3b3b', '#e040fb', '#39ff14'];
+        ctx.fillStyle = phaseCols[phaseProgress]; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'center';
+        ctx.fillText(`PHASE: ${phaseLabels[phaseProgress]}`, w / 2, h - 12);
+
+        // ── Pentester node ──
+        ctx.fillStyle = 'rgba(255, 145, 0, 0.1)'; ctx.strokeStyle = '#ff9100'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.roundRect(pentX - 38, pentY - 32, 76, 64, 5); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#ff9100'; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('PENTESTER', pentX, pentY - 16);
+        ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
+        ctx.fillText('Kali Linux', pentX, pentY);
+        ctx.fillStyle = '#ff9100'; ctx.font = '6px monospace';
+        ctx.fillText('Metasploit | Nmap', pentX, pentY + 14);
+
+        // Phase 0: Recon — discover hosts
+        if (phaseProgress >= 1 && frame % 20 === 0) {
+            const hidden = targets.filter(t => t.status === 'hidden');
+            if (hidden.length > 0) {
+                const t = hidden[0];
+                t.status = 'discovered';
+                hostsDiscovered++;
+                termLog(`> Host discovered: ${t.ip} (${t.os}) — ${t.service}`, 'info');
+            }
+        }
+
+        // Phase 2: Exploitation — send exploit packets
+        if (phaseProgress >= 2 && frame % 30 === 0) {
+            const exploitable = targets.filter(t => t.exploitable && t.status === 'discovered');
+            if (exploitable.length > 0) {
+                activeTarget = exploitable[0];
+                exploitPackets.push({ tx: activeTarget.x, ty: activeTarget.y, progress: 0 });
+                exploitsAttempted++;
+            }
+        }
+
+        // Phase 3: Privesc
+        if (phaseProgress === 3) {
+            if (frame === 320) privescLevel = 'User';
+            if (frame === 360) { privescLevel = 'Root'; termLog('> id = uid=0(root) gid=0(root)', 'error'); }
+        }
+
+        // Draw exploit packets
+        for (let i = exploitPackets.length - 1; i >= 0; i--) {
+            const ep = exploitPackets[i];
+            ep.progress += 0.02;
+            const epx = pentX + 38 + (ep.tx - 45 - pentX - 38) * ep.progress;
+            const epy = pentY + (ep.ty - pentY) * ep.progress;
+            const alpha = 1 - ep.progress * 0.5;
+
+            // Exploit packet
+            ctx.fillStyle = `rgba(255, 59, 59, ${alpha * 0.6})`; ctx.strokeStyle = `rgba(255, 59, 59, ${alpha})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.roundRect(epx - 16, epy - 7, 32, 14, 2); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`; ctx.font = 'bold 5px monospace'; ctx.textAlign = 'center';
+            ctx.fillText('EXPLOIT', epx, epy + 1);
+
+            if (ep.progress >= 1) {
+                exploitPackets.splice(i, 1);
+                // Mark target as compromised
+                const compromised = targets.find(t => t.x === ep.tx && t.y === ep.ty && t.status === 'discovered');
+                if (compromised) {
+                    compromised.status = 'compromised';
+                    shellsGained++;
+                    termLog(`> Shell gained on ${compromised.ip} via ${compromised.vuln}!`, 'error');
+                }
+            }
+        }
+
+        // ── Draw targets ──
+        targets.forEach(t => {
+            let color, bg, label;
+            switch (t.status) {
+                case 'hidden':
+                    color = 'rgba(255,255,255,0.12)'; bg = 'rgba(255,255,255,0.02)'; label = '?'; break;
+                case 'discovered':
+                    color = t.exploitable ? '#ffaa00' : '#39ff14';
+                    bg = t.exploitable ? 'rgba(255,170,0,0.06)' : 'rgba(57,255,20,0.06)';
+                    label = t.vuln !== 'None' ? t.vuln.substring(0, 14) : 'SECURE'; break;
+                case 'compromised':
+                    color = '#ff3b3b'; bg = 'rgba(255,59,59,0.12)'; label = '🔓 SHELL'; break;
+                default:
+                    color = 'rgba(255,255,255,0.12)'; bg = 'rgba(255,255,255,0.02)'; label = '?';
+            }
+
+            ctx.fillStyle = bg; ctx.strokeStyle = color; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.roundRect(t.x - 45, t.y - 26, 90, 52, 4); ctx.fill(); ctx.stroke();
+
+            ctx.fillStyle = color; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(t.status !== 'hidden' ? t.ip : '???', t.x, t.y - 14);
+            ctx.fillStyle = '#8892a8'; ctx.font = '6px monospace';
+            ctx.fillText(t.status !== 'hidden' ? `${t.os} | ${t.service}` : 'Unknown', t.x, t.y);
+            ctx.fillStyle = color; ctx.font = 'bold 6px monospace';
+            ctx.fillText(label, t.x, t.y + 14);
+
+            // Compromised pulse
+            if (t.status === 'compromised') {
+                const pr = 50 + Math.sin(frame * 0.08) * 5;
+                ctx.beginPath(); ctx.arc(t.x, t.y, pr, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(255, 59, 59, 0.12)'; ctx.lineWidth = 1; ctx.stroke();
+            }
+
+            // Scan line from pentester for discovered
+            if (t.status === 'discovered' && phaseProgress <= 2) {
+                ctx.beginPath(); ctx.moveTo(pentX + 38, pentY); ctx.lineTo(t.x - 45, t.y);
+                ctx.strokeStyle = 'rgba(255, 170, 0, 0.12)'; ctx.lineWidth = 0.5; ctx.setLineDash([3, 4]); ctx.stroke(); ctx.setLineDash([]);
+            }
+        });
+
+        // Update stats
+        if (frame % 15 === 0) {
+            const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
+            if (e0) e0.textContent = hostsDiscovered;
+            if (e1) e1.textContent = exploitsAttempted;
+            if (e2) e2.textContent = shellsGained;
+            if (e3) { e3.textContent = privescLevel; e3.style.color = privescLevel === 'Root' ? '#ff3b3b' : privescLevel === 'User' ? '#ffaa00' : '#8892a8'; }
+            setProgress(Math.min(100, (frame / 460) * 100));
+        }
+
+        if (frame >= 460) {
+            setProgress(100);
+            termLog(`> Pentest complete. ${shellsGained} shells gained, privesc to ${privescLevel}. Remediate findings immediately!`, 'success');
+            stopSimulation();
+            return;
+        }
+        state.simFrame = requestAnimationFrame(draw);
+    }
+    state.simFrame = requestAnimationFrame(draw);
+};
+
+/* ─── 43. NEXT-GEN FIREWALL ─────────────────────────────────────────────── */
+window.simulateFirewall = function() {
+    termLog('> Booting Next-Gen Firewall engine...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame = 0, packetsInspected = 0, threatsBlocked = 0, activeSessions = 0;
+    const packets = [];
+    const internalX = w * 0.85, internalY = h * 0.5;
+    const externalX = w * 0.15;
+    const fwX = w * 0.5, fwY = h * 0.5;
+
+    simTimeout(() => { if (!state.simRunning) return; activateStep(1); termLog('> Next-Gen DPI rule check active. Port 80/443 open. Port 21/22 blocked.', 'warning'); }, 600);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(2); termLog('> Alert: Inbound packet payload signature match on Port 80 (SQLi SQL-syntax).', 'error'); }, 1800);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(3); termLog('> Action: Stateful filter dropped SQLi packet. Threat source blocked.', 'error'); }, 3000);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(4); termLog('> Safe state verified. Allowed established traffic continues to flow.', 'success'); }, 4200);
+
+    function draw() {
+        if (!state.simRunning) return;
+        frame++;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
+
+        // Header
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('FIREWALL DEEP PACKET INSPECTION & ACL ROUTING', w / 2, 20);
+
+        // Draw External Client Zone
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.02)'; ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.beginPath(); ctx.roundRect(externalX - 50, h * 0.2, 100, h * 0.6, 5); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#8892a8'; ctx.font = 'bold 8px monospace';
+        ctx.fillText('EXTERNAL NETWORK', externalX, h * 0.25);
+        ctx.fillText('(Internet Traffic)', externalX, h * 0.29);
+
+        // Draw Firewall Wall (NGFW)
+        const isAlerting = (frame > 110 && frame < 200);
+        ctx.fillStyle = isAlerting ? 'rgba(229, 57, 53, 0.15)' : 'rgba(255, 255, 255, 0.02)';
+        ctx.strokeStyle = isAlerting ? '#e53935' : 'rgba(255, 255, 255, 0.2)';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.roundRect(fwX - 25, h * 0.15, 50, h * 0.7, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = isAlerting ? '#e53935' : '#8892a8'; ctx.font = 'bold 9px monospace';
+        ctx.fillText('NGFW', fwX, h * 0.22);
+        ctx.fillText(isAlerting ? '[ BLOCK ]' : '[ INSPECT ]', fwX, h * 0.78);
+
+        // Draw Internal Network Target (Server)
+        ctx.fillStyle = 'rgba(57, 255, 20, 0.05)'; ctx.strokeStyle = '#39ff14';
+        ctx.beginPath(); ctx.roundRect(internalX - 50, h * 0.3, 100, h * 0.4, 5); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#39ff14'; ctx.font = 'bold 8px monospace';
+        ctx.fillText('INTERNAL ZONE', internalX, h * 0.36);
+        ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
+        ctx.fillText('Web Server', internalX, h * 0.46);
+        ctx.fillText('10.0.0.100', internalX, h * 0.52);
+
+        // Generate incoming packets
+        if (frame % 20 === 0) {
+            const isMalicious = (frame > 100 && frame < 220 && Math.random() > 0.4);
+            const targetPort = isMalicious ? 80 : (Math.random() > 0.5 ? 443 : 21); // Port 21 is blocked
+            packets.push({
+                x: externalX,
+                y: h * 0.3 + Math.random() * (h * 0.4),
+                progress: 0,
+                type: isMalicious ? 'malicious' : (targetPort === 21 ? 'unauthorized' : 'legitimate'),
+                port: targetPort,
+            });
+        }
+
+        // Draw and process packets
+        for (let i = packets.length - 1; i >= 0; i--) {
+            const p = packets[i];
+            p.progress += 0.02;
+            const px = externalX + (internalX - externalX) * p.progress;
+
+            let col = '#00e5ff';
+            if (p.type === 'malicious') col = '#ff3b3b';
+            else if (p.type === 'unauthorized') col = '#ffaa00';
+            else col = '#39ff14';
+
+            // Draw packet
+            ctx.fillStyle = col;
+            ctx.beginPath(); ctx.arc(px, p.y, 4, 0, Math.PI * 2); ctx.fill();
+            ctx.font = '6px monospace'; ctx.fillStyle = '#fff';
+            ctx.fillText(`P:${p.port}`, px, p.y - 8);
+
+            // Firewall logic
+            if (px >= fwX - 25 && px <= fwX + 25) {
+                packetsInspected++;
+                if (p.type === 'malicious' || p.type === 'unauthorized') {
+                    threatsBlocked++;
+                    packets.splice(i, 1); // Drop packet
+                    continue;
+                }
+            }
+
+            if (p.progress >= 1) {
+                packets.splice(i, 1);
+                activeSessions = Math.min(100, activeSessions + 1);
+            }
+        }
+
+        // Stats update
+        if (frame % 15 === 0) {
+            const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
+            if (e0) e0.textContent = packetsInspected;
+            if (e1) e1.textContent = threatsBlocked;
+            if (e2) e2.textContent = activeSessions;
+            if (e3) e3.textContent = `${Math.min(95, 10 + Math.round(activeSessions * 0.6))}%`;
+            setProgress(Math.min(100, (frame / 400) * 100));
+        }
+
+        if (frame >= 400) {
+            setProgress(100);
+            termLog('> NGFW Inspection simulation complete. Outbound & inbound traffic successfully routed.', 'success');
+            stopSimulation();
+            return;
+        }
+        state.simFrame = requestAnimationFrame(draw);
+    }
+    state.simFrame = requestAnimationFrame(draw);
+};
+
+/* ─── 44. INTRUSION DETECTION SYSTEM ────────────────────────────────────── */
+window.simulateIDS = function() {
+    termLog('> Activating IDS/IPS mirroring sensor...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame = 0, alerts = 0, blockedIPs = 0, monitoredRate = 1.2;
+    const packets = [];
+    const tapX = w * 0.45, tapY = h * 0.4;
+    const idsX = w * 0.45, idsY = h * 0.75;
+    const startX = w * 0.1, endX = w * 0.9;
+    const trafficY = h * 0.4;
+
+    simTimeout(() => { if (!state.simRunning) return; activateStep(1); termLog('> Capturing flow packets. Analysis of signatures initialized.', 'warning'); }, 600);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(2); termLog('> Alert: Signature ID: 2001928 matches brute-force ssh payload.', 'error'); }, 1800);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(3); termLog('> Dynamic defense: IPS triggered null route for malicious IP.', 'error'); }, 3000);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(4); termLog('> System threat level normalized. Threat monitoring continues.', 'success'); }, 4200);
+
+    function draw() {
+        if (!state.simRunning) return;
+        frame++;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
+
+        // Title
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('INTRUSION DETECTION & PREVENTION SYSTEM (IDS/IPS)', w / 2, 20);
+
+        // Draw Network Backbone Line
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(startX, trafficY); ctx.lineTo(endX, trafficY); ctx.stroke();
+
+        // Draw Router/TAP
+        ctx.fillStyle = '#3a4b5c'; ctx.beginPath(); ctx.arc(tapX, tapY, 12, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 8px monospace';
+        ctx.fillText('TAP', tapX, tapY - 16);
+
+        // Draw IDS sensor
+        const alertFlash = (frame > 110 && frame < 200 && Math.sin(frame * 0.2) > 0);
+        ctx.fillStyle = alertFlash ? 'rgba(255, 59, 59, 0.2)' : 'rgba(255, 152, 0, 0.1)';
+        ctx.strokeStyle = alertFlash ? '#ff3b3b' : '#ff9800';
+        ctx.beginPath(); ctx.roundRect(idsX - 40, idsY - 20, 80, 40, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = alertFlash ? '#ff3b3b' : '#ff9800'; ctx.font = 'bold 8px monospace';
+        ctx.fillText(alertFlash ? 'IPS ALERT' : 'IDS SENSOR', idsX, idsY - 4);
+        ctx.fillStyle = '#8892a8'; ctx.font = '6px monospace';
+        ctx.fillText('Signature Engine', idsX, idsY + 10);
+
+        // Connection mirror line
+        ctx.strokeStyle = alertFlash ? 'rgba(255,59,59,0.3)' : 'rgba(255,152,0,0.3)';
+        ctx.setLineDash([2, 3]);
+        ctx.beginPath(); ctx.moveTo(tapX, tapY + 12); ctx.lineTo(idsX, idsY - 20); ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Generate packets
+        if (frame % 15 === 0) {
+            const isAttack = (frame > 90 && frame < 200 && Math.random() > 0.4);
+            packets.push({
+                x: startX,
+                y: trafficY,
+                progress: 0,
+                isMalicious: isAttack,
+            });
+        }
+
+        // Draw packets
+        for (let i = packets.length - 1; i >= 0; i--) {
+            const p = packets[i];
+            p.progress += 0.015;
+            const px = startX + (endX - startX) * p.progress;
+
+            ctx.fillStyle = p.isMalicious ? '#ff3b3b' : '#39ff14';
+            ctx.beginPath(); ctx.arc(px, p.y, 4, 0, Math.PI * 2); ctx.fill();
+
+            // Mirror trace when crossing TAP
+            if (px > tapX - 10 && px < tapX + 10) {
+                // Drawing mirror flow
+                ctx.fillStyle = p.isMalicious ? 'rgba(255,59,59,0.5)' : 'rgba(255,152,0,0.5)';
+                ctx.beginPath(); ctx.arc(idsX, idsY - 10, 4, 0, Math.PI * 2); ctx.fill();
+                if (p.isMalicious) {
+                    alerts++;
+                    blockedIPs = Math.min(25, blockedIPs + 1);
+                }
+            }
+        }
+
+        // Update stats
+        if (frame % 20 === 0) {
+            const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
+            monitoredRate = (1.1 + Math.sin(frame * 0.05) * 0.1).toFixed(1);
+            if (e0) e0.textContent = `${monitoredRate} Gbps`;
+            if (e2) e2.textContent = alerts;
+            if (e3) e3.textContent = blockedIPs;
+            setProgress(Math.min(100, (frame / 400) * 100));
+        }
+
+        if (frame >= 400) {
+            setProgress(100);
+            termLog('> IDS/IPS threat scan cycle ended. Logs archived.', 'success');
+            stopSimulation();
+            return;
+        }
+        state.simFrame = requestAnimationFrame(draw);
+    }
+    state.simFrame = requestAnimationFrame(draw);
+};
+
+/* ─── 45. MULTI-FACTOR AUTHENTICATION (MFA) ────────────────────────────── */
+window.simulateMFA = function() {
+    termLog('> Loading portal login validation module...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame = 0, attempts = 0, success = 0, bypass = 0, challenges = 0;
+    let mfaStatus = 'waiting_pass'; // waiting_pass → waiting_mfa → authorized
+
+    simTimeout(() => { if (!state.simRunning) return; activateStep(1); termLog('> Username/Password verification: OK.', 'info'); }, 600);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(2); termLog('> MFA Challenge initiated: OTP generated & sent to device.', 'warning'); }, 1500);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(3); termLog('> Awaiting second-factor input...', 'warning'); }, 2400);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(4); termLog('> Token verified. MFA verification status: SUCCESS.', 'success'); }, 3500);
+
+    function draw() {
+        if (!state.simRunning) return;
+        frame++;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
+
+        // Title
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('MULTI-FACTOR AUTHENTICATION (MFA) WORKFLOW', w / 2, 20);
+
+        // Update auth state by frame
+        if (frame === 60) {
+            mfaStatus = 'waiting_mfa';
+            challenges++;
+            attempts++;
+        }
+        if (frame === 240) {
+            mfaStatus = 'authorized';
+            success++;
+        }
+
+        // Draw user portal on the left
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.02)'; ctx.strokeStyle = '#00bcd4';
+        ctx.beginPath(); ctx.roundRect(w * 0.15 - 50, h * 0.25, 100, h * 0.5, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#00bcd4'; ctx.font = 'bold 8px monospace';
+        ctx.fillText('USER PORTAL', w * 0.15, h * 0.32);
+        ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
+        ctx.fillText('ID: admin_sec', w * 0.15, h * 0.44);
+        ctx.fillText('PW: **********', w * 0.15, h * 0.50);
+        ctx.fillStyle = (mfaStatus !== 'waiting_pass') ? '#39ff14' : '#8892a8';
+        ctx.fillText('PASS: VERIFIED', w * 0.15, h * 0.62);
+
+        // Draw authenticator mobile device on the right
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.02)'; ctx.strokeStyle = (mfaStatus === 'waiting_mfa') ? '#ff9800' : '#8892a8';
+        ctx.beginPath(); ctx.roundRect(w * 0.85 - 40, h * 0.25, 80, h * 0.5, 8); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#8892a8'; ctx.font = 'bold 8px monospace';
+        ctx.fillText('MOBILE AUTH', w * 0.85, h * 0.32);
+
+        if (mfaStatus === 'waiting_mfa') {
+            const blink = Math.sin(frame * 0.15) > 0;
+            ctx.fillStyle = blink ? '#ff9800' : 'rgba(255,152,0,0.5)'; ctx.font = 'bold 9px monospace';
+            ctx.fillText('CODE: 492 108', w * 0.85, h * 0.48);
+            ctx.fillStyle = '#8892a8'; ctx.font = '6px monospace';
+            ctx.fillText('Approve login request?', w * 0.85, h * 0.58);
+        } else if (mfaStatus === 'authorized') {
+            ctx.fillStyle = '#39ff14'; ctx.font = 'bold 9px monospace';
+            ctx.fillText('[ APPROVED ]', w * 0.85, h * 0.48);
+        }
+
+        // Draw Auth server in the middle
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.03)'; ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+        ctx.beginPath(); ctx.roundRect(w * 0.5 - 45, h * 0.3, 90, h * 0.4, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 8px monospace';
+        ctx.fillText('AUTH SERVER', w * 0.5, h * 0.38);
+
+        let centerText = 'AWAITING LOGIN';
+        let centerColor = '#8892a8';
+        if (mfaStatus === 'waiting_mfa') {
+            centerText = 'MFA CHALLENGE';
+            centerColor = '#ff9800';
+        } else if (mfaStatus === 'authorized') {
+            centerText = 'ACCESS GRANTED';
+            centerColor = '#39ff14';
+        }
+        ctx.fillStyle = centerColor; ctx.font = 'bold 8px monospace';
+        ctx.fillText(centerText, w * 0.5, h * 0.52);
+
+        // Draw connections
+        if (mfaStatus === 'waiting_mfa') {
+            // Signal from auth server to phone
+            ctx.strokeStyle = '#ff9800'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(w * 0.5 + 45, h * 0.5); ctx.lineTo(w * 0.85 - 40, h * 0.5); ctx.stroke();
+        } else if (mfaStatus === 'authorized') {
+            // Success lines
+            ctx.strokeStyle = '#39ff14'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(w * 0.85 - 40, h * 0.5); ctx.lineTo(w * 0.5 + 45, h * 0.5); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(w * 0.5 - 45, h * 0.5); ctx.lineTo(w * 0.15 + 50, h * 0.5); ctx.stroke();
+        }
+
+        // Stats update
+        if (frame % 20 === 0) {
+            const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
+            if (e0) e0.textContent = attempts;
+            if (e1) e1.textContent = challenges;
+            if (e2) e2.textContent = success;
+            if (e3) e3.textContent = bypass;
+            setProgress(Math.min(100, (frame / 360) * 100));
+        }
+
+        if (frame >= 360) {
+            setProgress(100);
+            termLog('> MFA Token verification validated. Access granted.', 'success');
+            stopSimulation();
+            return;
+        }
+        state.simFrame = requestAnimationFrame(draw);
+    }
+    state.simFrame = requestAnimationFrame(draw);
+};
+
+/* ─── 46. ZERO TRUST ARCHITECTURE ───────────────────────────────────────── */
+window.simulateZeroTrust = function() {
+    termLog('> Enforcing Zero Trust micro-perimeter policies...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame = 0, checks = 0, segments = 3, blocked = 0;
+    const userX = w * 0.15, userY = h * 0.5;
+    const pdpX = w * 0.45, pdpY = h * 0.5;
+
+    const resources = [
+        { name: 'Finance DB', y: h * 0.22, x: w * 0.8, status: 'evaluating' },
+        { name: 'Git Repo', y: h * 0.50, x: w * 0.8, status: 'granted' },
+        { name: 'K8s Cluster', y: h * 0.78, x: w * 0.8, status: 'evaluating' },
+    ];
+
+    simTimeout(() => { if (!state.simRunning) return; activateStep(1); termLog('> Context verification: Evaluating client device compliance & credentials.', 'info'); }, 600);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(2); termLog('> Micro-segment authorization requested for Resource: Git Repo.', 'warning'); }, 1500);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(3); termLog('> Access request evaluated by PDP. Continuous token challenge: SUCCESS.', 'error'); }, 2500);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(4); termLog('> Ephemeral micro-tunnel established. Access limited to resource domain.', 'success'); }, 3600);
+
+    function draw() {
+        if (!state.simRunning) return;
+        frame++;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
+
+        // Title
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('ZERO TRUST ARCHITECTURE — CONTINUOUS AUTH & PDP CONTROL', w / 2, 20);
+
+        // User Node
+        ctx.fillStyle = 'rgba(255,255,255,0.02)'; ctx.strokeStyle = '#00e5ff';
+        ctx.beginPath(); ctx.roundRect(userX - 40, userY - 30, 80, 60, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#00e5ff'; ctx.font = 'bold 8px monospace';
+        ctx.fillText('ENDPOINT', userX, userY - 10);
+        ctx.fillStyle = '#8892a8'; ctx.font = '6px monospace';
+        ctx.fillText('User: auditor', userX, userY + 4);
+        ctx.fillText('Posture: OK', userX, userY + 14);
+
+        // PDP (Policy Decision Point)
+        ctx.fillStyle = 'rgba(76, 175, 80, 0.15)'; ctx.strokeStyle = '#4caf50';
+        ctx.beginPath(); ctx.roundRect(pdpX - 45, pdpY - 40, 90, 80, 5); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#4caf50'; ctx.font = 'bold 9px monospace';
+        ctx.fillText('POLICY ENGINE', pdpX, pdpY - 20);
+        ctx.font = 'bold 8px monospace';
+        ctx.fillText('(PDP / PEP)', pdpX, pdpY - 8);
+        ctx.fillStyle = '#8892a8'; ctx.font = '6px monospace';
+        ctx.fillText('Evaluating Context', pdpX, pdpY + 12);
+        ctx.fillText('Token Validation', pdpX, pdpY + 22);
+
+        // Resources & evaluation
+        resources.forEach((res, i) => {
+            if (frame > 60 && frame < 150) {
+                res.status = 'evaluating';
+            } else if (frame >= 150) {
+                if (i === 1) { // Authorized for Git Repo
+                    res.status = 'granted';
+                } else {
+                    res.status = 'denied';
+                }
+            }
+
+            let boxColor = '#8892a8';
+            let label = 'AWAITING';
+            if (res.status === 'granted') { boxColor = '#39ff14'; label = 'AUTHORIZED'; }
+            if (res.status === 'denied') { boxColor = '#ff3b3b'; label = 'BLOCKED'; }
+            if (res.status === 'evaluating') { boxColor = '#ff9800'; label = 'CHECKING'; }
+
+            // Draw microsegments
+            ctx.fillStyle = 'rgba(255,255,255,0.01)'; ctx.strokeStyle = boxColor;
+            ctx.beginPath(); ctx.roundRect(res.x - 45, res.y - 18, 90, 36, 4); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 7px monospace';
+            ctx.fillText(res.name, res.x, res.y - 4);
+            ctx.fillStyle = boxColor; ctx.font = '6px monospace';
+            ctx.fillText(label, res.x, res.y + 8);
+
+            // Connective lines
+            if (res.status === 'granted') {
+                ctx.strokeStyle = '#39ff14'; ctx.lineWidth = 1.5;
+                ctx.beginPath(); ctx.moveTo(userX + 40, userY); ctx.lineTo(pdpX - 45, pdpY); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(pdpX + 45, pdpY); ctx.lineTo(res.x - 45, res.y); ctx.stroke();
+            } else if (res.status === 'denied' && frame > 150) {
+                ctx.strokeStyle = 'rgba(255, 59, 59, 0.2)'; ctx.lineWidth = 0.5;
+                ctx.beginPath(); ctx.moveTo(pdpX + 45, pdpY); ctx.lineTo(res.x - 45, res.y); ctx.stroke();
+            }
+        });
+
+        // Update stats
+        if (frame % 20 === 0) {
+            const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
+            if (frame > 60) checks = 3;
+            if (frame >= 150) blocked = 2;
+            if (e0) e0.textContent = checks;
+            if (e2) e2.textContent = segments;
+            if (e3) e3.textContent = blocked;
+            setProgress(Math.min(100, (frame / 360) * 100));
+        }
+
+        if (frame >= 360) {
+            setProgress(100);
+            termLog('> Zero Trust PDP evaluation complete. Tunnels terminated.', 'success');
+            stopSimulation();
+            return;
+        }
+        state.simFrame = requestAnimationFrame(draw);
+    }
+    state.simFrame = requestAnimationFrame(draw);
+};
+
+/* ─── 47. THREAT DEFENSE SYSTEM ─────────────────────────────────────────── */
+window.simulateDefenseSystem = function() {
+    termLog('> Launching Unified Threat Defense dashboard...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame = 0, events = 0, incidents = 0, contained = 0;
+    const clientX = w * 0.15, clientY = h * 0.5;
+    const siemX = w * 0.45, siemY = h * 0.5;
+    const firewallX = w * 0.8, firewallY = h * 0.3;
+    const edrX = w * 0.8, edrY = h * 0.7;
+
+    simTimeout(() => { if (!state.simRunning) return; activateStep(1); termLog('> EDR reports suspicious execution behavior on Host: 10.0.0.12.', 'warning'); }, 600);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(2); termLog('> SIEM correlated: Endpoint execution matches network beaconing trace.', 'error'); }, 1500);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(3); termLog('> SOAR playbook executing: quarantining Host 10.0.0.12.', 'error'); }, 2400);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(4); termLog('> Active mitigation finished. Threat vector isolated and neutralized.', 'success'); }, 3500);
+
+    function draw() {
+        if (!state.simRunning) return;
+        frame++;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
+
+        // Title
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('SOAR AUTOMATION & UNIFIED THREAT CONTAINMENT', w / 2, 20);
+
+        // Client PC (Threat Source)
+        const isQuarantined = (frame >= 180);
+        ctx.fillStyle = isQuarantined ? 'rgba(255,59,59,0.1)' : 'rgba(255,255,255,0.02)';
+        ctx.strokeStyle = isQuarantined ? '#ff3b3b' : 'rgba(255,255,255,0.15)';
+        ctx.lineWidth = isQuarantined ? 2.5 : 1;
+        ctx.beginPath(); ctx.roundRect(clientX - 45, clientY - 30, 90, 60, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = isQuarantined ? '#ff3b3b' : '#fff'; ctx.font = 'bold 8px monospace';
+        ctx.fillText(isQuarantined ? 'QUARANTINED' : 'ENDPOINT', clientX, clientY - 12);
+        ctx.fillStyle = '#8892a8'; ctx.font = '6px monospace';
+        ctx.fillText('IP: 10.0.0.12', clientX, clientY + 4);
+        ctx.fillText(isQuarantined ? 'EDR: ISOLATED' : 'EDR: ACTIVE', clientX, clientY + 14);
+
+        // Threat containment circle
+        if (isQuarantined) {
+            ctx.strokeStyle = 'rgba(255, 59, 59, 0.4)'; ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath(); ctx.arc(clientX, clientY, 65, 0, Math.PI*2); ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        // SIEM/SOAR Central Engine
+        ctx.fillStyle = 'rgba(63, 81, 181, 0.15)'; ctx.strokeStyle = '#3f51b5'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.roundRect(siemX - 45, siemY - 35, 90, 70, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#3f51b5'; ctx.font = 'bold 8px monospace';
+        ctx.fillText('SIEM / SOAR', siemX, siemY - 14);
+        ctx.fillStyle = '#8892a8'; ctx.font = '6px monospace';
+        ctx.fillText('Rules Engaged', siemX, siemY + 2);
+        ctx.fillText(isQuarantined ? 'Playbook: SOAR-IR' : 'Awaiting Signals', siemX, siemY + 12);
+
+        // Firewall Controller
+        ctx.fillStyle = 'rgba(255,255,255,0.02)'; ctx.strokeStyle = '#ff5722';
+        ctx.beginPath(); ctx.roundRect(firewallX - 45, firewallY - 22, 90, 44, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#ff5722'; ctx.font = 'bold 8px monospace';
+        ctx.fillText('NGFW CONTROLLER', firewallX, firewallY - 8);
+        ctx.fillStyle = '#8892a8'; ctx.font = '6px monospace';
+        ctx.fillText(isQuarantined ? 'Rule: Block 10.0.0.12' : 'Traffic Allowed', firewallX, firewallY + 6);
+
+        // EDR Manager
+        ctx.fillStyle = 'rgba(255,255,255,0.02)'; ctx.strokeStyle = '#9c27b0';
+        ctx.beginPath(); ctx.roundRect(firewallX - 45, edrY - 22, 90, 44, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#9c27b0'; ctx.font = 'bold 8px monospace';
+        ctx.fillText('EDR AGENT MGMT', firewallX, edrY - 8);
+        ctx.fillStyle = '#8892a8'; ctx.font = '6px monospace';
+        ctx.fillText(isQuarantined ? 'Host Isolated' : 'Host Normal', firewallX, edrY + 6);
+
+        // Flows and signals
+        events += rndInt(10, 30);
+        if (frame > 60 && frame < 180) {
+            // Signal from EDR manager to SIEM
+            ctx.strokeStyle = '#ff9800'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(firewallX - 45, edrY); ctx.lineTo(siemX + 45, siemY); ctx.stroke();
+            incidents = 1;
+        }
+
+        if (isQuarantined) {
+            // SOAR pushes blocks out
+            ctx.strokeStyle = '#39ff14'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.moveTo(siemX + 45, siemY); ctx.lineTo(firewallX - 45, firewallY); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(siemX + 45, siemY); ctx.lineTo(firewallX - 45, edrY); ctx.stroke();
+            contained = 1;
+        }
+
+        // Update stats
+        if (frame % 20 === 0) {
+            const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
+            if (e0) e0.textContent = events.toLocaleString();
+            if (e1) e1.textContent = incidents;
+            if (e2) e2.textContent = contained;
+            if (e3) e3.textContent = isQuarantined ? '1.8s' : '—';
+            setProgress(Math.min(100, (frame / 360) * 100));
+        }
+
+        if (frame >= 360) {
+            setProgress(100);
+            termLog('> Unified containment check: COMPLETE. Playbook finished successfully.', 'success');
+            stopSimulation();
+            return;
+        }
+        state.simFrame = requestAnimationFrame(draw);
+    }
+    state.simFrame = requestAnimationFrame(draw);
+};
+
