@@ -1,10 +1,5 @@
-/* ============================================
-   CyberShield — Design System & Styles
-   ============================================ */
-
-/* --- CSS Custom Properties --- */
 :root {
-    /* Background Colors */
+    
     --bg-primary: #060a13;
     --bg-secondary: #0a0e1a;
     --bg-tertiary: #0f1425;
@@ -13,7 +8,7 @@
     --bg-modal: rgba(6, 10, 19, 0.97);
     --bg-glass: rgba(15, 20, 37, 0.6);
 
-    /* Accent Colors */
+    
     --cyan: #00f0ff;
     --cyan-dim: rgba(0, 240, 255, 0.15);
     --cyan-glow: rgba(0, 240, 255, 0.4);
@@ -29,22 +24,22 @@
     --violet-dim: rgba(139, 92, 246, 0.15);
     --blue: #3b82f6;
 
-    /* Text Colors */
+    
     --text-primary: #e8ecf4;
     --text-secondary: #8892a8;
     --text-muted: #525c70;
     --text-accent: var(--cyan);
 
-    /* Border */
+    
     --border-color: rgba(255, 255, 255, 0.06);
     --border-glow: rgba(0, 240, 255, 0.2);
 
-    /* Typography */
+    
     --font-ui: 'Inter', system-ui, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
     --font-display: 'Orbitron', sans-serif;
 
-    /* Spacing */
+    
     --space-xs: 0.25rem;
     --space-sm: 0.5rem;
     --space-md: 1rem;
@@ -53,19 +48,19 @@
     --space-2xl: 3rem;
     --space-3xl: 4rem;
 
-    /* Radius */
+    
     --radius-sm: 6px;
     --radius-md: 10px;
     --radius-lg: 16px;
     --radius-xl: 24px;
     --radius-full: 100px;
 
-    /* Transitions */
+    
     --transition-fast: 150ms ease;
     --transition-base: 250ms ease;
     --transition-slow: 400ms cubic-bezier(0.16, 1, 0.3, 1);
 
-    /* Shadows */
+    
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
     --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
     --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
@@ -73,7 +68,6 @@
     --shadow-glow-magenta: 0 0 30px rgba(255, 0, 170, 0.2);
 }
 
-/* --- Reset & Base --- */
 *, *::before, *::after {
     margin: 0;
     padding: 0;
@@ -84,7 +78,6 @@ html {
     scroll-behavior: smooth;
 }
 
-/* Custom scrollbar for Webkit browsers (Chrome, Safari, iOS Safari, etc.) */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -109,12 +102,6 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg-primary); }
-::-webkit-scrollbar-thumb { background: var(--cyan-dim); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--cyan-glow); }
-
-/* --- Particles Canvas --- */
 #particles-canvas {
     position: fixed;
     top: 0;
@@ -125,7 +112,6 @@ body {
     pointer-events: none;
 }
 
-/* --- Scanline Overlay --- */
 .scanline-overlay {
     position: fixed;
     top: 0;
@@ -143,7 +129,6 @@ body {
     );
 }
 
-/* --- Navbar --- */
 .navbar {
     position: fixed;
     top: 0;
@@ -255,7 +240,6 @@ body {
     font-weight: 600;
 }
 
-/* --- Hero Section --- */
 .hero {
     position: relative;
     z-index: 2;
@@ -435,7 +419,6 @@ body {
 
 .hero-cta span, .hero-cta svg { position: relative; z-index: 1; }
 
-/* --- Threat Banner --- */
 .threat-banner {
     position: relative;
     z-index: 2;
@@ -474,7 +457,6 @@ body {
 .dot.yellow { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
 .dot.green { background: var(--lime); box-shadow: 0 0 6px var(--lime); }
 
-/* --- Attacks Section --- */
 .attacks-section {
     position: relative;
     z-index: 2;
@@ -534,7 +516,6 @@ body {
     color: var(--cyan);
 }
 
-/* --- Attack Cards Grid --- */
 .attacks-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -552,6 +533,8 @@ body {
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
     opacity: 0;
     transform: translateY(30px);
     animation: cardReveal 0.6s ease-out forwards;
@@ -690,6 +673,7 @@ body {
     justify-content: space-between;
     padding-top: var(--space-md);
     border-top: 1px solid var(--border-color);
+    margin-top: auto;
 }
 
 .card-category {
@@ -724,7 +708,6 @@ body {
     box-shadow: 0 0 15px var(--card-accent-dim, var(--cyan-dim));
 }
 
-/* --- Simulation Modal --- */
 .sim-modal {
     position: fixed;
     inset: 0;
@@ -881,7 +864,6 @@ body {
     color: var(--red);
 }
 
-/* Sim Body Layout */
 .sim-body {
     display: grid;
     grid-template-columns: 280px 1fr 280px;
@@ -924,7 +906,6 @@ body {
     border-bottom: 1px solid var(--border-color);
 }
 
-/* Steps */
 .steps-list {
     display: flex;
     flex-direction: column;
@@ -998,7 +979,6 @@ body {
     line-height: 1.4;
 }
 
-/* Center Panel - Visualization */
 .sim-center-panel {
     display: flex;
     flex-direction: column;
@@ -1058,7 +1038,6 @@ body {
     color: var(--text-muted);
 }
 
-/* Stats Panel */
 .stats-list {
     display: flex;
     flex-direction: column;
@@ -1091,7 +1070,6 @@ body {
     color: var(--cyan);
 }
 
-/* Defense Panel */
 .defense-list {
     display: flex;
     flex-direction: column;
@@ -1116,7 +1094,6 @@ body {
     font-size: 0.8rem;
 }
 
-/* Terminal */
 .sim-footer {
     padding: 0 2rem 1.5rem;
 }
@@ -1174,7 +1151,6 @@ body {
 .terminal-line.warning { color: var(--amber); }
 .terminal-line.info { color: var(--cyan); }
 
-/* --- About Section --- */
 .about-section {
     position: relative;
     z-index: 2;
@@ -1227,7 +1203,6 @@ body {
     line-height: 1.7;
 }
 
-/* --- Footer --- */
 .footer {
     position: relative;
     z-index: 2;
@@ -1266,10 +1241,6 @@ body {
     font-size: 0.75rem;
     color: var(--text-muted);
 }
-
-/* ============================================
-   ANIMATIONS
-   ============================================ */
 
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(20px); }
@@ -1323,7 +1294,6 @@ body {
     to { transform: translateY(-60px) scale(0.5); opacity: 0; }
 }
 
-/* --- Responsive --- */
 @media (max-width: 1200px) {
     .sim-body {
         grid-template-columns: 1fr;

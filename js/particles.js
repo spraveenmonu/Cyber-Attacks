@@ -1,7 +1,3 @@
-/* ============================================
-   CyberShield — Particles Background Engine
-   ============================================ */
-
 (function () {
     'use strict';
 
@@ -45,8 +41,6 @@
         update() {
             this.x += this.vx;
             this.y += this.vy;
-
-            // Mouse repulsion
             if (mouse.x !== null) {
                 const dx = this.x - mouse.x;
                 const dy = this.y - mouse.y;
@@ -57,12 +51,8 @@
                     this.vy += (dy / dist) * force;
                 }
             }
-
-            // Damping
             this.vx *= 0.999;
             this.vy *= 0.999;
-
-            // Wrap
             if (this.x < -10) this.x = width + 10;
             if (this.x > width + 10) this.x = -10;
             if (this.y < -10) this.y = height + 10;
@@ -116,8 +106,6 @@
         drawConnections();
         requestAnimationFrame(animate);
     }
-
-    // Events
     window.addEventListener('resize', () => {
         resize();
     });
@@ -131,8 +119,6 @@
         mouse.x = null;
         mouse.y = null;
     });
-
-    // Start
     init();
     animate();
 })();

@@ -1,10 +1,5 @@
-/* ============================================
-   CyberShield — Attack Simulation Engine
-   ============================================ */
-
 'use strict';
 
-/* ─── ATTACK DEFINITIONS ────────────────────────────────────────────────── */
 const ATTACKS = [
     {
         id: 'ddos',
@@ -1510,12 +1505,74 @@ const ATTACKS = [
         ],
         simulate: 'simulateDefenseSystem',
     },
+    {
+        id: 'hoax',
+        name: 'Hoax Attack',
+        icon: '📢',
+        category: 'social',
+        severity: 'medium',
+        tags: ['hoax', 'misinformation', 'social-engineering', 'panic', 'deception'],
+        description: 'A hoax attack spreads false warnings or misinformation (e.g., fake virus alerts, fraudulent chain messages, or fabricated security threats) to cause panic, waste resources, trick users into deleting legitimate files, or install actual malware disguised as a "fix."',
+        accent: '#e040fb',
+        accentDim: 'rgba(224,64,251,0.15)',
+        steps: [
+            { title: 'Hoax Crafted', desc: 'Attacker creates a convincing fake warning (e.g., "Critical virus found!").' },
+            { title: 'Mass Distribution', desc: 'Hoax spread via email, social media, messaging apps, and forums.' },
+            { title: 'Panic Induced', desc: 'Recipients believe the hoax and forward it, amplifying reach.' },
+            { title: 'Victim Action', desc: 'Users follow malicious instructions: delete system files or install "fix."' },
+            { title: 'Damage Realized', desc: 'Systems damaged or actual malware installed through the fake remedy.' },
+        ],
+        stats: [
+            { label: 'Messages Sent', value: '0', live: true },
+            { label: 'Users Deceived', value: '0', live: true },
+            { label: 'Shares/Forwards', value: '0', live: true },
+            { label: 'Systems Damaged', value: '0', live: true },
+        ],
+        defense: [
+            'Verify all security warnings with official vendor sources before acting.',
+            'Educate users to recognize hoax patterns (urgency, chain forwarding).',
+            'Implement email/messaging filters to block known hoax templates.',
+            'Never delete system files based on unverified social media warnings.',
+            'Report hoax messages to IT security teams for organization-wide alerts.',
+        ],
+        simulate: 'simulateHoaxAttack',
+    },
+    {
+        id: 'dictionary',
+        name: 'Dictionary Attack',
+        icon: '📖',
+        category: 'network',
+        severity: 'high',
+        tags: ['dictionary', 'password', 'wordlist', 'authentication', 'credential-crack'],
+        description: 'A dictionary attack systematically tries every word from a precompiled wordlist (dictionary) — including common passwords, phrases, and variations — against a login system or password hash, exploiting users who choose predictable, human-readable passwords.',
+        accent: '#ff6d00',
+        accentDim: 'rgba(255,109,0,0.15)',
+        steps: [
+            { title: 'Wordlist Loaded', desc: 'Attacker loads a dictionary file with millions of common passwords and phrases.' },
+            { title: 'Target Identified', desc: 'Login endpoint or password hash file identified for attack.' },
+            { title: 'Sequential Testing', desc: 'Each word from the dictionary is tested as a password sequentially.' },
+            { title: 'Variation Mutations', desc: 'Common mutations applied (P@ssword, password123, PASSWORD!).' },
+            { title: 'Credential Cracked', desc: 'Weak dictionary-based password matched — unauthorized access gained.' },
+        ],
+        stats: [
+            { label: 'Words Tried', value: '0', live: true },
+            { label: 'Words/sec', value: '0', live: true },
+            { label: 'Matches Found', value: '0', live: true },
+            { label: 'Wordlist Size', value: '14.3M', live: false },
+        ],
+        defense: [
+            'Enforce minimum 12-character passwords with complexity requirements.',
+            'Implement account lockout or progressive delays after failed attempts.',
+            'Use password blacklists to block known common/dictionary passwords.',
+            'Enable Multi-Factor Authentication (MFA) on all accounts.',
+            'Deploy CAPTCHA on login forms to prevent automated attacks.',
+        ],
+        simulate: 'simulateDictionaryAttack',
+    },
 ];
 
-/* Sort attacks alphabetically by name */
 ATTACKS.sort((a, b) => a.name.localeCompare(b.name));
 
-/* ─── APP STATE ─────────────────────────────────────────────────────────── */
 const state = {
     activeFilter: 'all',
     currentAttack: null,
@@ -1526,7 +1583,6 @@ const state = {
     threatsAnalyzed: 156000,
 };
 
-/* ─── DOM CACHE ─────────────────────────────────────────────────────────── */
 const $ = (id) => document.getElementById(id);
 const dom = {
     grid: null,
@@ -1550,7 +1606,6 @@ const dom = {
     typedText: null,
 };
 
-/* ─── INITIALIZATION ────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
     dom.grid = $('attacks-grid');
     dom.modal = $('sim-modal');
@@ -1619,7 +1674,6 @@ function incrementSimulations() {
     }
 }
 
-/* ─── RENDER ATTACK CARDS ───────────────────────────────────────────────── */
 function renderCards(filter) {
     if (!filter) filter = 'all';
     dom.grid.innerHTML = '';
@@ -1658,7 +1712,6 @@ function renderCards(filter) {
     });
 }
 
-/* ─── FILTER BAR ────────────────────────────────────────────────────────── */
 function setupFilters() {
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1670,7 +1723,6 @@ function setupFilters() {
     });
 }
 
-/* ─── CARD MOUSE TRACKING (SPOTLIGHT EFFECT) ────────────────────────────── */
 function setupCardMouseTracking() {
     document.addEventListener('mousemove', (e) => {
         document.querySelectorAll('.attack-card').forEach(card => {
@@ -1683,7 +1735,6 @@ function setupCardMouseTracking() {
     });
 }
 
-/* ─── MODAL OPEN/CLOSE ──────────────────────────────────────────────────── */
 function setupModal() {
     dom.simClose.addEventListener('click', closeModal);
     dom.modal.addEventListener('click', (e) => {
@@ -1758,7 +1809,6 @@ function closeModal() {
     state.currentAttack = null;
 }
 
-/* ─── SIMULATION CONTROLS ───────────────────────────────────────────────── */
 function startSimulation() {
     if (state.simRunning || !state.currentAttack) return;
     state.simRunning = true;
@@ -1800,7 +1850,6 @@ function resetSimulation() {
     dom.simTerminalBody.innerHTML = `<div class="terminal-line">> CyberShield v2.0 — Reset complete. Ready to simulate.</div>`;
 }
 
-/* ─── UTILITIES ─────────────────────────────────────────────────────────── */
 function termLog(msg, type) {
     if (!type) type = '';
     const line = document.createElement('div');
@@ -1848,7 +1897,6 @@ function clearCanvas() {
 function rnd(min, max) { return Math.random() * (max - min) + min; }
 function rndInt(min, max) { return Math.floor(rnd(min, max)); }
 
-/* ─── TYPING EFFECT ─────────────────────────────────────────────────────── */
 function runTypingEffect() {
     const phrases = [
         'Visualizing cyber threats in real-time.',
@@ -1874,7 +1922,6 @@ function runTypingEffect() {
     type();
 }
 
-/* ─── COUNTER ANIMATION ─────────────────────────────────────────────────── */
 function animateCounters() {
     document.querySelectorAll('.counter').forEach(el => {
         const target = parseInt(el.dataset.target);
@@ -1890,7 +1937,6 @@ function animateCounters() {
     });
 }
 
-/* ─── NAVBAR SCROLL ─────────────────────────────────────────────────────── */
 function setupNavbar() {
     const navbar = $('navbar');
     window.addEventListener('scroll', () => {
@@ -1905,7 +1951,6 @@ function setupNavbar() {
     });
 }
 
-/* ─── CYBER GLOBE ANIMATION ─────────────────────────────────────────────── */
 function animateCyberGlobe() {
     const globe = $('cyber-globe');
     if (!globe) return;
@@ -1937,11 +1982,6 @@ function animateCyberGlobe() {
     }
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   ATTACK SIMULATION FUNCTIONS
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* ─── 1. DDoS ───────────────────────────────────────────────────────────── */
 window.simulateDDoS = function() {
     termLog('> Activating botnet command channels...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -2019,7 +2059,6 @@ window.simulateDDoS = function() {
     state.simFrame = requestAnimationFrame(draw);
 };
 
-/* ─── 2. PHISHING ───────────────────────────────────────────────────────── */
 window.simulatePhishing = function() {
     termLog('> Crafting spoofed email campaign...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -2097,7 +2136,6 @@ window.simulatePhishing = function() {
     state.simFrame=requestAnimationFrame(draw);
 };
 
-/* ─── 3. SQL INJECTION ──────────────────────────────────────────────────── */
 window.simulateSQLi = function() {
     termLog('> Scanning web application for injection points...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -2169,7 +2207,6 @@ window.simulateSQLi = function() {
     state.simFrame=requestAnimationFrame(draw);
 };
 
-/* ─── 4. XSS ────────────────────────────────────────────────────────────── */
 window.simulateXSS = function() {
     termLog('> Injecting malicious script into comment field...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -2253,7 +2290,6 @@ window.simulateXSS = function() {
     state.simFrame=requestAnimationFrame(draw);
 };
 
-/* ─── 5. RANSOMWARE ─────────────────────────────────────────────────────── */
 window.simulateRansomware = function() {
     termLog('> Malware initializing... contacting C2 server.', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -2321,7 +2357,6 @@ window.simulateRansomware = function() {
     state.simFrame=requestAnimationFrame(draw);
 };
 
-/* ─── 6. BRUTE FORCE ────────────────────────────────────────────────────── */
 window.simulateBruteForce = function() {
     termLog('> Loading dictionary: rockyou.txt (14M passwords)', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -2388,7 +2423,6 @@ window.simulateBruteForce = function() {
     state.simFrame=requestAnimationFrame(draw);
 };
 
-/* ─── 7. MAN-IN-THE-MIDDLE ──────────────────────────────────────────────── */
 window.simulateMitM = function() {
     termLog('> Initiating ARP spoofing on local network...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -2478,7 +2512,6 @@ window.simulateMitM = function() {
     state.simFrame=requestAnimationFrame(draw);
 };
 
-/* ─── 8. ZERO-DAY EXPLOIT ───────────────────────────────────────────────── */
 window.simulateZeroDay = function() {
     termLog('> Zero-day CVE detected — no patch available.', 'error');
     const { canvas, ctx, w, h } = getCanvas();
@@ -2532,7 +2565,6 @@ window.simulateZeroDay = function() {
     state.simFrame=requestAnimationFrame(draw);
 };
 
-/* ─── 9. DNS SPOOFING ───────────────────────────────────────────────────── */
 window.simulateDNSSpoofing = function() {
     termLog('> Targeting DNS resolver — cache poisoning attack...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -2606,7 +2638,6 @@ window.simulateDNSSpoofing = function() {
     state.simFrame=requestAnimationFrame(draw);
 };
 
-/* ─── 10. ARP POISONING ─────────────────────────────────────────────────── */
 window.simulateARPPoison = function() {
     termLog('> Scanning LAN for ARP table targets...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -2700,7 +2731,6 @@ window.simulateARPPoison = function() {
     state.simFrame=requestAnimationFrame(draw);
 };
 
-/* ─── 11. SOCIAL ENGINEERING ────────────────────────────────────────────── */
 window.simulateSocialEngineering = function() {
     termLog('> Profiling target via OSINT intelligence...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -2774,7 +2804,6 @@ window.simulateSocialEngineering = function() {
     state.simFrame=requestAnimationFrame(draw);
 };
 
-/* ─── 12. INSIDER THREAT ────────────────────────────────────────────────── */
 window.simulateInsiderThreat = function() {
     termLog('> Monitoring privileged user activity...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -2853,11 +2882,6 @@ window.simulateInsiderThreat = function() {
     state.simFrame=requestAnimationFrame(draw);
 };
 
-/* ══════════════════════════════════════════════════════════════════════════
-   ADDITIONAL ATTACK SIMULATION FUNCTIONS (13 new attacks)
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* ─── 13. PASSWORD ATTACK ───────────────────────────────────────────────── */
 window.simulatePasswordAttack = function() {
     termLog('> Loading leaked credential database from dark web...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -2879,15 +2903,11 @@ window.simulatePasswordAttack = function() {
         ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
 
         const bW=Math.min(580,w-20), bX=(w-bW)/2;
-        // Header
         ctx.fillStyle='#ffaa00'; ctx.font='bold 12px monospace'; ctx.textAlign='center';
         ctx.fillText('PASSWORD HASH CRACKING — RAINBOW TABLE',w/2,22);
-
-        // Hash table display
         hashes.forEach((entry,i)=>{
             const hy=40+i*42;
             if(hy>h-60)return;
-            // Progress animation
             if(frame>40+i*25&&!entry.cracked){
                 entry.progress=Math.min(1,entry.progress+0.025);
                 if(entry.progress>=1){entry.cracked=true;cracked++;activateStep(3);}
@@ -2898,8 +2918,6 @@ window.simulatePasswordAttack = function() {
             ctx.fillStyle=entry.cracked?'rgba(255,59,59,0.12)':entry.progress>0?'rgba(255,170,0,0.08)':'rgba(255,255,255,0.02)';
             ctx.strokeStyle=entry.cracked?'rgba(255,59,59,0.35)':isWeak?'rgba(255,170,0,0.25)':'rgba(57,255,20,0.2)';
             ctx.lineWidth=1; ctx.beginPath(); ctx.roundRect(bX,hy,bW,34,4); ctx.fill(); ctx.stroke();
-
-            // Progress fill
             if(entry.progress>0&&!entry.cracked){
                 ctx.fillStyle='rgba(255,170,0,0.25)';
                 ctx.beginPath(); ctx.roundRect(bX,hy,bW*entry.progress,34,4); ctx.fill();
@@ -2914,8 +2932,6 @@ window.simulatePasswordAttack = function() {
                 ctx.fillStyle='#ff3b3b'; ctx.font='bold 9px monospace'; ctx.textAlign='right';
                 ctx.fillText(`CRACKED: ${entry.pwd}`,bX+bW-8,hy+13);
             }
-
-            // Mini progress bar
             ctx.fillStyle='rgba(255,255,255,0.05)'; ctx.fillRect(bX+8,hy+20,bW-16,6);
             const barGrad=ctx.createLinearGradient(bX+8,0,bX+bW-8,0);
             barGrad.addColorStop(0,'#ffaa00'); barGrad.addColorStop(1,entry.cracked?'#ff3b3b':'#39ff14');
@@ -2923,8 +2939,6 @@ window.simulatePasswordAttack = function() {
             ctx.fillRect(bX+8,hy+20,(bW-16)*entry.progress,6);
             ctx.textAlign='left';
         });
-
-        // Credential stuffing phase
         if(cracked>3&&frame%40===0&&sitesTested<sites.length){
             sitesTested++;
             if(Math.random()>0.5){accountsTaken++;activateStep(4);termLog(`> Account takeover: ${sites[sitesTested-1]} — credentials matched!`,'error');}
@@ -2945,7 +2959,6 @@ window.simulatePasswordAttack = function() {
     state.simFrame=requestAnimationFrame(draw);
 };
 
-/* ─── 14. URL INTERPRETATION ────────────────────────────────────────────── */
 window.simulateURLInterpretation = function() {
     termLog('> Probing web application URL structure...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -2973,8 +2986,6 @@ window.simulateURLInterpretation = function() {
 
         ctx.fillStyle='#3b82f6'; ctx.font='bold 11px monospace'; ctx.textAlign='center';
         ctx.fillText('URL MANIPULATION ATTACKS — PROBE RESULTS',w/2,22);
-
-        // Reveal tests progressively
         urlTests.forEach(test=>{
             if(frame>=test.delay&&!revealed.includes(test.url)){
                 revealed.push(test.url);
@@ -3021,7 +3032,6 @@ window.simulateURLInterpretation = function() {
     state.simFrame=requestAnimationFrame(draw);
 };
 
-/* ─── 15. SESSION HIJACKING ─────────────────────────────────────────────── */
 window.simulateSessionHijack = function() {
     termLog('> Scanning network for active session tokens...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -3059,8 +3069,6 @@ window.simulateSessionHijack = function() {
             ctx.fillStyle=sess.captured?'rgba(139,92,246,0.15)':'rgba(255,255,255,0.02)';
             ctx.strokeStyle=sess.captured?'rgba(139,92,246,0.5)':'rgba(255,255,255,0.06)';
             ctx.lineWidth=1; ctx.beginPath(); ctx.roundRect(bX,sy,bW,60,6); ctx.fill(); ctx.stroke();
-
-            // Token flow animation
             if(sess.progress>0&&!sess.captured){
                 ctx.fillStyle='rgba(139,92,246,0.2)'; ctx.beginPath(); ctx.roundRect(bX,sy,bW*sess.progress,60,6); ctx.fill();
             }
@@ -3096,7 +3104,6 @@ window.simulateSessionHijack = function() {
     state.simFrame=requestAnimationFrame(draw);
 };
 
-/* ─── 16. TROJAN HORSE ──────────────────────────────────────────────────── */
 window.simulateTrojan = function() {
     termLog('> Trojan packaged as fake game installer...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -3116,17 +3123,11 @@ window.simulateTrojan = function() {
         frame++;
         ctx.clearRect(0,0,w,h);
         ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
-
-        // Two panels: victim (left), attacker C2 (right)
         const midX=w/2-10;
-
-        // Victim side
         ctx.fillStyle='rgba(255,255,255,0.02)'; ctx.strokeStyle='rgba(255,255,255,0.05)'; ctx.lineWidth=1;
         ctx.beginPath(); ctx.roundRect(8,10,midX-8,h-20,6); ctx.fill(); ctx.stroke();
         ctx.fillStyle='#3b82f6'; ctx.font='bold 10px monospace'; ctx.textAlign='center';
         ctx.fillText('VICTIM MACHINE',midX/2,26);
-
-        // Fake game window
         if(frame<40){
             ctx.fillStyle='rgba(30,40,60,0.9)'; ctx.beginPath(); ctx.roundRect(20,40,midX-28,100,6); ctx.fill();
             ctx.fillStyle='#e8ecf4'; ctx.font='bold 12px monospace'; ctx.textAlign='center';
@@ -3143,8 +3144,6 @@ window.simulateTrojan = function() {
             ctx.fillText(`Port: 4444 OPEN (reverse shell)`,midX/2,96);
             ctx.fillText(`Hook: WH_KEYBOARD_LL (active)`,midX/2,110);
         }
-
-        // Stolen files list
         if(stolenItems.length>0){
             ctx.fillStyle='#8892a8'; ctx.font='bold 8px monospace'; ctx.textAlign='left';
             ctx.fillText('EXFILTRATING:',20,165);
@@ -3153,8 +3152,6 @@ window.simulateTrojan = function() {
                 ctx.fillText(`📤 ${item}`,20,180+i*16);
             });
         }
-
-        // Keylogger simulation
         if(frame>100){
             const kY=h-80;
             ctx.fillStyle='rgba(255,0,170,0.05)'; ctx.strokeStyle='rgba(255,0,170,0.2)'; ctx.lineWidth=1;
@@ -3166,8 +3163,6 @@ window.simulateTrojan = function() {
             ctx.fillText(sample.slice(0,Math.min(sample.length,Math.floor((frame-100)/2))),16,kY+30);
             keystrokesLogged=Math.min(480,frame*2);
         }
-
-        // Attacker C2 side
         ctx.fillStyle='rgba(255,59,59,0.03)'; ctx.strokeStyle='rgba(255,59,59,0.12)'; ctx.lineWidth=1;
         ctx.beginPath(); ctx.roundRect(midX+8,10,w-midX-18,h-20,6); ctx.fill(); ctx.stroke();
         ctx.fillStyle='#ff3b3b'; ctx.font='bold 10px monospace'; ctx.textAlign='center';
@@ -3180,8 +3175,6 @@ window.simulateTrojan = function() {
         ctx.fillText('Active C2 Connections',midX+8+(w-midX-18)/2,h/2+5);
         ctx.fillText(`${filesStolen} files stolen`,midX+8+(w-midX-18)/2,h/2+20);
         ctx.fillText(`${payloadDownloads} payloads delivered`,midX+8+(w-midX-18)/2,h/2+35);
-
-        // C2 beacon packets
         if(frame%20===0&&frame>40){
             c2Packets.push({x:midX-10,y:h/2,tx:midX+20,ty:h/2,p:0});
         }
@@ -3192,14 +3185,11 @@ window.simulateTrojan = function() {
             ctx.fillStyle=`rgba(255,59,59,${1-pkt.p})`; ctx.fill();
         });
         c2Packets.splice(0,c2Packets.filter(p=>p.p>=1).length);
-
-        // Steal files
         if(frame%70===0&&stolenItems.length<stealItems.length&&frame>60){
             stolenItems.push(stealItems[stolenItems.length]);
             filesStolen++;
             if(stolenItems.length===3)activateStep(3);
         }
-        // Payload download
         if(frame===280){payloadDownloads++;activateStep(4);termLog('> Ransomware payload downloaded and executing!','error');}
 
         if(frame%15===0){
@@ -3216,7 +3206,6 @@ window.simulateTrojan = function() {
     state.simFrame=requestAnimationFrame(draw);
 };
 
-/* ─── 17. DRIVE-BY DOWNLOAD ─────────────────────────────────────────────── */
 window.simulateDriveBy = function() {
     termLog('> Victim navigating to compromised website...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -3238,27 +3227,20 @@ window.simulateDriveBy = function() {
         frame++;
         ctx.clearRect(0,0,w,h);
         ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
-
-        // Browser mockup
         const bW=Math.min(560,w-20), bX=(w-bW)/2;
         ctx.fillStyle='rgba(20,25,40,0.95)'; ctx.strokeStyle='rgba(255,0,170,0.2)'; ctx.lineWidth=1;
         ctx.beginPath(); ctx.roundRect(bX,8,bW,h-16,8); ctx.fill(); ctx.stroke();
-
-        // Browser chrome
         ctx.fillStyle='rgba(255,0,170,0.08)'; ctx.fillRect(bX,8,bW,26);
         ctx.fillStyle='#ff00aa'; ctx.font='9px monospace'; ctx.textAlign='left';
         ctx.fillText(`http://news-today${frame>30?'-legit':''}.com/article`,bX+10,24);
         ctx.fillStyle='#ffaa00'; ctx.font='8px monospace';
         ctx.fillText('⚠ NOT SECURE',bX+bW-80,24);
-
-        // Page content (fake news)
         if(frame<40){
             ctx.fillStyle='#e8ecf4'; ctx.font='bold 14px Inter'; ctx.textAlign='center';
             ctx.fillText('Breaking News — Click to Read More',bX+bW/2,65);
             ctx.fillStyle='#8892a8'; ctx.font='10px monospace';
             ctx.fillText('Loading article...',bX+bW/2,90);
         } else {
-            // Exploit kit scanning
             ctx.fillStyle='#ff00aa'; ctx.font='bold 10px monospace'; ctx.textAlign='center';
             ctx.fillText('EXPLOIT KIT ACTIVATED — SCANNING BROWSER',bX+bW/2,50);
 
@@ -3312,7 +3294,6 @@ window.simulateDriveBy = function() {
     state.simFrame=requestAnimationFrame(draw);
 };
 
-/* ─── 18. EAVESDROPPING ─────────────────────────────────────────────────── */
 window.simulateEavesdropping = function() {
     termLog('> NIC set to promiscuous mode — capturing all traffic...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -3338,23 +3319,15 @@ window.simulateEavesdropping = function() {
         frame++;
         ctx.clearRect(0,0,w,h);
         ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
-
-        // Wireshark-style UI
         const bW=Math.min(580,w-20), bX=(w-bW)/2;
         ctx.fillStyle='rgba(15,20,35,0.95)'; ctx.strokeStyle='rgba(57,255,20,0.15)'; ctx.lineWidth=1;
         ctx.beginPath(); ctx.roundRect(bX,8,bW,h-16,6); ctx.fill(); ctx.stroke();
-
-        // Toolbar
         ctx.fillStyle='rgba(57,255,20,0.08)'; ctx.fillRect(bX,8,bW,24);
         ctx.fillStyle='#39ff14'; ctx.font='9px monospace'; ctx.textAlign='left';
         ctx.fillText('tcpdump / Wireshark v4.2  |  Interface: eth0  |  Filter: none',bX+10,23);
-
-        // Column headers
         ctx.fillStyle='rgba(255,255,255,0.05)'; ctx.fillRect(bX,32,bW,16);
         ctx.fillStyle='#525c70'; ctx.font='8px monospace';
         ctx.fillText('No.    Time      Src IP          Dst IP          Proto    Info',bX+8,43);
-
-        // Add packet every 12 frames
         if(frame%12===0){
             const proto=protocols[packetsCaptured%protocols.length];
             protocolsSniffed.add(proto);
@@ -3363,8 +3336,6 @@ window.simulateEavesdropping = function() {
             packetsCaptured++;
             if(capturedPackets[capturedPackets.length-1].sensitive){credentialsFound++;termLog(`> ${proto} credential: ${data.data.split('\n')[0].slice(0,50)}`,'error');}
         }
-
-        // Display packets
         capturedPackets.slice(-Math.floor((h-80)/18)).forEach((pkt,i)=>{
             const py=48+i*18;
             if(py>h-30)return;
@@ -3391,7 +3362,6 @@ window.simulateEavesdropping = function() {
     state.simFrame=requestAnimationFrame(draw);
 };
 
-/* ─── 19. BIRTHDAY ATTACK ───────────────────────────────────────────────── */
 window.simulateBirthdayAttack = function() {
     termLog('> Targeting MD5 hash function — birthday paradox exploit...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -3415,15 +3385,11 @@ window.simulateBirthdayAttack = function() {
 
         ctx.fillStyle='#ff00aa'; ctx.font='bold 12px monospace'; ctx.textAlign='center';
         ctx.fillText('BIRTHDAY ATTACK — HASH COLLISION SEARCH',w/2,22);
-
-        // Hash distribution visualization
         const bW=Math.min(560,w-20), bX=(w-bW)/2;
         const bucketW=(bW-BUCKETS)/BUCKETS;
         const maxH=h*0.45;
 
         hashesComputed+=Math.min(50,frame*2);
-
-        // Add hashes to buckets
         if(frame%3===0){
             const bucket=rndInt(0,BUCKETS);
             hashSpace[bucket].count++;
@@ -3434,8 +3400,6 @@ window.simulateBirthdayAttack = function() {
                 if(collisionsFound===1){activateStep(3);termLog(`> COLLISION FOUND! Bucket ${bucket}: two inputs, same hash!`,'error');}
             }
         }
-
-        // Draw histogram
         const maxCount=Math.max(1,...hashSpace.map(b=>b.count));
         hashSpace.forEach((bucket,i)=>{
             const bh=Math.max(2,(bucket.count/Math.max(maxCount,1))*maxH);
@@ -3448,13 +3412,9 @@ window.simulateBirthdayAttack = function() {
                 ctx.beginPath(); ctx.arc(bx+bucketW/2,by-8,6,0,Math.PI*2); ctx.fill();
             }
         });
-
-        // X-axis label
         ctx.fillStyle='#525c70'; ctx.font='8px monospace'; ctx.textAlign='center';
         ctx.fillText('Hash Buckets (128-bit MD5 space, visualized)',w/2,h*0.72+14);
         ctx.fillText(`Hashes computed: ${hashesComputed.toLocaleString()}  |  Collisions: ${collisionsFound}`,w/2,h*0.72+28);
-
-        // Collision display
         if(collisionPairs.length>0){
             const cy=h*0.78;
             ctx.fillStyle='rgba(255,0,170,0.08)'; ctx.strokeStyle='rgba(255,0,170,0.3)'; ctx.lineWidth=1;
@@ -3484,7 +3444,6 @@ window.simulateBirthdayAttack = function() {
     state.simFrame=requestAnimationFrame(draw);
 };
 
-/* ─── 20. MALWARE ───────────────────────────────────────────────────────── */
 window.simulateMalware = function() {
     termLog('> Worm malware activated — scanning for vulnerable hosts...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -3498,7 +3457,6 @@ window.simulateMalware = function() {
     for(let i=0;i<NUM_NODES;i++){
         nodes.push({x:rnd(40,w-40),y:rnd(40,h-40),infected:false,infecting:false,progress:0,connections:[]});
     }
-    // Patient zero
     nodes[0].infected=true;
 
     simTimeout(()=>{if(!state.simRunning)return;activateStep(1);termLog('> Self-replication initiated across network shares.','error');},700);
@@ -3509,8 +3467,6 @@ window.simulateMalware = function() {
         frame++;
         ctx.clearRect(0,0,w,h);
         ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
-
-        // Every 30 frames, try to spread infection
         if(frame%25===0){
             nodes.filter(n=>n.infected).forEach(infected=>{
                 nodes.filter(n=>!n.infected&&!n.infecting).forEach(target=>{
@@ -3526,8 +3482,6 @@ window.simulateMalware = function() {
                 });
             });
         }
-
-        // Draw connections
         nodes.forEach((n,i)=>{
             nodes.slice(i+1).forEach(m=>{
                 const d=Math.hypot(m.x-n.x,m.y-n.y);
@@ -3539,8 +3493,6 @@ window.simulateMalware = function() {
                 }
             });
         });
-
-        // Draw nodes
         nodes.forEach(node=>{
             const r=node.infected?10:node.infecting?8:6;
             const color=node.infected?'#ff3b3b':node.infecting?'#ffaa00':'#3b82f6';
@@ -3550,8 +3502,6 @@ window.simulateMalware = function() {
             ctx.strokeStyle=color; ctx.lineWidth=2; ctx.stroke();
             ctx.shadowBlur=0;
         });
-
-        // Legend
         [{color:'#ff3b3b',label:'Infected'},{color:'#ffaa00',label:'Infecting'},{color:'#3b82f6',label:'Clean'}].forEach((item,i)=>{
             ctx.beginPath(); ctx.arc(20,h-50+i*18,6,0,Math.PI*2);
             ctx.fillStyle=`${item.color}30`; ctx.fill();
@@ -3578,7 +3528,6 @@ window.simulateMalware = function() {
     state.simFrame=requestAnimationFrame(draw);
 };
 
-/* ─── 21. HONEYPOT ──────────────────────────────────────────────────────── */
 window.simulateHoneypot = function() {
     termLog('> Deploying honeypot decoy on network...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -3607,8 +3556,6 @@ window.simulateHoneypot = function() {
         frame++;
         ctx.clearRect(0,0,w,h);
         ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
-
-        // Real assets (protected)
         realAssets.forEach(asset=>{
             ctx.beginPath(); ctx.arc(asset.x,asset.y,20,0,Math.PI*2);
             ctx.fillStyle='rgba(57,255,20,0.08)'; ctx.fill();
@@ -3617,8 +3564,6 @@ window.simulateHoneypot = function() {
             ctx.fillText(asset.label,asset.x,asset.y+22);
             ctx.fillText('PROTECTED',asset.x,asset.y+33);
         });
-
-        // Honeypot (glowing)
         ctx.shadowBlur=20; ctx.shadowColor='#ffaa00';
         ctx.beginPath(); ctx.arc(honeypot.x,honeypot.y,28,0,Math.PI*2);
         ctx.fillStyle='rgba(255,170,0,0.15)'; ctx.fill();
@@ -3628,11 +3573,7 @@ window.simulateHoneypot = function() {
         ctx.fillText('🍯',honeypot.x,honeypot.y-5);
         ctx.font='8px monospace'; ctx.textBaseline='top';
         honeypot.label.split('\n').forEach((l,i)=>ctx.fillText(l,honeypot.x,honeypot.y+30+i*11));
-
-        // Spawn attackers
         if(frame%40===0&&attackers.length<12) spawnAttacker();
-
-        // Animate attackers toward honeypot
         attackers.forEach((att,idx)=>{
             att.p+=0.015;
             const px=att.x+(att.tx-att.x)*att.p, py=att.y+(att.ty-att.y)*att.p;
@@ -3646,8 +3587,6 @@ window.simulateHoneypot = function() {
                 if(connectionsLured===4)activateStep(4);
             }
         });
-
-        // Stats panel
         const pY=h-65;
         ctx.fillStyle='rgba(255,170,0,0.05)'; ctx.strokeStyle='rgba(255,170,0,0.15)'; ctx.lineWidth=1;
         ctx.beginPath(); ctx.roundRect(8,pY,w-16,55,4); ctx.fill(); ctx.stroke();
@@ -3670,7 +3609,6 @@ window.simulateHoneypot = function() {
     state.simFrame=requestAnimationFrame(draw);
 };
 
-/* ─── 22. REVERSE ENGINEERING ───────────────────────────────────────────── */
 window.simulateReverseEngineering = function() {
     termLog('> Loading binary target into Ghidra disassembler...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -3697,7 +3635,6 @@ window.simulateReverseEngineering = function() {
         ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
 
         const midX=(w/2)-5;
-        // Assembly panel (left)
         ctx.fillStyle='rgba(0,240,255,0.03)'; ctx.strokeStyle='rgba(0,240,255,0.12)'; ctx.lineWidth=1;
         ctx.beginPath(); ctx.roundRect(8,8,midX-8,h-16,6); ctx.fill(); ctx.stroke();
         ctx.fillStyle='#00f0ff'; ctx.font='bold 9px monospace'; ctx.textAlign='left';
@@ -3713,14 +3650,10 @@ window.simulateReverseEngineering = function() {
             ctx.fillText(`0x${(0x401100+i*7).toString(16).toUpperCase()}  ${line}`,16,ly);
             functionsAnalyzed=Math.max(functionsAnalyzed,i+1);
         });
-
-        // Strings panel (right)
         ctx.fillStyle='rgba(0,240,255,0.03)'; ctx.strokeStyle='rgba(0,240,255,0.12)'; ctx.lineWidth=1;
         ctx.beginPath(); ctx.roundRect(midX+8,8,w-midX-18,h-16,6); ctx.fill(); ctx.stroke();
         ctx.fillStyle='#00f0ff'; ctx.font='bold 9px monospace'; ctx.textAlign='left';
         ctx.fillText('STRINGS EXTRACTED',midX+16,22);
-
-        // Reveal strings
         if(frame%40===0&&foundStrings.length<strings.length){
             foundStrings.push(strings[foundStrings.length]);
             stringsExtracted++;
@@ -3751,7 +3684,6 @@ window.simulateReverseEngineering = function() {
     state.simFrame=requestAnimationFrame(draw);
 };
 
-/* ─── 23. ROOTKIT ───────────────────────────────────────────────────────── */
 window.simulateRootkit = function() {
     termLog('> Loading kernel module — rootkit installing...', 'error');
     const { canvas, ctx, w, h } = getCanvas();
@@ -3775,8 +3707,6 @@ window.simulateRootkit = function() {
         ctx.fillText('ROOTKIT — KERNEL SYSCALL HOOKING',w/2,22);
 
         const bW=Math.min(580,w-20), bX=(w-bW)/2;
-
-        // Syscall hook table
         ctx.fillStyle='#525c70'; ctx.font='bold 9px monospace'; ctx.textAlign='left';
         ctx.fillText('SYSTEM SERVICE DESCRIPTOR TABLE (SSDT):',bX+6,42);
 
@@ -3797,8 +3727,6 @@ window.simulateRootkit = function() {
             }
             ctx.textAlign='left';
         });
-
-        // Hidden processes
         if(frame>120){
             const procY=h-90;
             ctx.fillStyle='rgba(255,59,59,0.05)'; ctx.strokeStyle='rgba(255,59,59,0.15)'; ctx.lineWidth=1;
@@ -3832,7 +3760,6 @@ window.simulateRootkit = function() {
     state.simFrame=requestAnimationFrame(draw);
 };
 
-/* ─── 24. KEYLOGGER ─────────────────────────────────────────────────────── */
 window.simulateKeylogger = function() {
     termLog('> Keylogger injected via malware dropper...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -3861,8 +3788,6 @@ window.simulateKeylogger = function() {
         ctx.fillText('KEYLOGGER — KEYSTROKE CAPTURE IN PROGRESS',w/2,22);
 
         const bW=Math.min(580,w-20), bX=(w-bW)/2;
-
-        // Keyboard visualization
         const kbY=38;
         const keys='QWERTYUIOPASDFGHJKLZXCVBNM';
         const activeKey=keys[Math.floor(frame/4)%keys.length];
@@ -3879,8 +3804,6 @@ window.simulateKeylogger = function() {
             ctx.fillText(key,kx+12,ky+14);
             if(isActive)keysCaptured++;
         });
-
-        // Log display
         if(frame%55===0&&revealedSeqs.length<keySequences.length){
             revealedSeqs.push(keySequences[revealedSeqs.length]);
             sessionsLogged++;
@@ -3920,7 +3843,6 @@ window.simulateKeylogger = function() {
     state.simFrame=requestAnimationFrame(draw);
 };
 
-/* ─── 25. WATERING HOLE ─────────────────────────────────────────────────── */
 window.simulateWateringHole = function() {
     termLog('> APT actor profiling target organization...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -3947,23 +3869,17 @@ window.simulateWateringHole = function() {
         frame++;
         ctx.clearRect(0,0,w,h);
         ctx.fillStyle='rgba(6,10,19,0.97)'; ctx.fillRect(0,0,w,h);
-
-        // Attacker node
         ctx.shadowBlur=15; ctx.shadowColor='#ff3b3b';
         ctx.beginPath(); ctx.arc(attacker.x,attacker.y,18,0,Math.PI*2);
         ctx.fillStyle='rgba(255,59,59,0.15)'; ctx.fill();
         ctx.strokeStyle='#ff3b3b'; ctx.lineWidth=2; ctx.stroke(); ctx.shadowBlur=0;
         ctx.fillStyle='#ff3b3b'; ctx.font='bold 9px monospace'; ctx.textAlign='center'; ctx.textBaseline='top';
         ctx.fillText(attacker.label,attacker.x,attacker.y+20);
-
-        // Target org
         ctx.beginPath(); ctx.arc(org.x,org.y,22,0,Math.PI*2);
         ctx.fillStyle='rgba(59,130,246,0.12)'; ctx.fill();
         ctx.strokeStyle='#3b82f6'; ctx.lineWidth=2; ctx.stroke();
         ctx.fillStyle='#3b82f6'; ctx.font='bold 9px monospace'; ctx.textAlign='center'; ctx.textBaseline='top';
         ctx.fillText(org.label,org.x,org.y+24);
-
-        // Watering hole sites
         if(frame%80===0&&compromised.length<targetSites.length){
             compromised.push(targetSites[compromised.length]);
             sitesCompromised++;
@@ -3985,18 +3901,13 @@ window.simulateWateringHole = function() {
             ctx.fillStyle=isComp?'#8b5cf6':'#525c70'; ctx.font='8px monospace'; ctx.textAlign='center'; ctx.textBaseline='top';
             ctx.fillText(site.name,pos.x,pos.y+22); ctx.fillText(site.url,pos.x,pos.y+33);
             if(isComp)ctx.fillText('POISONED!',pos.x,pos.y+44);
-
-            // Line from attacker to site
             if(isComp){
                 ctx.beginPath(); ctx.setLineDash([4,4]); ctx.moveTo(attacker.x,attacker.y+18); ctx.lineTo(pos.x,pos.y-20);
                 ctx.strokeStyle='rgba(255,59,59,0.3)'; ctx.lineWidth=1; ctx.stroke(); ctx.setLineDash([]);
-                // Line from site to org
                 ctx.beginPath(); ctx.moveTo(pos.x,pos.y+20); ctx.lineTo(org.x,org.y-22);
                 ctx.strokeStyle='rgba(139,92,246,0.3)'; ctx.lineWidth=1; ctx.stroke();
             }
         });
-
-        // Victim particles
         if(frame>100&&frame%30===0&&sitesCompromised>0){
             const pos=positions[rndInt(0,Math.min(sitesCompromised,3))];
             flowParticles.push({x:pos.x,y:pos.y+20,tx:org.x,ty:org.y-22,p:0});
@@ -4030,7 +3941,6 @@ window.simulateWateringHole = function() {
     state.simFrame=requestAnimationFrame(draw);
 };
 
-/* ─── 26. EMAIL VIRUS ───────────────────────────────────────────────────── */
 window.simulateEmailVirus = function() {
     termLog('> Connecting to SMTP mail server...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -4060,8 +3970,6 @@ window.simulateEmailVirus = function() {
         frame++;
         ctx.clearRect(0, 0, w, h);
         ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
-
-        // Draw Workstation Host node in center-middle
         const hostX = w / 2, hostY = h * 0.55;
         ctx.shadowBlur = 10; ctx.shadowColor = filesInfected > 0 ? '#ff3b3b' : '#00f0ff';
         ctx.beginPath(); ctx.arc(hostX, hostY, 25, 0, Math.PI * 2);
@@ -4070,8 +3978,6 @@ window.simulateEmailVirus = function() {
         ctx.fillStyle = '#fff'; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center';
         ctx.fillText('HOST', hostX, hostY - 4);
         ctx.fillText('WORKSTATION', hostX, hostY + 6);
-
-        // Infecting Local files animation
         if (frame > 84 && frame < 132 && frame % 16 === 0) {
             const idx = Math.floor((frame - 85) / 16);
             if (localFiles[idx]) {
@@ -4080,8 +3986,6 @@ window.simulateEmailVirus = function() {
                 termLog(`> File infected: C:\\Windows\\System32\\${localFiles[idx].name}`, 'error');
             }
         }
-
-        // Draw local files
         localFiles.forEach(f => {
             const isInf = f.status === 'infected';
             ctx.fillStyle = isInf ? 'rgba(255, 59, 59, 0.2)' : 'rgba(255, 255, 255, 0.05)';
@@ -4089,20 +3993,15 @@ window.simulateEmailVirus = function() {
             ctx.beginPath(); ctx.roundRect(f.x - 30, f.y - 12, 60, 24, 4); ctx.fill(); ctx.stroke();
             ctx.fillStyle = isInf ? '#ff3b3b' : '#8892a8'; ctx.font = '9px monospace'; ctx.textAlign = 'center';
             ctx.fillText(f.name, f.x, f.y + 4);
-            // Draw link to host
             ctx.beginPath(); ctx.moveTo(f.x, f.y + 12); ctx.lineTo(hostX, hostY - 25);
             ctx.strokeStyle = isInf ? 'rgba(255, 59, 59, 0.3)' : 'rgba(255, 255, 255, 0.05)'; ctx.stroke();
         });
-
-        // Launch outbound emails
         if (frame > 180 && frame % 25 === 0 && emailsSent < 40) {
             const dest = contacts[rndInt(0, 4)];
             packets.push({ x: hostX, y: hostY, tx: dest.x, ty: dest.y, p: 0, target: dest });
             emailsSent++;
             mailLoad = Math.min(100, mailLoad + 8);
         }
-
-        // Draw contact nodes and packets
         contacts.forEach(c => {
             const isComp = c.status === 'compromised';
             ctx.beginPath(); ctx.arc(c.x, c.y, 8, 0, Math.PI * 2);
@@ -4148,7 +4047,6 @@ window.simulateEmailVirus = function() {
     state.simFrame = requestAnimationFrame(draw);
 };
 
-/* ─── 27. PARASITIC VIRUS ───────────────────────────────────────────────── */
 window.simulateParasiticVirus = function() {
     termLog('> Loading process execution analyzer...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -4174,8 +4072,6 @@ window.simulateParasiticVirus = function() {
 
         ctx.fillStyle = '#fff'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
         ctx.fillText('PARASITIC BINARY INJECTION SIMULATION', w / 2, 25);
-
-        // Animate scans and infections
         if (frame === 60) executables[0].inf = true; // infected initially
         if (frame > 90 && frame < 200 && frame % 1 === 0) {
             checked = Math.min(220, checked + 2);
@@ -4192,28 +4088,19 @@ window.simulateParasiticVirus = function() {
         }
 
         executables.forEach((ex, idx) => {
-            // Draw clean / infected file block structure
             const bx = ex.x - 45, by = ex.y - 60, bw = 90, bh = 120;
-            
-            // Outer block
             ctx.fillStyle = 'rgba(255, 255, 255, 0.02)';
             ctx.strokeStyle = ex.inf ? '#ff3b3b' : 'rgba(255, 255, 255, 0.1)';
             ctx.lineWidth = 1;
             ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 6); ctx.fill(); ctx.stroke();
-
-            // Label
             ctx.fillStyle = ex.inf ? '#ff3b3b' : '#8892a8'; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center';
             ctx.fillText(ex.name, ex.x, by - 8);
-
-            // Clean block segment (green/grey)
             ctx.fillStyle = 'rgba(0, 240, 255, 0.08)';
             ctx.strokeStyle = 'rgba(0, 240, 255, 0.2)';
             ctx.beginPath(); ctx.roundRect(bx + 6, by + 40, bw - 12, bh - 48, 4); ctx.fill(); ctx.stroke();
             ctx.fillStyle = '#525c70'; ctx.font = '8px monospace';
             ctx.fillText('Original Host', ex.x, by + 75);
             ctx.fillText('Code Segment', ex.x, by + 87);
-
-            // Virus block segment (red) at top (prepended)
             if (ex.inf) {
                 ctx.fillStyle = 'rgba(255, 59, 59, 0.2)';
                 ctx.strokeStyle = '#ff3b3b';
@@ -4221,18 +4108,12 @@ window.simulateParasiticVirus = function() {
                 ctx.fillStyle = '#ff3b3b'; ctx.font = 'bold 7px monospace';
                 ctx.fillText('VIRUS HEADER', ex.x, by + 20);
                 ctx.fillText('(Prepended Payload)', ex.x, by + 30);
-
-                // Draw entry point arrow going to virus first, then to clean code
                 ctx.beginPath(); ctx.moveTo(ex.x, by - 20); ctx.lineTo(ex.x, by + 8);
                 ctx.strokeStyle = '#ffaa00'; ctx.lineWidth = 2; ctx.stroke();
-                // Arrow tip
                 ctx.beginPath(); ctx.moveTo(ex.x - 3, by + 5); ctx.lineTo(ex.x, by + 8); ctx.lineTo(ex.x + 3, by + 5); ctx.stroke();
-
-                // Arrow from virus back to host
                 ctx.beginPath(); ctx.moveTo(ex.x, by + 34); ctx.lineTo(ex.x, by + 40);
                 ctx.strokeStyle = '#39ff14'; ctx.stroke();
             } else {
-                // Direct arrow clean entry
                 ctx.beginPath(); ctx.moveTo(ex.x, by - 20); ctx.lineTo(ex.x, by + 40);
                 ctx.strokeStyle = '#00f0ff'; ctx.lineWidth = 1; ctx.stroke();
             }
@@ -4258,7 +4139,6 @@ window.simulateParasiticVirus = function() {
     state.simFrame = requestAnimationFrame(draw);
 };
 
-/* ─── 28. MEMORY RESIDENT VIRUS ─────────────────────────────────────────── */
 window.simulateMemoryResidentVirus = function() {
     termLog('> Allocating process mapping sandbox...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -4292,8 +4172,6 @@ window.simulateMemoryResidentVirus = function() {
 
         ctx.fillStyle = '#fff'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
         ctx.fillText('SYSTEM RAM RESIDENCE & API INTERCEPTION', w / 2, 22);
-
-        // Infecting RAM blocks animation
         if (frame > 40 && frame < 90 && frame % 10 === 0) {
             const idx = Math.floor((frame - 41) / 10);
             if (memorySlots[idx]) {
@@ -4301,8 +4179,6 @@ window.simulateMemoryResidentVirus = function() {
                 memoryUsed = (idx + 1) * 8;
             }
         }
-
-        // Draw RAM grid
         ctx.fillStyle = '#525c70'; ctx.font = '8px monospace'; ctx.textAlign = 'left';
         ctx.fillText('SYSTEM RAM MATRIX', w * 0.15, h * 0.38);
 
@@ -4313,16 +4189,12 @@ window.simulateMemoryResidentVirus = function() {
             ctx.fillStyle = slot.infected ? '#fff' : '#525c70'; ctx.font = '7px monospace'; ctx.textAlign = 'center';
             ctx.fillText(slot.infected ? 'RES' : slot.label, slot.x + 15, slot.y + 12);
         });
-
-        // Hook arrows to interrupt vectors
         if (hooked > 0) {
             ctx.beginPath(); ctx.moveTo(w * 0.35, h * 0.55); ctx.lineTo(w * 0.65, h * 0.55);
             ctx.strokeStyle = '#ff3b3b'; ctx.lineWidth = 1.5; ctx.stroke();
             ctx.fillStyle = '#ff3b3b'; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'center';
             ctx.fillText('HOOKED VECTOR: INT 21h', w * 0.5, h * 0.53);
         }
-
-        // Pass files through file system call loop
         const apiX = w * 0.72, apiY = h * 0.6;
         ctx.fillStyle = 'rgba(0, 240, 255, 0.05)';
         ctx.strokeStyle = '#00f0ff';
@@ -4330,8 +4202,6 @@ window.simulateMemoryResidentVirus = function() {
         ctx.fillStyle = '#00f0ff'; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'center';
         ctx.fillText('File Open API', apiX, apiY - 5);
         ctx.fillText('(ReadFile)', apiX, apiY + 10);
-
-        // Animate files
         if (frame > 120 && frame % 60 === 0) {
             const fIdx = Math.floor((frame - 120) / 60) % files.length;
             files[fIdx].y = h * 0.15;
@@ -4341,7 +4211,6 @@ window.simulateMemoryResidentVirus = function() {
         files.forEach(f => {
             if (f.y >= h * 0.15 && f.y < h * 0.8) {
                 f.y += 2;
-                // Hook check
                 if (Math.abs(f.y - apiY) < 15) {
                     if (hooked > 0 && f.state === 'clean') {
                         f.state = 'infected';
@@ -4377,7 +4246,6 @@ window.simulateMemoryResidentVirus = function() {
     state.simFrame = requestAnimationFrame(draw);
 };
 
-/* ─── 29. BOOT SECTOR VIRUS ─────────────────────────────────────────────── */
 window.simulateBootSectorVirus = function() {
     termLog('> Loading Master Boot Record (MBR) analyzer...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -4398,22 +4266,16 @@ window.simulateBootSectorVirus = function() {
 
         ctx.fillStyle = '#fff'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
         ctx.fillText('MBR HIJACK & PRE-OS BOOT SEQUENCE', w / 2, 22);
-
-        // Nodes coordinates
         const biosX = w * 0.18, biosY = h * 0.5;
         const MBRX = w * 0.42, MBRY = h * 0.5;
         const ramX = w * 0.68, ramY = h * 0.35;
         const osX = w * 0.68, osY = h * 0.65;
-
-        // Draw BIOS Node
         ctx.fillStyle = 'rgba(255, 255, 255, 0.03)'; ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
         ctx.beginPath(); ctx.roundRect(biosX - 35, biosY - 20, 70, 40, 4); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#8892a8'; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center';
         ctx.fillText('BIOS', biosX, biosY - 4);
         ctx.fillStyle = '#39ff14'; ctx.font = '7px monospace';
         ctx.fillText('POST OK', biosX, biosY + 10);
-
-        // Draw MBR Sector 0 Node
         const isMBRBad = frame > 40;
         ctx.fillStyle = isMBRBad ? 'rgba(255, 59, 59, 0.1)' : 'rgba(0, 240, 255, 0.05)';
         ctx.strokeStyle = isMBRBad ? '#ff3b3b' : '#00f0ff';
@@ -4423,20 +4285,14 @@ window.simulateBootSectorVirus = function() {
         ctx.fillText('(MBR Boot)', MBRX, MBRY - 2);
         ctx.fillStyle = isMBRBad ? '#ff3b3b' : '#8892a8'; ctx.font = '8px monospace';
         ctx.fillText(isMBRBad ? '[POISONED]' : '[CLEAN]', MBRX, MBRY + 16);
-
-        // BIOS reads MBR
         if (frame > 20) {
             ctx.beginPath(); ctx.moveTo(biosX + 35, biosY); ctx.lineTo(MBRX - 45, MBRY);
             ctx.strokeStyle = isMBRBad ? '#ff3b3b' : '#00f0ff'; ctx.stroke();
             sectorReads = 1;
         }
-
-        // MBR copies to High Memory RAM
         if (frame > 60) {
             ctx.beginPath(); ctx.moveTo(MBRX + 45, MBRY - 10); ctx.lineTo(ramX - 45, ramY);
             ctx.strokeStyle = '#ff3b3b'; ctx.stroke();
-            
-            // Draw RAM Slot
             ctx.fillStyle = 'rgba(255, 59, 59, 0.2)'; ctx.strokeStyle = '#ff3b3b';
             ctx.beginPath(); ctx.roundRect(ramX - 45, ramY - 20, 90, 40, 4); ctx.fill(); ctx.stroke();
             ctx.fillStyle = '#ff3b3b'; ctx.font = 'bold 8px monospace';
@@ -4444,13 +4300,9 @@ window.simulateBootSectorVirus = function() {
             ctx.fillText('(Virus Active)', ramX, ramY + 10);
             MBRStatus = 'Corrupt';
         }
-
-        // MBR chain loads OS (from sector 14 copy)
         if (frame > 130) {
             ctx.beginPath(); ctx.moveTo(MBRX + 45, MBRY + 10); ctx.lineTo(osX - 45, osY);
             ctx.strokeStyle = '#39ff14'; ctx.stroke();
-            
-            // Draw OS Node
             ctx.fillStyle = 'rgba(57, 255, 20, 0.1)'; ctx.strokeStyle = '#39ff14';
             ctx.beginPath(); ctx.roundRect(osX - 45, osY - 20, 90, 40, 4); ctx.fill(); ctx.stroke();
             ctx.fillStyle = '#39ff14'; ctx.font = 'bold 9px monospace';
@@ -4459,8 +4311,6 @@ window.simulateBootSectorVirus = function() {
             ctx.fillText('BOOTED SUCCESS', osX, osY + 10);
             sectorReads = 2;
         }
-
-        // Virus in RAM intercepts system IO
         if (frame > 200) {
             ctx.beginPath(); ctx.setLineDash([3, 3]);
             ctx.moveTo(osX, osY - 20); ctx.lineTo(ramX, ramY + 20);
@@ -4489,7 +4339,6 @@ window.simulateBootSectorVirus = function() {
     state.simFrame = requestAnimationFrame(draw);
 };
 
-/* ─── 30. STEALTH VIRUS ─────────────────────────────────────────────────── */
 window.simulateStealthVirus = function() {
     termLog('> Spawning antivirus scanning monitor...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -4510,13 +4359,9 @@ window.simulateStealthVirus = function() {
 
         ctx.fillStyle = '#fff'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
         ctx.fillText('STEALTH VECTOR SPOOFING & I/O HOOKING', w / 2, 22);
-
-        // Core entities positions
         const avX = w * 0.18, avY = h * 0.45;
         const driverX = w * 0.5, driverY = h * 0.45;
         const diskX = w * 0.82, diskY = h * 0.45;
-
-        // Draw AV Scanner Node
         ctx.fillStyle = 'rgba(255, 255, 255, 0.02)'; ctx.strokeStyle = '#00f0ff';
         ctx.beginPath(); ctx.roundRect(avX - 45, avY - 40, 90, 80, 4); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#00f0ff'; ctx.font = 'bold 9px monospace';
@@ -4529,8 +4374,6 @@ window.simulateStealthVirus = function() {
         } else {
             ctx.fillText('Parsing disk...', avX, avY + 15);
         }
-
-        // Draw File System Driver (Kernel Call handler)
         const isHookActive = frame > 40;
         ctx.fillStyle = isHookActive ? 'rgba(255, 59, 59, 0.15)' : 'rgba(255, 255, 255, 0.03)';
         ctx.strokeStyle = isHookActive ? '#ff3b3b' : 'rgba(255, 255, 255, 0.1)';
@@ -4540,8 +4383,6 @@ window.simulateStealthVirus = function() {
         ctx.fillText('FILE SYSTEM I/O', driverX, driverY - 8);
         ctx.fillStyle = isHookActive ? '#ff3b3b' : '#525c70'; ctx.font = '7px monospace';
         ctx.fillText(isHookActive ? '[HOOK ACTIVE]' : '[SECURE]', driverX, driverY + 20);
-
-        // Draw Physical Disk File explorer.exe
         ctx.fillStyle = 'rgba(255, 59, 59, 0.1)'; ctx.strokeStyle = '#ff3b3b';
         ctx.beginPath(); ctx.roundRect(diskX - 45, diskY - 40, 90, 80, 4); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#ff3b3b'; ctx.font = 'bold 9px monospace';
@@ -4550,28 +4391,19 @@ window.simulateStealthVirus = function() {
         ctx.fillText('explorer.exe', diskX, diskY - 5);
         ctx.fillStyle = '#ff3b3b'; ctx.font = 'bold 7px monospace';
         ctx.fillText('INFECTED BYTES', diskX, diskY + 15);
-
-        // AV sends Read Request
         if (frame > 80) {
             ctx.beginPath(); ctx.moveTo(avX + 45, avY - 10); ctx.lineTo(driverX - 55, driverY - 10);
             ctx.strokeStyle = '#00f0ff'; ctx.stroke();
             ctx.fillStyle = '#00f0ff'; ctx.font = '7px monospace';
             ctx.fillText('ReadReq', (avX + driverX) / 2, avY - 15);
         }
-
-        // Kernel Hook Interception
         if (frame > 140) {
-            // Instead of reading the infected disk directly, hook triggers and reads a clean cache block
             ctx.fillStyle = 'rgba(57, 255, 20, 0.08)'; ctx.strokeStyle = '#39ff14';
             ctx.beginPath(); ctx.roundRect(driverX - 45, driverY + 55, 90, 24, 3); ctx.fill(); ctx.stroke();
             ctx.fillStyle = '#39ff14'; ctx.font = 'bold 7px monospace';
             ctx.fillText('CLEAN FILE CACHE', driverX, driverY + 68);
-
-            // Arrow to cache
             ctx.beginPath(); ctx.moveTo(driverX, driverY + 40); ctx.lineTo(driverX, driverY + 55);
             ctx.strokeStyle = '#39ff14'; ctx.stroke();
-
-            // Arrow from cache back to AV
             ctx.beginPath(); ctx.moveTo(driverX - 45, driverY + 65); ctx.lineTo(avX, avY + 40);
             ctx.strokeStyle = '#39ff14'; ctx.stroke();
             ctx.fillStyle = '#39ff14'; ctx.font = '7px monospace';
@@ -4598,7 +4430,6 @@ window.simulateStealthVirus = function() {
     state.simFrame = requestAnimationFrame(draw);
 };
 
-/* ─── 31. POLYMORPHIC VIRUS ─────────────────────────────────────────────── */
 window.simulatePolymorphicVirus = function() {
     termLog('> Loading signature analyzer and emulated sandbox...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -4624,8 +4455,6 @@ window.simulatePolymorphicVirus = function() {
 
         ctx.fillStyle = '#fff'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
         ctx.fillText('POLYMORPHIC MUTATION & SANDBOX DECRYPTION', w / 2, 22);
-
-        // Original Payload Box
         const pX = w * 0.18, pY = h * 0.45;
         ctx.fillStyle = 'rgba(255, 59, 59, 0.15)'; ctx.strokeStyle = '#ff3b3b';
         ctx.beginPath(); ctx.roundRect(pX - 45, pY - 40, 90, 80, 4); ctx.fill(); ctx.stroke();
@@ -4634,8 +4463,6 @@ window.simulatePolymorphicVirus = function() {
         ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
         ctx.fillText('Static instructions', pX, pY - 5);
         ctx.fillText('Signature: [A3 B9 22]', pX, pY + 15);
-
-        // Polymorphic engine
         const engX = w * 0.5, engY = h * 0.45;
         ctx.fillStyle = 'rgba(255, 255, 255, 0.02)'; ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
         ctx.beginPath(); ctx.roundRect(engX - 55, engY - 40, 110, 80, 4); ctx.fill(); ctx.stroke();
@@ -4649,12 +4476,8 @@ window.simulatePolymorphicVirus = function() {
             keys = frame > 140 ? 2 : 1;
             stubs = keys;
         }
-
-        // Link payload to engine
         ctx.beginPath(); ctx.moveTo(pX + 45, pY); ctx.lineTo(engX - 55, engY);
         ctx.strokeStyle = '#ff3b3b'; ctx.stroke();
-
-        // Mutated outputs
         replicationFiles.forEach((file, idx) => {
             const fx = w * 0.8, fy = h * 0.25 + idx * 75;
             const activeInfect = frame > 80 + idx * 60;
@@ -4680,8 +4503,6 @@ window.simulatePolymorphicVirus = function() {
                 ctx.strokeStyle = file.color; ctx.stroke();
             }
         });
-
-        // Sandbox emulator captures it
         if (frame > 280) {
             ctx.strokeStyle = '#39ff14'; ctx.lineWidth = 1.5;
             ctx.strokeRect(w * 0.7, h * 0.15, w * 0.25, h * 0.7);
@@ -4711,7 +4532,6 @@ window.simulatePolymorphicVirus = function() {
     state.simFrame = requestAnimationFrame(draw);
 };
 
-/* ─── 32. METAMORPHIC VIRUS ─────────────────────────────────────────────── */
 window.simulateMetamorphicVirus = function() {
     termLog('> Spawning disassembler and rewriting engines...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -4732,8 +4552,6 @@ window.simulateMetamorphicVirus = function() {
 
         ctx.fillStyle = '#fff'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
         ctx.fillText('METAMORPHIC CODE REWRITING & REASSEMBLY', w / 2, 22);
-
-        // Assembly window A (Original)
         const aX = w * 0.22, aY = h * 0.52, aW = 140, aH = 140;
         ctx.fillStyle = 'rgba(255, 255, 255, 0.02)'; ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
         ctx.beginPath(); ctx.roundRect(aX - aW / 2, aY - aH / 2, aW, aH, 4); ctx.fill(); ctx.stroke();
@@ -4745,8 +4563,6 @@ window.simulateMetamorphicVirus = function() {
         ctx.fillText('3:  MOV [EBX], EAX', aX - aW / 2 + 10, aY);
         ctx.fillText('4:  JMP short 0x12', aX - aW / 2 + 10, aY + 20);
         ctx.fillText('5:  RET', aX - aW / 2 + 10, aY + 40);
-
-        // Rewrite Engine
         const eX = w * 0.5, eY = h * 0.5;
         ctx.fillStyle = 'rgba(255, 255, 255, 0.02)'; ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
         ctx.beginPath(); ctx.arc(eX, eY, 32, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
@@ -4757,8 +4573,6 @@ window.simulateMetamorphicVirus = function() {
             ctx.beginPath(); ctx.arc(eX, eY, 36, -Math.PI / 2, -Math.PI / 2 + (frame % 100 / 100) * Math.PI * 2);
             ctx.strokeStyle = '#ffaa00'; ctx.lineWidth = 2; ctx.stroke();
         }
-
-        // Assembly window B (Morphed)
         const bX = w * 0.78, bY = h * 0.52, bW = 140, bH = 140;
         ctx.fillStyle = 'rgba(255, 59, 59, 0.04)'; ctx.strokeStyle = frame > 120 ? '#ff3b3b' : 'rgba(255, 255, 255, 0.1)';
         ctx.beginPath(); ctx.roundRect(bX - bW / 2, bY - bH / 2, bW, bH, 4); ctx.fill(); ctx.stroke();
@@ -4777,8 +4591,6 @@ window.simulateMetamorphicVirus = function() {
         } else {
             ctx.fillText('Pending reassembly...', bX - bW / 2 + 10, bY);
         }
-
-        // Connecting lines
         if (frame > 30) {
             ctx.beginPath(); ctx.moveTo(aX + aW / 2, aY); ctx.lineTo(eX - 32, eY);
             ctx.strokeStyle = '#ffaa00'; ctx.lineWidth = 1; ctx.stroke();
@@ -4808,7 +4620,6 @@ window.simulateMetamorphicVirus = function() {
     state.simFrame = requestAnimationFrame(draw);
 };
 
-/* ─── 33. NETWORK WORM ──────────────────────────────────────────────────── */
 window.simulateWormGeneral = function() {
     termLog('> Scanning local subnet ranges...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -4838,16 +4649,12 @@ window.simulateWormGeneral = function() {
 
         ctx.fillStyle = '#fff'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
         ctx.fillText('WORM NETWORK REPLICATION & LATERAL MOVEMENT', w / 2, 22);
-
-        // Draw network connection lines
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)'; ctx.lineWidth = 1;
         for (let i = 0; i < nodes.length; i++) {
             for (let j = i + 1; j < nodes.length; j++) {
                 ctx.beginPath(); ctx.moveTo(nodes[i].x, nodes[i].y); ctx.lineTo(nodes[j].x, nodes[j].y); ctx.stroke();
             }
         }
-
-        // Scanning phase
         if (frame > 40 && frame % 12 === 0) {
             const infNodes = nodes.filter(n => n.status === 'infected');
             const cleanNodes = nodes.filter(n => n.status === 'clean');
@@ -4859,8 +4666,6 @@ window.simulateWormGeneral = function() {
                 traffic = Math.min(100, traffic + 1.5);
             }
         }
-
-        // Exploitation & infection phase
         if (frame === 140) {
             const target = nodes[1]; // Host B
             packets.push({ x: nodes[0].x, y: nodes[0].y, tx: target.x, ty: target.y, p: 0, target: target, type: 'exploit' });
@@ -4876,8 +4681,6 @@ window.simulateWormGeneral = function() {
             packets.push({ x: nodes[3].x, y: nodes[3].y, tx: target.x, ty: target.y, p: 0, target: target, type: 'exploit' });
             exploits++;
         }
-
-        // Draw packets
         packets.forEach(p => {
             p.p += 0.035;
             const px = p.x + (p.tx - p.x) * p.p;
@@ -4897,8 +4700,6 @@ window.simulateWormGeneral = function() {
         for (let i = packets.length - 1; i >= 0; i--) {
             if (packets[i].dead) packets.splice(i, 1);
         }
-
-        // Draw nodes
         nodes.forEach(n => {
             const isInfected = n.status === 'infected';
             ctx.shadowBlur = isInfected ? 12 : 0; ctx.shadowColor = '#ffaa00';
@@ -4931,7 +4732,6 @@ window.simulateWormGeneral = function() {
     state.simFrame = requestAnimationFrame(draw);
 };
 
-/* ─── 34. EMAIL WORM ────────────────────────────────────────────────────── */
 window.simulateEmailWorm = function() {
     termLog('> Initializing Outlook MAPI connectors...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -4958,13 +4758,9 @@ window.simulateEmailWorm = function() {
 
         ctx.fillStyle = '#fff'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
         ctx.fillText('SMTP BROADCAST & TARGET INBOX MULTIPLICATION', w / 2, 22);
-
-        // Core entities positions
         const hostX = w * 0.18, hostY = h * 0.5;
         const smtpX = w * 0.5, smtpY = h * 0.5;
         const targetX = w * 0.82;
-
-        // Draw Local Infected Host Node
         ctx.fillStyle = 'rgba(255, 170, 0, 0.15)'; ctx.strokeStyle = '#ffaa00';
         ctx.beginPath(); ctx.roundRect(hostX - 45, hostY - 40, 90, 80, 4); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#ffaa00'; ctx.font = 'bold 9px monospace';
@@ -4972,8 +4768,6 @@ window.simulateEmailWorm = function() {
         ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
         ctx.fillText('Outlook client', hostX, hostY - 5);
         ctx.fillText('Worm: active', hostX, hostY + 15);
-
-        // Draw SMTP server Node
         ctx.fillStyle = 'rgba(255, 255, 255, 0.02)'; ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
         ctx.beginPath(); ctx.roundRect(smtpX - 45, smtpY - 40, 90, 80, 4); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#fff'; ctx.font = 'bold 9px monospace';
@@ -4982,21 +4776,15 @@ window.simulateEmailWorm = function() {
         ctx.fillText('mail.corp.com', smtpX, smtpY - 5);
         ctx.fillStyle = connections > 0 ? '#39ff14' : '#525c70'; ctx.font = 'bold 7px monospace';
         ctx.fillText(connections > 0 ? '[PORT 25 OPEN]' : '[STANDBY]', smtpX, smtpY + 15);
-
-        // Sending letters from host to server
         if (frame > 60 && frame % 15 === 0 && dispatched < 60) {
             mails.push({ x: hostX + 45, y: hostY, tx: smtpX - 45, ty: smtpY, p: 0, type: 'to-server' });
             dispatched++;
         }
-
-        // Sending from server to targets
         if (frame > 140 && frame % 20 === 0) {
             const destIdx = Math.floor(frame / 20) % inboxList.length;
             const destY = h * 0.25 + destIdx * 75;
             mails.push({ x: smtpX + 45, y: smtpY, tx: targetX - 50, ty: destY, p: 0, type: 'to-target', target: inboxList[destIdx] });
         }
-
-        // Draw mails
         mails.forEach(m => {
             m.p += 0.035;
             const mx = m.x + (m.tx - m.x) * m.p;
@@ -5016,8 +4804,6 @@ window.simulateEmailWorm = function() {
         for (let i = mails.length - 1; i >= 0; i--) {
             if (mails[i].dead) mails.splice(i, 1);
         }
-
-        // Draw target inbox nodes
         inboxList.forEach((inb, idx) => {
             const ty = h * 0.25 + idx * 75;
             const isInf = inb.status === 'infected';
@@ -5051,7 +4837,6 @@ window.simulateEmailWorm = function() {
     state.simFrame = requestAnimationFrame(draw);
 };
 
-/* ─── 35. TROJAN DISGUISE ────────────────────────────────────────────────── */
 window.simulateTrojanGeneral = function() {
     termLog('> Packaging wrapper payload installer...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -5072,8 +4857,6 @@ window.simulateTrojanGeneral = function() {
 
         ctx.fillStyle = '#fff'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
         ctx.fillText('WRAPPER INSTALLATION & VISUAL DISGUISE', w / 2, 22);
-
-        // Disguise installer frame
         const instX = w * 0.15, instY = h * 0.35, instW = 120, instH = 80;
         ctx.fillStyle = 'rgba(255, 255, 255, 0.02)'; ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
         ctx.beginPath(); ctx.roundRect(instX, instY, instW, instH, 4); ctx.fill(); ctx.stroke();
@@ -5084,8 +4867,6 @@ window.simulateTrojanGeneral = function() {
         ctx.fillText('Signer: Unverified', instX + 8, instY + 48);
         ctx.fillStyle = '#00f0ff'; ctx.font = 'bold 7px monospace';
         ctx.fillText('[DISGUISE: PDF APP]', instX + 8, instY + 68);
-
-        // Normal Front-end Process (User visual)
         const uiX = w * 0.46, uiY = h * 0.28, uiW = 120, uiH = 90;
         const isUiRunning = frame > 80;
         ctx.fillStyle = isUiRunning ? 'rgba(57, 255, 20, 0.05)' : 'rgba(255, 255, 255, 0.01)';
@@ -5102,14 +4883,10 @@ window.simulateTrojanGeneral = function() {
         } else {
             ctx.fillText('Waiting for wrapper...', uiX + 8, uiY + 34);
         }
-
-        // Execution arrow
         if (isUiRunning) {
             ctx.beginPath(); ctx.moveTo(instX + instW, instY + instH / 2); ctx.lineTo(uiX, uiY + uiH / 2);
             ctx.strokeStyle = '#00f0ff'; ctx.stroke();
         }
-
-        // Hidden Back-end Process (Malicious thread)
         const malX = w * 0.72, malY = h * 0.52, malW = 120, malH = 90;
         const isMalRunning = frame > 130;
         ctx.fillStyle = isMalRunning ? 'rgba(255, 59, 59, 0.12)' : 'rgba(255, 255, 255, 0.01)';
@@ -5152,7 +4929,6 @@ window.simulateTrojanGeneral = function() {
     state.simFrame = requestAnimationFrame(draw);
 };
 
-/* ─── 36. PASSIVE TROJAN ────────────────────────────────────────────────── */
 window.simulatePassiveTrojan = function() {
     termLog('> Binding listener network sockets...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -5173,13 +4949,9 @@ window.simulatePassiveTrojan = function() {
 
         ctx.fillStyle = '#fff'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
         ctx.fillText('PASSIVE BACKDOOR PORT LISTENER & SHELL BIND', w / 2, 22);
-
-        // Draw Firewall Wall in center-middle
         const fX = w * 0.52, fY = h * 0.55;
         ctx.fillStyle = 'rgba(255, 255, 255, 0.01)'; ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
         ctx.beginPath(); ctx.fillRect(fX - 4, h * 0.2, 8, h * 0.6);
-
-        // Draw firewall gate representing Port 9999
         const gateActive = frame > 90;
         ctx.fillStyle = gateActive ? 'rgba(57, 255, 20, 0.15)' : 'rgba(255, 59, 59, 0.2)';
         ctx.strokeStyle = gateActive ? '#39ff14' : '#ff3b3b';
@@ -5189,8 +4961,6 @@ window.simulatePassiveTrojan = function() {
         ctx.fillText('PORT', fX, fY - 6);
         ctx.fillText('9999', fX, fY + 4);
         ctx.fillText(gateActive ? '[OPEN]' : '[BLOCKED]', fX, fY + 14);
-
-        // Draw Victim PC (host) behind firewall
         const hostX = w * 0.76, hostY = h * 0.5;
         const isListening = frame > 40;
         ctx.fillStyle = isListening ? 'rgba(255, 59, 59, 0.1)' : 'rgba(255, 255, 255, 0.02)';
@@ -5201,8 +4971,6 @@ window.simulatePassiveTrojan = function() {
         ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
         ctx.fillText(isListening ? 'netstat: LISTEN' : 'Standby', hostX, hostY);
         ctx.fillText('Egress: 0 packets', hostX, hostY + 15);
-
-        // Draw Attacker PC outside firewall
         const attX = w * 0.22, attY = h * 0.5;
         ctx.fillStyle = 'rgba(255, 255, 255, 0.02)'; ctx.strokeStyle = '#8b5cf6';
         ctx.beginPath(); ctx.roundRect(attX - 45, attY - 40, 90, 80, 4); ctx.fill(); ctx.stroke();
@@ -5210,8 +4978,6 @@ window.simulatePassiveTrojan = function() {
         ctx.fillText('ATTACKER PC', attX, attY - 20);
         ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
         ctx.fillText('nmap scan...', attX, attY);
-
-        // Attacker connecting inbound
         if (frame > 220) {
             ctx.beginPath(); ctx.moveTo(attX + 45, attY); ctx.lineTo(fX - 15, fY);
             ctx.strokeStyle = '#8b5cf6'; ctx.lineWidth = 1.5; ctx.stroke();
@@ -5247,7 +5013,6 @@ window.simulatePassiveTrojan = function() {
     state.simFrame = requestAnimationFrame(draw);
 };
 
-/* ─── 37. ACTIVE TROJAN ─────────────────────────────────────────────────── */
 window.simulateActiveTrojan = function() {
     termLog('> Registering startup persistence handlers...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -5269,13 +5034,9 @@ window.simulateActiveTrojan = function() {
 
         ctx.fillStyle = '#fff'; ctx.font = 'bold 11px monospace'; ctx.textAlign = 'center';
         ctx.fillText('ACTIVE REVERSE SHELL TUNNELING & BEACONING', w / 2, 22);
-
-        // Core entities positions
         const hostX = w * 0.18, hostY = h * 0.5;
         const fX = w * 0.48, fY = h * 0.5;
         const c2X = w * 0.82, c2Y = h * 0.5;
-
-        // Draw Infected Host PC Node
         ctx.fillStyle = 'rgba(255, 59, 59, 0.12)'; ctx.strokeStyle = '#ff3b3b';
         ctx.beginPath(); ctx.roundRect(hostX - 45, hostY - 40, 90, 80, 4); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#ff3b3b'; ctx.font = 'bold 9px monospace';
@@ -5283,24 +5044,16 @@ window.simulateActiveTrojan = function() {
         ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
         ctx.fillText('Agent: beaconing', hostX, hostY - 5);
         ctx.fillText('Internal network', hostX, hostY + 15);
-
-        // Draw Outbound Firewall Wall
         ctx.fillStyle = 'rgba(255, 255, 255, 0.01)'; ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
         ctx.beginPath(); ctx.fillRect(fX - 4, h * 0.2, 8, h * 0.6);
-
-        // Inbound block sign on firewall
         ctx.fillStyle = 'rgba(255, 59, 59, 0.1)'; ctx.strokeStyle = '#ff3b3b';
         ctx.beginPath(); ctx.arc(fX, fY - 50, 12, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#ff3b3b'; ctx.font = 'bold 7px monospace'; ctx.textAlign = 'center';
         ctx.fillText('IN', fX, fY - 52); ctx.fillText('BLOCKED', fX, fY - 43);
-
-        // Outbound permit sign on firewall (Port 443 open)
         ctx.fillStyle = 'rgba(57, 255, 20, 0.1)'; ctx.strokeStyle = '#39ff14';
         ctx.beginPath(); ctx.arc(fX, fY + 50, 12, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#39ff14'; ctx.font = 'bold 7px monospace';
         ctx.fillText('OUT', fX, fY + 48); ctx.fillText('OK', fX, fY + 57);
-
-        // Draw Attacker C2 Server Node
         const isC2Linked = frame > 120;
         ctx.fillStyle = isC2Linked ? 'rgba(139, 92, 246, 0.15)' : 'rgba(255, 255, 255, 0.02)';
         ctx.strokeStyle = isC2Linked ? '#8b5cf6' : 'rgba(255, 255, 255, 0.1)';
@@ -5311,8 +5064,6 @@ window.simulateActiveTrojan = function() {
         ctx.fillText('attacker-dns.org', c2X, c2Y - 5);
         ctx.fillStyle = isC2Linked ? '#39ff14' : '#525c70'; ctx.font = 'bold 7px monospace';
         ctx.fillText(isC2Linked ? '[TUNNEL OPEN]' : '[OFFLINE]', c2X, c2Y + 15);
-
-        // Active Beacon pulses outbound from host
         if (frame > 80 && frame % 40 === 0 && beacons.length < 8) {
             beacons.push({ x: hostX + 45, y: hostY, tx: c2X - 45, ty: c2Y, p: 0 });
             heartbeats++;
@@ -5333,8 +5084,6 @@ window.simulateActiveTrojan = function() {
         for (let i = beacons.length - 1; i >= 0; i--) {
             if (beacons[i].dead) beacons.splice(i, 1);
         }
-
-        // Connection line overlay
         if (isC2Linked) {
             ctx.beginPath(); ctx.moveTo(hostX + 45, hostY); ctx.lineTo(c2X - 45, c2Y);
             ctx.strokeStyle = 'rgba(57, 255, 20, 0.25)'; ctx.lineWidth = 1.5; ctx.stroke();
@@ -5360,7 +5109,6 @@ window.simulateActiveTrojan = function() {
     state.simFrame = requestAnimationFrame(draw);
 };
 
-/* ─── 38. DoS (DENIAL OF SERVICE — SINGLE SOURCE) ──────────────────────── */
 window.simulateDoS = function() {
     termLog('> Initiating single-source SYN flood attack...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -5373,8 +5121,6 @@ window.simulateDoS = function() {
     const packets = [];
     const halfOpenSlots = [];
     const maxSlots = 18;
-
-    // Pre-build half-open connection slot positions (arc around server)
     for (let i = 0; i < maxSlots; i++) {
         const angle = -Math.PI / 2 + (i / maxSlots) * Math.PI * 2;
         halfOpenSlots.push({ angle, x: serverX + Math.cos(angle) * (serverR + 28), y: serverY + Math.sin(angle) * (serverR + 28), active: false, age: 0 });
@@ -5389,14 +5135,10 @@ window.simulateDoS = function() {
         if (!state.simRunning) return;
         frame++;
         ctx.clearRect(0, 0, w, h);
-
-        // Background gradient
         const bg = ctx.createRadialGradient(serverX, serverY, 0, serverX, serverY, Math.min(w, h) / 1.5);
         bg.addColorStop(0, `rgba(40, 12, 5, ${Math.min(0.85, frame / 300)})`);
         bg.addColorStop(1, 'rgba(6, 10, 19, 0)');
         ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
-
-        // ── Attacker Machine ──
         ctx.fillStyle = 'rgba(255, 107, 53, 0.12)'; ctx.strokeStyle = '#ff6b35';
         ctx.lineWidth = 1.5;
         ctx.beginPath(); ctx.roundRect(attackerX - 40, attackerY - 35, 80, 70, 6); ctx.fill(); ctx.stroke();
@@ -5406,18 +5148,13 @@ window.simulateDoS = function() {
         ctx.fillText('192.168.1.66', attackerX, attackerY - 4);
         ctx.fillStyle = '#ff6b35'; ctx.font = 'bold 8px monospace';
         ctx.fillText('[ FLOODING ]', attackerX, attackerY + 14);
-        // Pulse ring
         const pulseR = 40 + Math.sin(frame * 0.1) * 6;
         ctx.beginPath(); ctx.arc(attackerX, attackerY, pulseR, 0, Math.PI * 2);
         ctx.strokeStyle = `rgba(255, 107, 53, ${0.15 + Math.sin(frame * 0.1) * 0.1})`; ctx.lineWidth = 1; ctx.stroke();
-
-        // ── Target Server ──
         const hc = serverHealth > 60 ? '#39ff14' : serverHealth > 25 ? '#ffaa00' : '#ff3b3b';
-        // Health arc
         ctx.beginPath();
         ctx.arc(serverX, serverY, serverR + 10, -Math.PI / 2, -Math.PI / 2 + (serverHealth / 100) * Math.PI * 2);
         ctx.strokeStyle = hc; ctx.lineWidth = 3; ctx.stroke();
-        // Server body
         ctx.beginPath(); ctx.arc(serverX, serverY, serverR, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(255, 107, 53, ${0.08 + (1 - serverHealth / 100) * 0.25})`; ctx.fill();
         ctx.strokeStyle = hc; ctx.lineWidth = 2; ctx.stroke();
@@ -5425,8 +5162,6 @@ window.simulateDoS = function() {
         ctx.fillText('SERVER', serverX, serverY - 8);
         ctx.fillStyle = hc; ctx.font = 'bold 9px monospace';
         ctx.fillText(`${Math.round(serverHealth)}%`, serverX, serverY + 8);
-
-        // ── Half-open connection slots (ring around server) ──
         halfOpenSlots.forEach((slot, i) => {
             if (slot.active) {
                 slot.age++;
@@ -5434,7 +5169,6 @@ window.simulateDoS = function() {
                 ctx.beginPath(); ctx.arc(slot.x, slot.y, 5, 0, Math.PI * 2);
                 ctx.fillStyle = `rgba(255, 170, 0, ${flicker * 0.8})`; ctx.fill();
                 ctx.strokeStyle = `rgba(255, 170, 0, ${flicker * 0.5})`; ctx.lineWidth = 0.5; ctx.stroke();
-                // Connecting line to server
                 ctx.beginPath(); ctx.moveTo(slot.x, slot.y); ctx.lineTo(serverX, serverY);
                 ctx.strokeStyle = `rgba(255, 170, 0, ${flicker * 0.15})`; ctx.lineWidth = 0.5; ctx.stroke();
             } else {
@@ -5442,15 +5176,11 @@ window.simulateDoS = function() {
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.06)'; ctx.fill();
             }
         });
-
-        // ── Fire SYN packets ──
         if (frame > 30 && frame % 3 === 0) {
             const jitterY = rnd(-30, 30);
             packets.push({ x: attackerX + 40, y: attackerY + jitterY, progress: 0, size: rnd(2, 4.5) });
             synPerSec++;
         }
-
-        // ── Draw & advance packets ──
         for (let i = packets.length - 1; i >= 0; i--) {
             const pkt = packets[i];
             pkt.progress += 0.025;
@@ -5459,29 +5189,23 @@ window.simulateDoS = function() {
             const alpha = 1 - pkt.progress;
             ctx.beginPath(); ctx.arc(px, py, pkt.size * (1 - pkt.progress * 0.4), 0, Math.PI * 2);
             ctx.fillStyle = `rgba(255, 107, 53, ${alpha})`; ctx.fill();
-            // Label on first few
             if (i % 8 === 0 && pkt.progress < 0.3) {
                 ctx.fillStyle = `rgba(255, 107, 53, ${alpha * 0.6})`; ctx.font = '6px monospace'; ctx.textAlign = 'left';
                 ctx.fillText('SYN', px + 6, py - 3);
             }
             if (pkt.progress >= 1) {
                 packets.splice(i, 1);
-                // Fill a half-open slot
                 const freeSlot = halfOpenSlots.find(s => !s.active);
                 if (freeSlot) { freeSlot.active = true; freeSlot.age = 0; halfOpen++; }
                 serverHealth = Math.max(0, serverHealth - 0.12);
                 serverMem = Math.min(100, 100 - serverHealth);
             }
         }
-
-        // ── Connection label ──
         const midX = (attackerX + serverX) / 2, midY = h * 0.22;
         ctx.fillStyle = 'rgba(255, 107, 53, 0.7)'; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center';
         ctx.fillText('TCP SYN FLOOD — SINGLE SOURCE', midX, midY);
         ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '7px monospace';
         ctx.fillText('No ACK returned → half-open connections pile up', midX, midY + 14);
-
-        // ── Update live stats ──
         if (frame % 20 === 0) {
             const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
             if (e0) e0.textContent = (synPerSec * 600).toLocaleString();
@@ -5507,7 +5231,6 @@ window.simulateDoS = function() {
     state.simFrame = requestAnimationFrame(draw);
 };
 
-/* ─── 39. IP SPOOFING ───────────────────────────────────────────────────── */
 window.simulateIPSpoofing = function() {
     termLog('> Scanning target network for trusted host relationships...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -5532,15 +5255,9 @@ window.simulateIPSpoofing = function() {
         if (!state.simRunning) return;
         frame++;
         ctx.clearRect(0, 0, w, h);
-
-        // Background
         ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
-
-        // Title
         ctx.fillStyle = '#fff'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
         ctx.fillText('IP SPOOFING — PACKET HEADER FORGERY', w / 2, 18);
-
-        // ── Trusted Host (faded, being impersonated) ──
         ctx.fillStyle = 'rgba(57, 255, 20, 0.06)'; ctx.strokeStyle = 'rgba(57, 255, 20, 0.3)';
         ctx.lineWidth = 1;
         ctx.beginPath(); ctx.roundRect(trustedX - 38, trustedY - 28, 76, 56, 4); ctx.fill(); ctx.stroke();
@@ -5550,14 +5267,10 @@ window.simulateIPSpoofing = function() {
         ctx.fillText(spoofedIP, trustedX, trustedY + 2);
         ctx.fillStyle = 'rgba(57, 255, 20, 0.5)'; ctx.font = '7px monospace';
         ctx.fillText('(Impersonated)', trustedX, trustedY + 16);
-
-        // Dashed line from attacker to trusted host label (spoofing link)
         ctx.setLineDash([3, 4]);
         ctx.beginPath(); ctx.moveTo(attackerX, attackerY - 35); ctx.lineTo(trustedX, trustedY + 28);
         ctx.strokeStyle = 'rgba(224, 64, 251, 0.25)'; ctx.lineWidth = 1; ctx.stroke();
         ctx.setLineDash([]);
-
-        // ── Attacker ──
         ctx.fillStyle = 'rgba(224, 64, 251, 0.12)'; ctx.strokeStyle = '#e040fb';
         ctx.lineWidth = 1.5;
         ctx.beginPath(); ctx.roundRect(attackerX - 42, attackerY - 35, 84, 70, 5); ctx.fill(); ctx.stroke();
@@ -5567,7 +5280,6 @@ window.simulateIPSpoofing = function() {
         ctx.fillText(`Real: ${realIP}`, attackerX, attackerY - 4);
         ctx.fillStyle = '#e040fb'; ctx.font = 'bold 7px monospace';
         ctx.fillText(`Spoofs: ${spoofedIP}`, attackerX, attackerY + 10);
-        // Packet forge indicator
         if (frame > 60) {
             const blink = Math.sin(frame * 0.12) > 0;
             if (blink) {
@@ -5575,8 +5287,6 @@ window.simulateIPSpoofing = function() {
                 ctx.fillText('[ FORGING HEADERS ]', attackerX, attackerY + 26);
             }
         }
-
-        // ── Firewall ──
         const fwColor = firewallBypassed ? 'rgba(255, 59, 59, 0.6)' : 'rgba(57, 255, 20, 0.4)';
         ctx.fillStyle = 'rgba(255, 255, 255, 0.02)';
         ctx.strokeStyle = fwColor;
@@ -5587,14 +5297,10 @@ window.simulateIPSpoofing = function() {
         ctx.fillText('FIREWALL', firewallX, h * 0.11);
         ctx.fillStyle = firewallBypassed ? '#ff3b3b' : '#39ff14'; ctx.font = '7px monospace';
         ctx.fillText(firewallBypassed ? 'BYPASSED' : 'ACL ACTIVE', firewallX, h * 0.88);
-
-        // IP whitelist on firewall
         ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '6px monospace';
         ctx.fillText('Whitelist:', firewallX, h * 0.28);
         ctx.fillStyle = '#39ff14';
         ctx.fillText(spoofedIP, firewallX, h * 0.33);
-
-        // ── Target Server ──
         const serverTrust = Math.min(100, trustLevel);
         const sc = serverTrust > 70 ? '#ff3b3b' : serverTrust > 30 ? '#ffaa00' : '#39ff14';
         ctx.fillStyle = 'rgba(0, 200, 255, 0.08)'; ctx.strokeStyle = '#00c8ff';
@@ -5604,15 +5310,12 @@ window.simulateIPSpoofing = function() {
         ctx.fillText('TARGET SERVER', serverX, serverY - 22);
         ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
         ctx.fillText('10.0.0.1', serverX, serverY - 8);
-        // Trust meter bar
         ctx.fillStyle = 'rgba(255,255,255,0.1)';
         ctx.fillRect(serverX - 30, serverY + 8, 60, 6);
         ctx.fillStyle = sc;
         ctx.fillRect(serverX - 30, serverY + 8, (serverTrust / 100) * 60, 6);
         ctx.fillStyle = '#fff'; ctx.font = '6px monospace';
         ctx.fillText(`Trust: ${Math.round(serverTrust)}%`, serverX, serverY + 26);
-
-        // ── Packet forging visualization ──
         if (frame > 80 && frame % 12 === 0) {
             packets.push({ x: attackerX + 42, y: attackerY, progress: 0 });
             packetsForged++;
@@ -5621,31 +5324,23 @@ window.simulateIPSpoofing = function() {
         for (let i = packets.length - 1; i >= 0; i--) {
             const pkt = packets[i];
             pkt.progress += 0.015;
-
-            // Packet travels attacker → firewall → server
             let px, py;
             if (pkt.progress < 0.5) {
-                // attacker → firewall
                 const t = pkt.progress / 0.5;
                 px = attackerX + 42 + (firewallX - attackerX - 42) * t;
                 py = attackerY + (firewallY - attackerY) * t;
             } else {
-                // firewall → server
                 const t = (pkt.progress - 0.5) / 0.5;
                 px = firewallX + 6 + (serverX - 45 - firewallX - 6) * t;
                 py = firewallY + (serverY - firewallY) * t;
             }
 
             const alpha = 0.9 - pkt.progress * 0.5;
-            // Packet box
             ctx.fillStyle = `rgba(224, 64, 251, ${alpha * 0.7})`; ctx.strokeStyle = `rgba(224, 64, 251, ${alpha})`;
             ctx.lineWidth = 1;
             ctx.beginPath(); ctx.roundRect(px - 14, py - 8, 28, 16, 2); ctx.fill(); ctx.stroke();
-            // Packet label — shows spoofed IP
             ctx.fillStyle = `rgba(57, 255, 20, ${alpha})`; ctx.font = 'bold 5px monospace'; ctx.textAlign = 'center';
             ctx.fillText(`SRC:${spoofedIP}`, px, py + 1);
-
-            // Passing through firewall — flash
             if (pkt.progress > 0.48 && pkt.progress < 0.52) {
                 ctx.beginPath(); ctx.arc(firewallX, firewallY, 15, 0, Math.PI * 2);
                 ctx.fillStyle = 'rgba(57, 255, 20, 0.15)'; ctx.fill();
@@ -5656,8 +5351,6 @@ window.simulateIPSpoofing = function() {
                 trustLevel = Math.min(100, trustLevel + 1.5);
             }
         }
-
-        // ── Spoofed header detail panel ──
         if (frame > 60) {
             const panelX = w * 0.30, panelY = h * 0.78;
             ctx.fillStyle = 'rgba(224, 64, 251, 0.06)'; ctx.strokeStyle = 'rgba(224, 64, 251, 0.25)';
@@ -5670,8 +5363,6 @@ window.simulateIPSpoofing = function() {
             ctx.fillStyle = '#ff3b3b'; ctx.font = '6px monospace';
             ctx.fillText(`REAL IP: ${realIP}  (HIDDEN)`, panelX, panelY + 14);
         }
-
-        // ── Update live stats ──
         if (frame % 20 === 0) {
             const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
             if (e0) e0.textContent = packetsForged;
@@ -5692,15 +5383,12 @@ window.simulateIPSpoofing = function() {
     state.simFrame = requestAnimationFrame(draw);
 };
 
-/* ─── 40. VULNERABILITY SCANNING ────────────────────────────────────────── */
 window.simulateVulnScan = function() {
     termLog('> Initializing vulnerability scanner (OpenVAS engine)...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
     activateStep(0);
 
     let frame = 0, portsScanned = 0, servicesFound = 0, vulnsDetected = 0, criticalCVEs = 0;
-
-    // Network hosts to scan
     const hosts = [];
     const cols = 5, rows = 3;
     for (let r = 0; r < rows; r++) {
@@ -5718,8 +5406,6 @@ window.simulateVulnScan = function() {
         }
     }
     let currentHostIdx = -1;
-
-    // Scanner node
     const scannerX = w * 0.06, scannerY = h * 0.5;
 
     simTimeout(() => { if (!state.simRunning) return; activateStep(1); termLog('> Port scanning target subnet 10.0.0.0/24...', 'warning'); }, 500);
@@ -5732,30 +5418,21 @@ window.simulateVulnScan = function() {
         frame++;
         ctx.clearRect(0, 0, w, h);
         ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
-
-        // Title
         ctx.fillStyle = '#fff'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
         ctx.fillText('VULNERABILITY SCANNER — NETWORK AUDIT', w / 2, 16);
-
-        // Scanner node
         ctx.fillStyle = 'rgba(0, 229, 255, 0.1)'; ctx.strokeStyle = '#00e5ff'; ctx.lineWidth = 1.5;
         ctx.beginPath(); ctx.roundRect(scannerX - 28, scannerY - 24, 56, 48, 4); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#00e5ff'; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillText('SCANNER', scannerX, scannerY - 8);
         ctx.fillStyle = '#8892a8'; ctx.font = '6px monospace';
         ctx.fillText('OpenVAS', scannerX, scannerY + 6);
-        // Pulse
         const pulseR = 28 + Math.sin(frame * 0.08) * 4;
         ctx.beginPath(); ctx.arc(scannerX, scannerY, pulseR, 0, Math.PI * 2);
         ctx.strokeStyle = `rgba(0, 229, 255, ${0.1 + Math.sin(frame * 0.08) * 0.08})`; ctx.lineWidth = 1; ctx.stroke();
-
-        // Advance scanning — one host at a time
         if (frame % 25 === 0 && currentHostIdx < hosts.length - 1) {
             currentHostIdx++;
             hosts[currentHostIdx].scanning = true;
         }
-
-        // Draw hosts
         hosts.forEach((host, idx) => {
             if (host.scanning && !host.scanned) {
                 host.scanProgress += 0.02;
@@ -5768,8 +5445,6 @@ window.simulateVulnScan = function() {
                     criticalCVEs += host.criticals;
                 }
             }
-
-            // Host box
             const boxColor = host.scanned
                 ? (host.vulns > 2 ? '#ff3b3b' : host.vulns > 0 ? '#ffaa00' : '#39ff14')
                 : (host.scanning ? '#00e5ff' : 'rgba(255,255,255,0.15)');
@@ -5778,32 +5453,23 @@ window.simulateVulnScan = function() {
                 : 'rgba(255,255,255,0.02)';
             ctx.strokeStyle = boxColor; ctx.lineWidth = 1;
             ctx.beginPath(); ctx.roundRect(host.x - 30, host.y - 20, 60, 40, 3); ctx.fill(); ctx.stroke();
-
-            // IP label
             ctx.fillStyle = boxColor; ctx.font = 'bold 7px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             ctx.fillText(host.ip, host.x, host.y - 8);
-
-            // Status
             if (host.scanned) {
                 ctx.fillStyle = host.vulns > 2 ? '#ff3b3b' : host.vulns > 0 ? '#ffaa00' : '#39ff14';
                 ctx.font = '6px monospace';
                 ctx.fillText(host.vulns > 0 ? `${host.vulns} CVEs` : 'CLEAN', host.x, host.y + 6);
             } else if (host.scanning) {
-                // Scan progress bar
                 ctx.fillStyle = 'rgba(255,255,255,0.1)';
                 ctx.fillRect(host.x - 20, host.y + 4, 40, 3);
                 ctx.fillStyle = '#00e5ff';
                 ctx.fillRect(host.x - 20, host.y + 4, 40 * host.scanProgress, 3);
             }
-
-            // Scan beam from scanner to current host
             if (host.scanning && !host.scanned) {
                 ctx.beginPath(); ctx.moveTo(scannerX + 28, scannerY); ctx.lineTo(host.x - 30, host.y);
                 ctx.strokeStyle = `rgba(0, 229, 255, ${0.3 + Math.sin(frame * 0.15) * 0.15})`; ctx.lineWidth = 1; ctx.setLineDash([4, 4]); ctx.stroke(); ctx.setLineDash([]);
             }
         });
-
-        // Update stats
         if (frame % 15 === 0) {
             const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
             if (e0) e0.textContent = portsScanned;
@@ -5824,15 +5490,12 @@ window.simulateVulnScan = function() {
     state.simFrame = requestAnimationFrame(draw);
 };
 
-/* ─── 41. SECURITY PATCHING ─────────────────────────────────────────────── */
 window.simulatePatching = function() {
     termLog('> Initiating patch management cycle...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
     activateStep(0);
 
     let frame = 0, systemsScanned = 0, patchesAvailable = 0, patchesApplied = 0, systemsSecured = 0;
-
-    // Systems grid
     const systems = [];
     const cols = 6, rows = 3;
     for (let r = 0; r < rows; r++) {
@@ -5864,12 +5527,8 @@ window.simulatePatching = function() {
         frame++;
         ctx.clearRect(0, 0, w, h);
         ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
-
-        // Title
         ctx.fillStyle = '#fff'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
         ctx.fillText('SECURITY PATCH MANAGEMENT — DEPLOYMENT CYCLE', w / 2, 16);
-
-        // Phase indicator
         const phases = ['SCANNING', 'DOWNLOADING', 'PATCHING', 'VERIFIED'];
         const phaseColors = ['#00e5ff', '#ffaa00', '#e040fb', '#39ff14'];
         if (frame < 120) phase = 0;
@@ -5879,16 +5538,12 @@ window.simulatePatching = function() {
 
         ctx.fillStyle = phaseColors[phase]; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center';
         ctx.fillText(`PHASE: ${phases[phase]}`, w / 2, h * 0.94);
-
-        // Scan systems sequentially
         if (phase === 0 && frame % 6 === 0 && scanIdx < systems.length) {
             systems[scanIdx].status = 'scanned';
             systemsScanned++;
             if (systems[scanIdx].vulnLevel > 0) patchesAvailable++;
             scanIdx++;
         }
-
-        // Download patches
         if (phase === 1) {
             systems.forEach(sys => {
                 if (sys.status === 'scanned' && sys.vulnLevel > 0) {
@@ -5900,8 +5555,6 @@ window.simulatePatching = function() {
                 }
             });
         }
-
-        // Apply patches
         if (phase === 2) {
             systems.forEach(sys => {
                 if (sys.status === 'ready' || (sys.status === 'scanned' && sys.vulnLevel > 0)) {
@@ -5917,8 +5570,6 @@ window.simulatePatching = function() {
                 }
             });
         }
-
-        // Verify
         if (phase === 3) {
             systems.forEach(sys => {
                 if (sys.status !== 'verified') {
@@ -5927,8 +5578,6 @@ window.simulatePatching = function() {
                 }
             });
         }
-
-        // Draw systems
         systems.forEach(sys => {
             let boxColor, bgColor, statusText;
             switch (sys.status) {
@@ -5957,8 +5606,6 @@ window.simulatePatching = function() {
             ctx.fillText(sys.name, sys.x, sys.y - 10);
             ctx.font = '6px monospace';
             ctx.fillText(statusText, sys.x, sys.y + 4);
-
-            // Progress bars
             if (sys.status === 'downloading') {
                 ctx.fillStyle = 'rgba(255,255,255,0.1)';
                 ctx.fillRect(sys.x - 20, sys.y + 14, 40, 3);
@@ -5972,8 +5619,6 @@ window.simulatePatching = function() {
                 ctx.fillRect(sys.x - 20, sys.y + 14, 40 * sys.patchProgress, 3);
             }
         });
-
-        // Update stats
         if (frame % 15 === 0) {
             const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
             if (e0) e0.textContent = systemsScanned;
@@ -5994,7 +5639,6 @@ window.simulatePatching = function() {
     state.simFrame = requestAnimationFrame(draw);
 };
 
-/* ─── 42. PENETRATION TESTING ───────────────────────────────────────────── */
 window.simulatePentest = function() {
     termLog('> Initiating authorized penetration test (scope: 10.0.0.0/24)...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -6002,8 +5646,6 @@ window.simulatePentest = function() {
 
     let frame = 0, hostsDiscovered = 0, exploitsAttempted = 0, shellsGained = 0;
     let privescLevel = 'None';
-
-    // Network targets
     const targets = [
         { x: w * 0.50, y: h * 0.18, ip: '10.0.0.1', os: 'Linux 5.15', service: 'Apache 2.4.49', vuln: 'CVE-2021-41773', exploitable: true, status: 'hidden' },
         { x: w * 0.78, y: h * 0.18, ip: '10.0.0.5', os: 'Win Server 2019', service: 'SMB 3.1.1', vuln: 'CVE-2020-0796', exploitable: true, status: 'hidden' },
@@ -6011,8 +5653,6 @@ window.simulatePentest = function() {
         { x: w * 0.78, y: h * 0.50, ip: '10.0.0.20', os: 'CentOS 7', service: 'MySQL 5.7', vuln: 'CVE-2023-21912', exploitable: true, status: 'hidden' },
         { x: w * 0.64, y: h * 0.78, ip: '10.0.0.50', os: 'Win 10 Pro', service: 'RDP 10.0', vuln: 'CVE-2019-0708', exploitable: true, status: 'hidden' },
     ];
-
-    // Pentester
     const pentX = w * 0.10, pentY = h * 0.50;
     const exploitPackets = [];
     let activeTarget = null;
@@ -6028,12 +5668,8 @@ window.simulatePentest = function() {
         frame++;
         ctx.clearRect(0, 0, w, h);
         ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
-
-        // Title
         ctx.fillStyle = '#fff'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
         ctx.fillText('PENETRATION TEST — AUTHORIZED RED TEAM ENGAGEMENT', w / 2, 16);
-
-        // Phase
         if (frame < 100) phaseProgress = 0;
         else if (frame < 200) phaseProgress = 1;
         else if (frame < 320) phaseProgress = 2;
@@ -6044,8 +5680,6 @@ window.simulatePentest = function() {
         const phaseCols = ['#00e5ff', '#ffaa00', '#ff3b3b', '#e040fb', '#39ff14'];
         ctx.fillStyle = phaseCols[phaseProgress]; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'center';
         ctx.fillText(`PHASE: ${phaseLabels[phaseProgress]}`, w / 2, h - 12);
-
-        // ── Pentester node ──
         ctx.fillStyle = 'rgba(255, 145, 0, 0.1)'; ctx.strokeStyle = '#ff9100'; ctx.lineWidth = 1.5;
         ctx.beginPath(); ctx.roundRect(pentX - 38, pentY - 32, 76, 64, 5); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#ff9100'; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -6054,8 +5688,6 @@ window.simulatePentest = function() {
         ctx.fillText('Kali Linux', pentX, pentY);
         ctx.fillStyle = '#ff9100'; ctx.font = '6px monospace';
         ctx.fillText('Metasploit | Nmap', pentX, pentY + 14);
-
-        // Phase 0: Recon — discover hosts
         if (phaseProgress >= 1 && frame % 20 === 0) {
             const hidden = targets.filter(t => t.status === 'hidden');
             if (hidden.length > 0) {
@@ -6065,8 +5697,6 @@ window.simulatePentest = function() {
                 termLog(`> Host discovered: ${t.ip} (${t.os}) — ${t.service}`, 'info');
             }
         }
-
-        // Phase 2: Exploitation — send exploit packets
         if (phaseProgress >= 2 && frame % 30 === 0) {
             const exploitable = targets.filter(t => t.exploitable && t.status === 'discovered');
             if (exploitable.length > 0) {
@@ -6075,22 +5705,16 @@ window.simulatePentest = function() {
                 exploitsAttempted++;
             }
         }
-
-        // Phase 3: Privesc
         if (phaseProgress === 3) {
             if (frame === 320) privescLevel = 'User';
             if (frame === 360) { privescLevel = 'Root'; termLog('> id = uid=0(root) gid=0(root)', 'error'); }
         }
-
-        // Draw exploit packets
         for (let i = exploitPackets.length - 1; i >= 0; i--) {
             const ep = exploitPackets[i];
             ep.progress += 0.02;
             const epx = pentX + 38 + (ep.tx - 45 - pentX - 38) * ep.progress;
             const epy = pentY + (ep.ty - pentY) * ep.progress;
             const alpha = 1 - ep.progress * 0.5;
-
-            // Exploit packet
             ctx.fillStyle = `rgba(255, 59, 59, ${alpha * 0.6})`; ctx.strokeStyle = `rgba(255, 59, 59, ${alpha})`;
             ctx.lineWidth = 1;
             ctx.beginPath(); ctx.roundRect(epx - 16, epy - 7, 32, 14, 2); ctx.fill(); ctx.stroke();
@@ -6099,7 +5723,6 @@ window.simulatePentest = function() {
 
             if (ep.progress >= 1) {
                 exploitPackets.splice(i, 1);
-                // Mark target as compromised
                 const compromised = targets.find(t => t.x === ep.tx && t.y === ep.ty && t.status === 'discovered');
                 if (compromised) {
                     compromised.status = 'compromised';
@@ -6108,8 +5731,6 @@ window.simulatePentest = function() {
                 }
             }
         }
-
-        // ── Draw targets ──
         targets.forEach(t => {
             let color, bg, label;
             switch (t.status) {
@@ -6134,22 +5755,16 @@ window.simulatePentest = function() {
             ctx.fillText(t.status !== 'hidden' ? `${t.os} | ${t.service}` : 'Unknown', t.x, t.y);
             ctx.fillStyle = color; ctx.font = 'bold 6px monospace';
             ctx.fillText(label, t.x, t.y + 14);
-
-            // Compromised pulse
             if (t.status === 'compromised') {
                 const pr = 50 + Math.sin(frame * 0.08) * 5;
                 ctx.beginPath(); ctx.arc(t.x, t.y, pr, 0, Math.PI * 2);
                 ctx.strokeStyle = 'rgba(255, 59, 59, 0.12)'; ctx.lineWidth = 1; ctx.stroke();
             }
-
-            // Scan line from pentester for discovered
             if (t.status === 'discovered' && phaseProgress <= 2) {
                 ctx.beginPath(); ctx.moveTo(pentX + 38, pentY); ctx.lineTo(t.x - 45, t.y);
                 ctx.strokeStyle = 'rgba(255, 170, 0, 0.12)'; ctx.lineWidth = 0.5; ctx.setLineDash([3, 4]); ctx.stroke(); ctx.setLineDash([]);
             }
         });
-
-        // Update stats
         if (frame % 15 === 0) {
             const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
             if (e0) e0.textContent = hostsDiscovered;
@@ -6170,7 +5785,6 @@ window.simulatePentest = function() {
     state.simFrame = requestAnimationFrame(draw);
 };
 
-/* ─── 43. NEXT-GEN FIREWALL ─────────────────────────────────────────────── */
 window.simulateFirewall = function() {
     termLog('> Booting Next-Gen Firewall engine...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -6192,19 +5806,13 @@ window.simulateFirewall = function() {
         frame++;
         ctx.clearRect(0, 0, w, h);
         ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
-
-        // Header
         ctx.fillStyle = '#fff'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
         ctx.fillText('FIREWALL DEEP PACKET INSPECTION & ACL ROUTING', w / 2, 20);
-
-        // Draw External Client Zone
         ctx.fillStyle = 'rgba(255, 255, 255, 0.02)'; ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
         ctx.beginPath(); ctx.roundRect(externalX - 50, h * 0.2, 100, h * 0.6, 5); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#8892a8'; ctx.font = 'bold 8px monospace';
         ctx.fillText('EXTERNAL NETWORK', externalX, h * 0.25);
         ctx.fillText('(Internet Traffic)', externalX, h * 0.29);
-
-        // Draw Firewall Wall (NGFW)
         const isAlerting = (frame > 110 && frame < 200);
         ctx.fillStyle = isAlerting ? 'rgba(229, 57, 53, 0.15)' : 'rgba(255, 255, 255, 0.02)';
         ctx.strokeStyle = isAlerting ? '#e53935' : 'rgba(255, 255, 255, 0.2)';
@@ -6213,8 +5821,6 @@ window.simulateFirewall = function() {
         ctx.fillStyle = isAlerting ? '#e53935' : '#8892a8'; ctx.font = 'bold 9px monospace';
         ctx.fillText('NGFW', fwX, h * 0.22);
         ctx.fillText(isAlerting ? '[ BLOCK ]' : '[ INSPECT ]', fwX, h * 0.78);
-
-        // Draw Internal Network Target (Server)
         ctx.fillStyle = 'rgba(57, 255, 20, 0.05)'; ctx.strokeStyle = '#39ff14';
         ctx.beginPath(); ctx.roundRect(internalX - 50, h * 0.3, 100, h * 0.4, 5); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#39ff14'; ctx.font = 'bold 8px monospace';
@@ -6222,8 +5828,6 @@ window.simulateFirewall = function() {
         ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
         ctx.fillText('Web Server', internalX, h * 0.46);
         ctx.fillText('10.0.0.100', internalX, h * 0.52);
-
-        // Generate incoming packets
         if (frame % 20 === 0) {
             const isMalicious = (frame > 100 && frame < 220 && Math.random() > 0.4);
             const targetPort = isMalicious ? 80 : (Math.random() > 0.5 ? 443 : 21); // Port 21 is blocked
@@ -6235,8 +5839,6 @@ window.simulateFirewall = function() {
                 port: targetPort,
             });
         }
-
-        // Draw and process packets
         for (let i = packets.length - 1; i >= 0; i--) {
             const p = packets[i];
             p.progress += 0.02;
@@ -6246,14 +5848,10 @@ window.simulateFirewall = function() {
             if (p.type === 'malicious') col = '#ff3b3b';
             else if (p.type === 'unauthorized') col = '#ffaa00';
             else col = '#39ff14';
-
-            // Draw packet
             ctx.fillStyle = col;
             ctx.beginPath(); ctx.arc(px, p.y, 4, 0, Math.PI * 2); ctx.fill();
             ctx.font = '6px monospace'; ctx.fillStyle = '#fff';
             ctx.fillText(`P:${p.port}`, px, p.y - 8);
-
-            // Firewall logic
             if (px >= fwX - 25 && px <= fwX + 25) {
                 packetsInspected++;
                 if (p.type === 'malicious' || p.type === 'unauthorized') {
@@ -6268,8 +5866,6 @@ window.simulateFirewall = function() {
                 activeSessions = Math.min(100, activeSessions + 1);
             }
         }
-
-        // Stats update
         if (frame % 15 === 0) {
             const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
             if (e0) e0.textContent = packetsInspected;
@@ -6290,7 +5886,6 @@ window.simulateFirewall = function() {
     state.simFrame = requestAnimationFrame(draw);
 };
 
-/* ─── 44. INTRUSION DETECTION SYSTEM ────────────────────────────────────── */
 window.simulateIDS = function() {
     termLog('> Activating IDS/IPS mirroring sensor...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -6313,21 +5908,13 @@ window.simulateIDS = function() {
         frame++;
         ctx.clearRect(0, 0, w, h);
         ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
-
-        // Title
         ctx.fillStyle = '#fff'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
         ctx.fillText('INTRUSION DETECTION & PREVENTION SYSTEM (IDS/IPS)', w / 2, 20);
-
-        // Draw Network Backbone Line
         ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 3;
         ctx.beginPath(); ctx.moveTo(startX, trafficY); ctx.lineTo(endX, trafficY); ctx.stroke();
-
-        // Draw Router/TAP
         ctx.fillStyle = '#3a4b5c'; ctx.beginPath(); ctx.arc(tapX, tapY, 12, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = '#fff'; ctx.font = 'bold 8px monospace';
         ctx.fillText('TAP', tapX, tapY - 16);
-
-        // Draw IDS sensor
         const alertFlash = (frame > 110 && frame < 200 && Math.sin(frame * 0.2) > 0);
         ctx.fillStyle = alertFlash ? 'rgba(255, 59, 59, 0.2)' : 'rgba(255, 152, 0, 0.1)';
         ctx.strokeStyle = alertFlash ? '#ff3b3b' : '#ff9800';
@@ -6336,14 +5923,10 @@ window.simulateIDS = function() {
         ctx.fillText(alertFlash ? 'IPS ALERT' : 'IDS SENSOR', idsX, idsY - 4);
         ctx.fillStyle = '#8892a8'; ctx.font = '6px monospace';
         ctx.fillText('Signature Engine', idsX, idsY + 10);
-
-        // Connection mirror line
         ctx.strokeStyle = alertFlash ? 'rgba(255,59,59,0.3)' : 'rgba(255,152,0,0.3)';
         ctx.setLineDash([2, 3]);
         ctx.beginPath(); ctx.moveTo(tapX, tapY + 12); ctx.lineTo(idsX, idsY - 20); ctx.stroke();
         ctx.setLineDash([]);
-
-        // Generate packets
         if (frame % 15 === 0) {
             const isAttack = (frame > 90 && frame < 200 && Math.random() > 0.4);
             packets.push({
@@ -6353,8 +5936,6 @@ window.simulateIDS = function() {
                 isMalicious: isAttack,
             });
         }
-
-        // Draw packets
         for (let i = packets.length - 1; i >= 0; i--) {
             const p = packets[i];
             p.progress += 0.015;
@@ -6362,10 +5943,7 @@ window.simulateIDS = function() {
 
             ctx.fillStyle = p.isMalicious ? '#ff3b3b' : '#39ff14';
             ctx.beginPath(); ctx.arc(px, p.y, 4, 0, Math.PI * 2); ctx.fill();
-
-            // Mirror trace when crossing TAP
             if (px > tapX - 10 && px < tapX + 10) {
-                // Drawing mirror flow
                 ctx.fillStyle = p.isMalicious ? 'rgba(255,59,59,0.5)' : 'rgba(255,152,0,0.5)';
                 ctx.beginPath(); ctx.arc(idsX, idsY - 10, 4, 0, Math.PI * 2); ctx.fill();
                 if (p.isMalicious) {
@@ -6374,8 +5952,6 @@ window.simulateIDS = function() {
                 }
             }
         }
-
-        // Update stats
         if (frame % 20 === 0) {
             const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
             monitoredRate = (1.1 + Math.sin(frame * 0.05) * 0.1).toFixed(1);
@@ -6396,7 +5972,6 @@ window.simulateIDS = function() {
     state.simFrame = requestAnimationFrame(draw);
 };
 
-/* ─── 45. MULTI-FACTOR AUTHENTICATION (MFA) ────────────────────────────── */
 window.simulateMFA = function() {
     termLog('> Loading portal login validation module...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -6415,12 +5990,8 @@ window.simulateMFA = function() {
         frame++;
         ctx.clearRect(0, 0, w, h);
         ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
-
-        // Title
         ctx.fillStyle = '#fff'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
         ctx.fillText('MULTI-FACTOR AUTHENTICATION (MFA) WORKFLOW', w / 2, 20);
-
-        // Update auth state by frame
         if (frame === 60) {
             mfaStatus = 'waiting_mfa';
             challenges++;
@@ -6430,8 +6001,6 @@ window.simulateMFA = function() {
             mfaStatus = 'authorized';
             success++;
         }
-
-        // Draw user portal on the left
         ctx.fillStyle = 'rgba(255, 255, 255, 0.02)'; ctx.strokeStyle = '#00bcd4';
         ctx.beginPath(); ctx.roundRect(w * 0.15 - 50, h * 0.25, 100, h * 0.5, 4); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#00bcd4'; ctx.font = 'bold 8px monospace';
@@ -6441,8 +6010,6 @@ window.simulateMFA = function() {
         ctx.fillText('PW: **********', w * 0.15, h * 0.50);
         ctx.fillStyle = (mfaStatus !== 'waiting_pass') ? '#39ff14' : '#8892a8';
         ctx.fillText('PASS: VERIFIED', w * 0.15, h * 0.62);
-
-        // Draw authenticator mobile device on the right
         ctx.fillStyle = 'rgba(255, 255, 255, 0.02)'; ctx.strokeStyle = (mfaStatus === 'waiting_mfa') ? '#ff9800' : '#8892a8';
         ctx.beginPath(); ctx.roundRect(w * 0.85 - 40, h * 0.25, 80, h * 0.5, 8); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#8892a8'; ctx.font = 'bold 8px monospace';
@@ -6458,8 +6025,6 @@ window.simulateMFA = function() {
             ctx.fillStyle = '#39ff14'; ctx.font = 'bold 9px monospace';
             ctx.fillText('[ APPROVED ]', w * 0.85, h * 0.48);
         }
-
-        // Draw Auth server in the middle
         ctx.fillStyle = 'rgba(255, 255, 255, 0.03)'; ctx.strokeStyle = 'rgba(255,255,255,0.15)';
         ctx.beginPath(); ctx.roundRect(w * 0.5 - 45, h * 0.3, 90, h * 0.4, 4); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#fff'; ctx.font = 'bold 8px monospace';
@@ -6476,20 +6041,14 @@ window.simulateMFA = function() {
         }
         ctx.fillStyle = centerColor; ctx.font = 'bold 8px monospace';
         ctx.fillText(centerText, w * 0.5, h * 0.52);
-
-        // Draw connections
         if (mfaStatus === 'waiting_mfa') {
-            // Signal from auth server to phone
             ctx.strokeStyle = '#ff9800'; ctx.lineWidth = 1.5;
             ctx.beginPath(); ctx.moveTo(w * 0.5 + 45, h * 0.5); ctx.lineTo(w * 0.85 - 40, h * 0.5); ctx.stroke();
         } else if (mfaStatus === 'authorized') {
-            // Success lines
             ctx.strokeStyle = '#39ff14'; ctx.lineWidth = 1.5;
             ctx.beginPath(); ctx.moveTo(w * 0.85 - 40, h * 0.5); ctx.lineTo(w * 0.5 + 45, h * 0.5); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(w * 0.5 - 45, h * 0.5); ctx.lineTo(w * 0.15 + 50, h * 0.5); ctx.stroke();
         }
-
-        // Stats update
         if (frame % 20 === 0) {
             const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
             if (e0) e0.textContent = attempts;
@@ -6510,7 +6069,6 @@ window.simulateMFA = function() {
     state.simFrame = requestAnimationFrame(draw);
 };
 
-/* ─── 46. ZERO TRUST ARCHITECTURE ───────────────────────────────────────── */
 window.simulateZeroTrust = function() {
     termLog('> Enforcing Zero Trust micro-perimeter policies...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -6536,12 +6094,8 @@ window.simulateZeroTrust = function() {
         frame++;
         ctx.clearRect(0, 0, w, h);
         ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
-
-        // Title
         ctx.fillStyle = '#fff'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
         ctx.fillText('ZERO TRUST ARCHITECTURE — CONTINUOUS AUTH & PDP CONTROL', w / 2, 20);
-
-        // User Node
         ctx.fillStyle = 'rgba(255,255,255,0.02)'; ctx.strokeStyle = '#00e5ff';
         ctx.beginPath(); ctx.roundRect(userX - 40, userY - 30, 80, 60, 4); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#00e5ff'; ctx.font = 'bold 8px monospace';
@@ -6549,8 +6103,6 @@ window.simulateZeroTrust = function() {
         ctx.fillStyle = '#8892a8'; ctx.font = '6px monospace';
         ctx.fillText('User: auditor', userX, userY + 4);
         ctx.fillText('Posture: OK', userX, userY + 14);
-
-        // PDP (Policy Decision Point)
         ctx.fillStyle = 'rgba(76, 175, 80, 0.15)'; ctx.strokeStyle = '#4caf50';
         ctx.beginPath(); ctx.roundRect(pdpX - 45, pdpY - 40, 90, 80, 5); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#4caf50'; ctx.font = 'bold 9px monospace';
@@ -6560,8 +6112,6 @@ window.simulateZeroTrust = function() {
         ctx.fillStyle = '#8892a8'; ctx.font = '6px monospace';
         ctx.fillText('Evaluating Context', pdpX, pdpY + 12);
         ctx.fillText('Token Validation', pdpX, pdpY + 22);
-
-        // Resources & evaluation
         resources.forEach((res, i) => {
             if (frame > 60 && frame < 150) {
                 res.status = 'evaluating';
@@ -6578,16 +6128,12 @@ window.simulateZeroTrust = function() {
             if (res.status === 'granted') { boxColor = '#39ff14'; label = 'AUTHORIZED'; }
             if (res.status === 'denied') { boxColor = '#ff3b3b'; label = 'BLOCKED'; }
             if (res.status === 'evaluating') { boxColor = '#ff9800'; label = 'CHECKING'; }
-
-            // Draw microsegments
             ctx.fillStyle = 'rgba(255,255,255,0.01)'; ctx.strokeStyle = boxColor;
             ctx.beginPath(); ctx.roundRect(res.x - 45, res.y - 18, 90, 36, 4); ctx.fill(); ctx.stroke();
             ctx.fillStyle = '#fff'; ctx.font = 'bold 7px monospace';
             ctx.fillText(res.name, res.x, res.y - 4);
             ctx.fillStyle = boxColor; ctx.font = '6px monospace';
             ctx.fillText(label, res.x, res.y + 8);
-
-            // Connective lines
             if (res.status === 'granted') {
                 ctx.strokeStyle = '#39ff14'; ctx.lineWidth = 1.5;
                 ctx.beginPath(); ctx.moveTo(userX + 40, userY); ctx.lineTo(pdpX - 45, pdpY); ctx.stroke();
@@ -6597,8 +6143,6 @@ window.simulateZeroTrust = function() {
                 ctx.beginPath(); ctx.moveTo(pdpX + 45, pdpY); ctx.lineTo(res.x - 45, res.y); ctx.stroke();
             }
         });
-
-        // Update stats
         if (frame % 20 === 0) {
             const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
             if (frame > 60) checks = 3;
@@ -6620,7 +6164,6 @@ window.simulateZeroTrust = function() {
     state.simFrame = requestAnimationFrame(draw);
 };
 
-/* ─── 47. THREAT DEFENSE SYSTEM ─────────────────────────────────────────── */
 window.simulateDefenseSystem = function() {
     termLog('> Launching Unified Threat Defense dashboard...', 'warning');
     const { canvas, ctx, w, h } = getCanvas();
@@ -6642,12 +6185,8 @@ window.simulateDefenseSystem = function() {
         frame++;
         ctx.clearRect(0, 0, w, h);
         ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
-
-        // Title
         ctx.fillStyle = '#fff'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
         ctx.fillText('SOAR AUTOMATION & UNIFIED THREAT CONTAINMENT', w / 2, 20);
-
-        // Client PC (Threat Source)
         const isQuarantined = (frame >= 180);
         ctx.fillStyle = isQuarantined ? 'rgba(255,59,59,0.1)' : 'rgba(255,255,255,0.02)';
         ctx.strokeStyle = isQuarantined ? '#ff3b3b' : 'rgba(255,255,255,0.15)';
@@ -6658,16 +6197,12 @@ window.simulateDefenseSystem = function() {
         ctx.fillStyle = '#8892a8'; ctx.font = '6px monospace';
         ctx.fillText('IP: 10.0.0.12', clientX, clientY + 4);
         ctx.fillText(isQuarantined ? 'EDR: ISOLATED' : 'EDR: ACTIVE', clientX, clientY + 14);
-
-        // Threat containment circle
         if (isQuarantined) {
             ctx.strokeStyle = 'rgba(255, 59, 59, 0.4)'; ctx.lineWidth = 1;
             ctx.setLineDash([4, 4]);
             ctx.beginPath(); ctx.arc(clientX, clientY, 65, 0, Math.PI*2); ctx.stroke();
             ctx.setLineDash([]);
         }
-
-        // SIEM/SOAR Central Engine
         ctx.fillStyle = 'rgba(63, 81, 181, 0.15)'; ctx.strokeStyle = '#3f51b5'; ctx.lineWidth = 1.5;
         ctx.beginPath(); ctx.roundRect(siemX - 45, siemY - 35, 90, 70, 4); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#3f51b5'; ctx.font = 'bold 8px monospace';
@@ -6675,41 +6210,31 @@ window.simulateDefenseSystem = function() {
         ctx.fillStyle = '#8892a8'; ctx.font = '6px monospace';
         ctx.fillText('Rules Engaged', siemX, siemY + 2);
         ctx.fillText(isQuarantined ? 'Playbook: SOAR-IR' : 'Awaiting Signals', siemX, siemY + 12);
-
-        // Firewall Controller
         ctx.fillStyle = 'rgba(255,255,255,0.02)'; ctx.strokeStyle = '#ff5722';
         ctx.beginPath(); ctx.roundRect(firewallX - 45, firewallY - 22, 90, 44, 4); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#ff5722'; ctx.font = 'bold 8px monospace';
         ctx.fillText('NGFW CONTROLLER', firewallX, firewallY - 8);
         ctx.fillStyle = '#8892a8'; ctx.font = '6px monospace';
         ctx.fillText(isQuarantined ? 'Rule: Block 10.0.0.12' : 'Traffic Allowed', firewallX, firewallY + 6);
-
-        // EDR Manager
         ctx.fillStyle = 'rgba(255,255,255,0.02)'; ctx.strokeStyle = '#9c27b0';
         ctx.beginPath(); ctx.roundRect(firewallX - 45, edrY - 22, 90, 44, 4); ctx.fill(); ctx.stroke();
         ctx.fillStyle = '#9c27b0'; ctx.font = 'bold 8px monospace';
         ctx.fillText('EDR AGENT MGMT', firewallX, edrY - 8);
         ctx.fillStyle = '#8892a8'; ctx.font = '6px monospace';
         ctx.fillText(isQuarantined ? 'Host Isolated' : 'Host Normal', firewallX, edrY + 6);
-
-        // Flows and signals
         events += rndInt(10, 30);
         if (frame > 60 && frame < 180) {
-            // Signal from EDR manager to SIEM
             ctx.strokeStyle = '#ff9800'; ctx.lineWidth = 1.5;
             ctx.beginPath(); ctx.moveTo(firewallX - 45, edrY); ctx.lineTo(siemX + 45, siemY); ctx.stroke();
             incidents = 1;
         }
 
         if (isQuarantined) {
-            // SOAR pushes blocks out
             ctx.strokeStyle = '#39ff14'; ctx.lineWidth = 1.5;
             ctx.beginPath(); ctx.moveTo(siemX + 45, siemY); ctx.lineTo(firewallX - 45, firewallY); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(siemX + 45, siemY); ctx.lineTo(firewallX - 45, edrY); ctx.stroke();
             contained = 1;
         }
-
-        // Update stats
         if (frame % 20 === 0) {
             const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
             if (e0) e0.textContent = events.toLocaleString();
@@ -6730,3 +6255,298 @@ window.simulateDefenseSystem = function() {
     state.simFrame = requestAnimationFrame(draw);
 };
 
+window.simulateHoaxAttack = function() {
+    termLog('> Crafting hoax warning messages...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame = 0, msgSent = 0, deceived = 0, shared = 0, damaged = 0;
+    const hoaxMessages = [
+        '⚠️ VIRUS ALERT: Delete SYSTEM32 immediately!',
+        '🚨 URGENT: Your device is infected! Install fix.exe NOW',
+        '⛔ WARNING: Forward this to 10 people or lose your data!',
+        '🔴 CRITICAL: Your bank account has been compromised!',
+        '❗ FBI WARNING: Your IP has been logged. Click here.',
+    ];
+    const particles = [];
+    const centerX = w * 0.5, centerY = h * 0.45;
+    const recipients = [];
+    for (let i = 0; i < 20; i++) {
+        const angle = (i / 20) * Math.PI * 2;
+        const radius = Math.min(w, h) * 0.35;
+        recipients.push({
+            x: centerX + Math.cos(angle) * radius,
+            y: centerY + Math.sin(angle) * radius,
+            deceived: false,
+            shared: false,
+            damaged: false,
+            deceivedAt: -1,
+        });
+    }
+
+    simTimeout(() => { if (!state.simRunning) return; activateStep(1); termLog('> Hoax distributed to 10,000+ email addresses and social media...', 'warning'); }, 800);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(2); termLog('> Panic spreading — users forwarding to contacts...', 'error'); }, 2000);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(3); termLog('> Victims deleting system files and installing fake "fix"...', 'error'); }, 3200);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(4); termLog('> Damage report: systems bricked, malware installed via hoax.', 'success'); }, 4500);
+
+    function draw() {
+        if (!state.simRunning) return;
+        frame++;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = '#e040fb'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('HOAX PROPAGATION NETWORK', w / 2, 18);
+        ctx.beginPath(); ctx.arc(centerX, centerY, 24, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(224, 64, 251, 0.2)'; ctx.fill();
+        ctx.strokeStyle = '#e040fb'; ctx.lineWidth = 2; ctx.stroke();
+        ctx.fillStyle = '#e040fb'; ctx.font = 'bold 9px monospace';
+        ctx.fillText('📢 HOAX', centerX, centerY - 4);
+        ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
+        ctx.fillText('SOURCE', centerX, centerY + 8);
+        const msgIdx = Math.floor(frame / 80) % hoaxMessages.length;
+        const msg = hoaxMessages[msgIdx];
+        ctx.fillStyle = 'rgba(224, 64, 251, 0.08)';
+        ctx.fillRect(w * 0.1, h - 50, w * 0.8, 28);
+        ctx.strokeStyle = 'rgba(224, 64, 251, 0.3)'; ctx.lineWidth = 1;
+        ctx.strokeRect(w * 0.1, h - 50, w * 0.8, 28);
+        ctx.fillStyle = '#e040fb'; ctx.font = '8px monospace';
+        ctx.fillText(msg, w / 2, h - 33);
+        if (frame % 8 === 0 && frame < 280) {
+            const targetIdx = rndInt(0, recipients.length);
+            const r = recipients[targetIdx];
+            particles.push({
+                x: centerX, y: centerY,
+                tx: r.x, ty: r.y,
+                progress: 0, targetIdx, color: '#e040fb',
+            });
+            msgSent++;
+        }
+        if (frame > 100 && frame % 15 === 0 && frame < 300) {
+            const deceivedOnes = recipients.filter(r => r.deceived);
+            if (deceivedOnes.length > 0) {
+                const src = deceivedOnes[rndInt(0, deceivedOnes.length)];
+                const targetIdx = rndInt(0, recipients.length);
+                const tgt = recipients[targetIdx];
+                if (!tgt.deceived) {
+                    particles.push({
+                        x: src.x, y: src.y,
+                        tx: tgt.x, ty: tgt.y,
+                        progress: 0, targetIdx, color: '#ffaa00',
+                    });
+                    shared++;
+                }
+            }
+        }
+        recipients.forEach((r, i) => {
+            ctx.strokeStyle = r.deceived ? 'rgba(255, 170, 0, 0.12)' : 'rgba(255, 255, 255, 0.04)';
+            ctx.lineWidth = 0.5;
+            ctx.beginPath(); ctx.moveTo(centerX, centerY); ctx.lineTo(r.x, r.y); ctx.stroke();
+        });
+        recipients.forEach((r, i) => {
+            ctx.beginPath(); ctx.arc(r.x, r.y, 10, 0, Math.PI * 2);
+            if (r.damaged) {
+                ctx.fillStyle = 'rgba(255, 59, 59, 0.3)';
+                ctx.strokeStyle = '#ff3b3b';
+            } else if (r.deceived) {
+                ctx.fillStyle = 'rgba(255, 170, 0, 0.2)';
+                ctx.strokeStyle = '#ffaa00';
+            } else {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            }
+            ctx.lineWidth = 1.5; ctx.fill(); ctx.stroke();
+            ctx.fillStyle = r.damaged ? '#ff3b3b' : r.deceived ? '#ffaa00' : '#8892a8';
+            ctx.font = '6px monospace'; ctx.textAlign = 'center';
+            ctx.fillText(r.damaged ? '💀' : r.deceived ? '😱' : '👤', r.x, r.y + 3);
+        });
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.progress += 0.035;
+            const px = p.x + (p.tx - p.x) * p.progress;
+            const py = p.y + (p.ty - p.y) * p.progress;
+            ctx.beginPath(); ctx.arc(px, py, 3, 0, Math.PI * 2);
+            ctx.fillStyle = p.color; ctx.globalAlpha = 1 - p.progress; ctx.fill();
+            ctx.globalAlpha = 1;
+
+            if (p.progress >= 1) {
+                particles.splice(i, 1);
+                const r = recipients[p.targetIdx];
+                if (!r.deceived) {
+                    r.deceived = true;
+                    r.deceivedAt = frame;
+                    deceived++;
+                }
+                if (r.deceived && !r.damaged && frame > 200 && Math.random() < 0.3) {
+                    r.damaged = true;
+                    damaged++;
+                }
+            }
+        }
+        if (frame % 15 === 0) {
+            const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2'), e3 = $('live-stat-3');
+            if (e0) e0.textContent = (msgSent * 127).toLocaleString();
+            if (e1) e1.textContent = (deceived * 84).toLocaleString();
+            if (e2) e2.textContent = (shared * 312).toLocaleString();
+            if (e3) e3.textContent = damaged;
+            setProgress(Math.min(100, (frame / 360) * 100));
+        }
+
+        if (frame >= 360) {
+            setProgress(100);
+            termLog('> Hoax propagation complete. Damage assessment finalized.', 'success');
+            stopSimulation();
+            return;
+        }
+        state.simFrame = requestAnimationFrame(draw);
+    }
+    state.simFrame = requestAnimationFrame(draw);
+};
+
+window.simulateDictionaryAttack = function() {
+    termLog('> Loading wordlist: rockyou.txt (14.3M entries)...', 'warning');
+    const { canvas, ctx, w, h } = getCanvas();
+    activateStep(0);
+
+    let frame = 0, wordsTried = 0, matches = 0;
+    const wordlist = [
+        'password', '123456', 'qwerty', 'letmein', 'dragon', 'master',
+        'monkey', 'shadow', 'sunshine', 'princess', 'football', 'charlie',
+        'abc123', 'trustno1', 'iloveyou', 'batman', 'access', 'hello',
+        'admin', 'passw0rd', 'welcome', 'login', 'starwars', 'solo',
+        'P@ssw0rd', 'summer2024', 'qwerty123', 'password1', '12345678',
+        'baseball', 'michael', 'hunter2', 'thomas', 'rangers', 'buster',
+    ];
+    const mutations = ['', '123', '!', '@1', '_2024', '1!', '#1', '2025'];
+    const targetHash = 'a8f5f167f44f4964e6c998dee827110c'; // md5("password1")
+    const loginBoxX = w * 0.65, loginBoxY = h * 0.25;
+    const wordlistBoxX = w * 0.15, wordlistBoxY = h * 0.2;
+    let currentWord = '';
+    let currentWordIdx = 0;
+    let cracked = false;
+    let crackedAt = -1;
+    const triedWords = [];
+
+    simTimeout(() => { if (!state.simRunning) return; activateStep(1); termLog('> Target: SSH login at 192.168.1.100:22 (user: admin)', 'warning'); }, 600);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(2); termLog('> Dictionary attack running — testing words sequentially...', 'error'); }, 1500);
+    simTimeout(() => { if (!state.simRunning) return; activateStep(3); termLog('> Applying mutations: appending numbers, symbols, case swaps...', 'error'); }, 2500);
+
+    function draw() {
+        if (!state.simRunning) return;
+        frame++;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(6, 10, 19, 0.97)'; ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = '#ff6d00'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('DICTIONARY ATTACK — SEQUENTIAL WORDLIST CRACKER', w / 2, 18);
+        ctx.fillStyle = 'rgba(255, 109, 0, 0.06)';
+        ctx.fillRect(wordlistBoxX - 60, wordlistBoxY, 120, h * 0.6);
+        ctx.strokeStyle = 'rgba(255, 109, 0, 0.3)'; ctx.lineWidth = 1;
+        ctx.strokeRect(wordlistBoxX - 60, wordlistBoxY, 120, h * 0.6);
+        ctx.fillStyle = '#ff6d00'; ctx.font = 'bold 8px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('📖 WORDLIST', wordlistBoxX, wordlistBoxY + 14);
+        ctx.fillStyle = '#8892a8'; ctx.font = '6px monospace';
+        ctx.fillText('rockyou.txt', wordlistBoxX, wordlistBoxY + 26);
+        ctx.fillText('14,344,392 entries', wordlistBoxX, wordlistBoxY + 36);
+        const visibleWords = 12;
+        for (let i = 0; i < visibleWords; i++) {
+            const wIdx = (currentWordIdx + i) % wordlist.length;
+            const y = wordlistBoxY + 50 + i * 14;
+            if (y > wordlistBoxY + h * 0.6 - 10) break;
+            const isActive = (i === 0);
+            ctx.fillStyle = isActive ? '#ff6d00' : '#525c70';
+            ctx.font = isActive ? 'bold 8px monospace' : '7px monospace';
+            ctx.textAlign = 'left';
+            ctx.fillText(isActive ? '▶ ' + wordlist[wIdx] : '  ' + wordlist[wIdx], wordlistBoxX - 50, y);
+        }
+        if (frame % 5 === 0 && !cracked) {
+            currentWordIdx = (currentWordIdx + 1) % wordlist.length;
+            const baseWord = wordlist[currentWordIdx];
+            const mutIdx = Math.floor(frame / 50) % mutations.length;
+            currentWord = baseWord + mutations[mutIdx];
+            wordsTried++;
+            triedWords.unshift({ word: currentWord, success: false });
+            if (triedWords.length > 8) triedWords.pop();
+            if (frame > 260 && !cracked) {
+                cracked = true;
+                crackedAt = frame;
+                currentWord = 'admin123!';
+                matches = 1;
+                triedWords.unshift({ word: currentWord, success: true });
+                if (triedWords.length > 8) triedWords.pop();
+                activateStep(4);
+                termLog(`> ✅ PASSWORD FOUND: "admin123!" — Login successful!`, 'error');
+            }
+        }
+        ctx.fillStyle = cracked ? 'rgba(57, 255, 20, 0.08)' : 'rgba(255, 255, 255, 0.03)';
+        ctx.fillRect(loginBoxX - 70, loginBoxY, 140, 120);
+        ctx.strokeStyle = cracked ? '#39ff14' : 'rgba(255, 255, 255, 0.15)'; ctx.lineWidth = 1.5;
+        ctx.strokeRect(loginBoxX - 70, loginBoxY, 140, 120);
+        ctx.fillStyle = cracked ? '#39ff14' : '#fff'; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center';
+        ctx.fillText(cracked ? '🔓 ACCESS GRANTED' : '🔒 SSH LOGIN', loginBoxX, loginBoxY + 18);
+        ctx.fillStyle = '#8892a8'; ctx.font = '7px monospace';
+        ctx.fillText('192.168.1.100:22', loginBoxX, loginBoxY + 34);
+        ctx.fillText('User: admin', loginBoxX, loginBoxY + 48);
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.fillRect(loginBoxX - 55, loginBoxY + 58, 110, 18);
+        ctx.strokeStyle = cracked ? '#39ff14' : '#ff6d00'; ctx.lineWidth = 1;
+        ctx.strokeRect(loginBoxX - 55, loginBoxY + 58, 110, 18);
+        ctx.fillStyle = cracked ? '#39ff14' : '#ff6d00'; ctx.font = 'bold 8px monospace';
+        const displayWord = currentWord || '...';
+        ctx.fillText(displayWord, loginBoxX, loginBoxY + 70);
+        ctx.fillStyle = cracked ? '#39ff14' : '#ff3b3b'; ctx.font = 'bold 8px monospace';
+        ctx.fillText(cracked ? '✅ AUTHENTICATED' : '❌ ACCESS DENIED', loginBoxX, loginBoxY + 95);
+        ctx.strokeStyle = cracked ? '#39ff14' : 'rgba(255, 109, 0, 0.5)'; ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(wordlistBoxX + 60, h * 0.5);
+        ctx.lineTo(loginBoxX - 70, h * 0.5);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = cracked ? '#39ff14' : '#ff6d00';
+        ctx.beginPath();
+        ctx.moveTo(loginBoxX - 70, h * 0.5);
+        ctx.lineTo(loginBoxX - 78, h * 0.5 - 4);
+        ctx.lineTo(loginBoxX - 78, h * 0.5 + 4);
+        ctx.closePath();
+        ctx.fill();
+        const logX = loginBoxX - 70, logY = loginBoxY + 130;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.02)';
+        ctx.fillRect(logX, logY, 140, 100);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)'; ctx.lineWidth = 0.5;
+        ctx.strokeRect(logX, logY, 140, 100);
+        ctx.fillStyle = '#8892a8'; ctx.font = 'bold 7px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('ATTEMPT LOG', loginBoxX, logY + 12);
+
+        triedWords.forEach((tw, i) => {
+            const ty = logY + 24 + i * 10;
+            if (ty > logY + 96) return;
+            ctx.textAlign = 'left';
+            ctx.fillStyle = tw.success ? '#39ff14' : '#ff3b3b';
+            ctx.font = '6px monospace';
+            ctx.fillText(tw.success ? '✓' : '✗', logX + 6, ty);
+            ctx.fillStyle = tw.success ? '#39ff14' : '#525c70';
+            ctx.fillText(tw.word, logX + 16, ty);
+        });
+        const progY = wordlistBoxY + h * 0.6 + 8;
+        ctx.fillStyle = 'rgba(255, 109, 0, 0.1)';
+        ctx.fillRect(wordlistBoxX - 60, progY, 120, 6);
+        const progWidth = Math.min(120, (frame / 360) * 120);
+        ctx.fillStyle = cracked ? '#39ff14' : '#ff6d00';
+        ctx.fillRect(wordlistBoxX - 60, progY, progWidth, 6);
+        if (frame % 10 === 0) {
+            const e0 = $('live-stat-0'), e1 = $('live-stat-1'), e2 = $('live-stat-2');
+            if (e0) e0.textContent = (wordsTried * 847).toLocaleString();
+            if (e1) e1.textContent = (Math.floor(wordsTried * 847 / Math.max(1, frame / 60))).toLocaleString();
+            if (e2) e2.textContent = matches;
+            setProgress(Math.min(100, (frame / 360) * 100));
+        }
+
+        if (frame >= 360) {
+            setProgress(100);
+            termLog('> Dictionary attack complete. Credential assessment finalized.', 'success');
+            stopSimulation();
+            return;
+        }
+        state.simFrame = requestAnimationFrame(draw);
+    }
+    state.simFrame = requestAnimationFrame(draw);
+};
